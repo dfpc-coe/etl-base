@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.0.2
+
+- :bug: Return layer as JSON, throwing if the request fails
+- :rocket: If doing local dev, automatically create ETL Token
+
 ### v1.0.1
 
 - :bug: Add TypeScript build step to release workflow

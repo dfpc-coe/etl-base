@@ -1,4 +1,5 @@
 import { FeatureCollection } from 'geojson';
+import jwt from 'jsonwebtoken';
 
 export interface TaskBaseSettings {
     api: string;
@@ -10,11 +11,17 @@ export default class TaskBase {
     etl: TaskBaseSettings;
 
     constructor() {
+
         this.etl = {
             api: process.env.ETL_API || '',
             layer: process.env.ETL_LAYER || '',
             token: process.env.ETL_TOKEN || ''
         };
+
+        // This is just a helper function for local development, signing with the (unsecure) default secret
+        if (!this.etl.token && (new URL(this.etl.api)).hostname === 'localhost') {
+            this.etl.token = jwt.sign({ access: 'cot', layer: parseInt(this.etl.layer) }, 'coe-wildland-fire')
+        }
 
         if (!this.etl.api) throw new Error('No ETL API URL Provided');
         if (!this.etl.layer) throw new Error('No ETL Layer Provided');
@@ -35,12 +42,19 @@ export default class TaskBase {
     }
 
     async layer(): Promise<object> {
-        return await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
+        const layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
             }
         });
+
+        if (!layer.ok) {
+            console.error(await layer.text());
+            throw new Error('Failed to get layer from ETL');
+        } else {
+            return await layer.json();
+        }
     }
 
     async submit(fc: FeatureCollection): Promise<boolean> {
