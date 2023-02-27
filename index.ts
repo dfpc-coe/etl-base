@@ -44,7 +44,7 @@ export default class TaskBase {
     }
 
     async submit(fc: FeatureCollection): Promise<boolean> {
-        console.log(`ok - filtered to ${fc.features.length} planes`);
+        console.log(`ok - posting ${fc.features.length} features`);
 
         if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
 
