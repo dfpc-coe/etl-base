@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.0.1
+
+- :bug: Add TypeScript build step to release workflow
+
 ### v1.0.0
 
 - :rocket: Initial Release
