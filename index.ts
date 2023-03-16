@@ -11,7 +11,6 @@ export default class TaskBase {
     etl: TaskBaseSettings;
 
     constructor() {
-
         this.etl = {
             api: process.env.ETL_API || '',
             layer: process.env.ETL_LAYER || '',
@@ -42,6 +41,7 @@ export default class TaskBase {
     }
 
     async layer(): Promise<object> {
+        console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
         const layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
             headers: {
@@ -62,6 +62,7 @@ export default class TaskBase {
 
         if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
 
+        console.log(`ok - POST ${new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api)}`);
         const post = await fetch(new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api), {
             method: 'POST',
             headers: {

@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.1.0
+
+- :arrow_up: Update base deps
+- :rocket: Additional logging
+
 ### v1.0.2
 
 - :bug: Return layer as JSON, throwing if the request fails
