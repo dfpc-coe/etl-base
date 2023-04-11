@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.1.2
+
+- :arrow_up: Update base deps
+
 ### v1.1.1
 
 - :arrow_up: Update base deps
