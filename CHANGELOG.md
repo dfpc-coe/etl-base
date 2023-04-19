@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.2.0
+
+- :tada: Include static type for layer response
+
 ### v1.1.2
 
 - :arrow_up: Update base deps

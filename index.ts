@@ -7,6 +7,29 @@ export interface TaskBaseSettings {
     token: string;
 }
 
+export interface TaskLayer {
+    id: number;
+    name: string;
+    created: number;
+    updated: number;
+    description: string;
+    enabled: boolean;
+    enabled_styles: boolean;
+    styles: unknown;
+    logging: boolean;
+    stale: number;
+    task: string;
+    cron: string;
+    environment: {
+        [k: string]: any
+    };
+    memory: number;
+    timeout: number;
+
+    data: number | null;
+    connection: number | null;
+}
+
 export default class TaskBase {
     etl: TaskBaseSettings;
 
@@ -40,7 +63,7 @@ export default class TaskBase {
         };
     }
 
-    async layer(): Promise<object> {
+    async layer(): Promise<TaskLayer> {
         console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
         const layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
@@ -53,7 +76,27 @@ export default class TaskBase {
             console.error(await layer.text());
             throw new Error('Failed to get layer from ETL');
         } else {
-            return await layer.json();
+            const json = await layer.json();
+
+            return {
+                id: json.id,
+                name: json.name,
+                created: json.created,
+                updated: json.updatd,
+                description: json.description,
+                enabled: json.enabled,
+                enabled_styles: json.enabled_styles,
+                styles: json.styles,
+                logging: json.logging,
+                stale: json.stale,
+                task: json.task,
+                cron: json.cron,
+                environment: json.environment,
+                memory: json.memory,
+                timeout: json.timeout,
+                data: json.data || null,
+                connection: json.connection || null,
+            }
         }
     }
 
