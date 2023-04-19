@@ -1,6 +1,10 @@
 import { FeatureCollection } from 'geojson';
 import jwt from 'jsonwebtoken';
 
+export interface Event {
+    type?: string
+}
+
 export interface TaskBaseSettings {
     api: string;
     layer: string;
