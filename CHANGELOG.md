@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.2.1
+
+- :tada: Include Event type
+
 ### v1.2.0
 
 - :tada: Include static type for layer response
