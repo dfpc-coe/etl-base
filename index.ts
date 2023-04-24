@@ -74,7 +74,7 @@ export default class TaskBase {
         };
     }
 
-    async alert(alert: TaskLayerAlert): Promise<void> {
+    async alert(alertin: TaskLayerAlert): Promise<object> {
         console.log(`ok - Generating Alert`);
 
         const alert = await fetch(new URL(`/api/layer/${this.etl.layer}/alert`, this.etl.api), {
@@ -82,14 +82,14 @@ export default class TaskBase {
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
             },
-            body: alert
+            body: JSON.stringify(alertin)
         });
 
         if (!alert.ok) {
             console.error(await alert.text());
             throw new Error('Failed to post alert to ETL');
         } else {
-            return;
+            return await alert.json();
         }
     }
 

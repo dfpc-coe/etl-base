@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.1
+
+- :bug: small typescript definition fixes
+
 ### v1.3.0
 
 - :rocket: Add support for creating Alerts
