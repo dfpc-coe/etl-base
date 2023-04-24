@@ -11,6 +11,13 @@ export interface TaskBaseSettings {
     token: string;
 }
 
+export interface TaskLayerAlert {
+    icon?: string;
+    priority?: string;
+    title: string;
+    description?: string;
+}
+
 export interface TaskLayer {
     id: number;
     name: string;
@@ -65,6 +72,25 @@ export default class TaskBase {
                 }
             }
         };
+    }
+
+    async alert(alert: TaskLayerAlert): Promise<void> {
+        console.log(`ok - Generating Alert`);
+
+        const alert = await fetch(new URL(`/api/layer/${this.etl.layer}/alert`, this.etl.api), {
+            method: 'post',
+            headers: {
+                'Authorization': `Bearer ${this.etl.token}`,
+            },
+            body: alert
+        });
+
+        if (!alert.ok) {
+            console.error(await alert.text());
+            throw new Error('Failed to post alert to ETL');
+        } else {
+            return;
+        }
     }
 
     async layer(): Promise<TaskLayer> {
