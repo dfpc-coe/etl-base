@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.0
+
+- :rocket: Add support for creating Alerts
+
 ### v1.2.1
 
 - :tada: Include Event type
