@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.3.2
+
+- :bug: Include ContentType header for alerts
+
 ### v1.3.1
 
 - :bug: small typescript definition fixes

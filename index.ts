@@ -81,6 +81,7 @@ export default class TaskBase {
             method: 'post',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(alertin)
         });
