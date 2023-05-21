@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.4.0
+
+- :rocket: The ETL CoT submission endpoint has a limit of 50mb per submission. To make for a better developer experience, automatically submit in smaller batches
+
 ### v1.3.2
 
 - :bug: Include ContentType header for alerts
