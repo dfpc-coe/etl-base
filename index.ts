@@ -9,6 +9,9 @@ export interface TaskBaseSettings {
     api: string;
     layer: string;
     token: string;
+    config: {
+        submit_size: number;
+    }
 }
 
 export interface TaskLayerAlert {
@@ -48,7 +51,10 @@ export default class TaskBase {
         this.etl = {
             api: process.env.ETL_API || '',
             layer: process.env.ETL_LAYER || '',
-            token: process.env.ETL_TOKEN || ''
+            token: process.env.ETL_TOKEN || '',
+            config: {
+                submit_size: 49 * 1000000
+            }
         };
 
         // This is just a helper function for local development, signing with the (unsecure) default secret
@@ -136,22 +142,45 @@ export default class TaskBase {
 
         if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
 
-        console.log(`ok - POST ${new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api)}`);
-        const post = await fetch(new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api), {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${this.etl.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(fc)
-        });
+        if (!fc.features.length) return true;
 
-        if (!post.ok) {
-            console.error(await post.text());
-            throw new Error('Failed to post layer to ETL');
-        } else {
-            console.log(await post.json());
-        }
+        // Store feats as buffers
+        const pre = Buffer.from('{"type":"FeatureCollection","features":[');
+        const post = Buffer.from(']}')
+        let buff = Buffer.from('');
+        let curr = pre.byteLength + post.byteLength;
+
+        do {
+            const tmpbuff = fc.features.length
+                ? (Buffer.from((buff.byteLength ? ',' : '') + JSON.stringify(fc.features.pop())))
+                : Buffer.from('');
+
+            console.error(curr)
+            if (curr + tmpbuff.byteLength > this.etl.config.submit_size) {
+                console.log(`ok - POST ${new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api)}`);
+                const postreq = await fetch(new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api), {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.etl.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: Buffer.concat([ pre, buff, post ])
+                });
+
+                if (!postreq.ok) {
+                    console.error(await postreq.text());
+                    throw new Error('Failed to post layer to ETL');
+                } else {
+                    console.log(await postreq.json());
+                }
+
+                buff = tmpbuff.slice(1); // Remove the preceding comma if staring the FC over
+                curr = pre.byteLength + post.byteLength + buff.byteLength;
+            } else {
+                buff = Buffer.concat([buff, tmpbuff]);
+                curr += buff.byteLength;
+            }
+        } while (fc.features.length || buff.byteLength);
 
         return true;
     }
