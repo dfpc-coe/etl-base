@@ -147,24 +147,39 @@ export default class TaskBase {
         // Store feats as buffers
         const pre = Buffer.from('{"type":"FeatureCollection","features":[');
         const post = Buffer.from(']}')
-        let buff = Buffer.from('');
+        let buffs = [pre];
+        let submit = false;
         let curr = pre.byteLength + post.byteLength;
 
         do {
-            const tmpbuff = fc.features.length
-                ? (Buffer.from((buff.byteLength ? ',' : '') + JSON.stringify(fc.features.pop())))
-                : Buffer.from('');
+            let tmpbuff: null | Buffer = null;
+            if (fc.features.length) {
+                tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(fc.features.pop()))
 
-            console.error(curr)
-            if (curr + tmpbuff.byteLength > this.etl.config.submit_size) {
+                if (curr + tmpbuff.byteLength <= this.etl.config.submit_size) {
+                    curr = curr + tmpbuff.byteLength;
+                    buffs.push(tmpbuff);
+                    tmpbuff = null;
+                } else {
+                    submit = true;
+                }
+            } else {
+                submit = true;
+            }
+
+            if (submit) {
+                submit = false;
+
                 console.log(`ok - POST ${new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api)}`);
+
+                buffs.push(post);
                 const postreq = await fetch(new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.etl.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: Buffer.concat([ pre, buff, post ])
+                    body: Buffer.concat(buffs)
                 });
 
                 if (!postreq.ok) {
@@ -174,13 +189,15 @@ export default class TaskBase {
                     console.log(await postreq.json());
                 }
 
-                buff = tmpbuff.slice(1); // Remove the preceding comma if staring the FC over
-                curr = pre.byteLength + post.byteLength + buff.byteLength;
-            } else {
-                buff = Buffer.concat([buff, tmpbuff]);
-                curr += buff.byteLength;
+                if (tmpbuff) {
+                    buffs = [pre, tmpbuff.slice(1)]; // Remove the preceding comma if staring the FC over
+                    curr = pre.byteLength + post.byteLength + tmpbuff.byteLength;
+                } else {
+                    buffs = [pre];
+                    curr = pre.byteLength + post.byteLength;
+                }
             }
-        } while (fc.features.length || buff.byteLength);
+        } while (fc.features.length || buffs.length > 1);
 
         return true;
     }
