@@ -63,3 +63,10 @@ export default class Task extends ETL {
     }
 }
 ```
+
+### API
+
+The API documentation is generated automatically by any commit to the `main` branch.
+
+Documentation for the API can be found at [tak-ps.github.io/etl-base](https://tak-ps.github.io/etl-base/)
+
