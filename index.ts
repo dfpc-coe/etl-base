@@ -47,6 +47,16 @@ export interface TaskLayer {
 export default class TaskBase {
     etl: TaskBaseSettings;
 
+    /**
+     * Create a new TaskBase instance - Usually not called directly but instead
+     * inherited via an `extends TaskBase` call
+     *
+     * Currently settings are configured based on the environment that will be provided by the
+     * ETL server. As such the following environment variables must be set.
+     * `ETL_API` - The URL of the API to use
+     * `ETL_LAYER` - The Integer Layer ID to get config information and post results to
+     * `ETL_TOKEN` - The access token specific to the Layer
+     */
     constructor() {
         this.etl = {
             api: process.env.ETL_API || '',
@@ -67,6 +77,13 @@ export default class TaskBase {
         if (!this.etl.token) throw new Error('No ETL Token Provided');
     }
 
+    /**
+     * The extended class should override this function if it needs additional user-defined
+     * config values. By default it simply adds a `DEBUG` boolean which will conditionally print
+     * CoT GeoJSON in the logs if true.
+     *
+     * @returns A JSON Schema Object
+     */
     static schema(): object {
         return {
             type: 'object',
@@ -80,6 +97,11 @@ export default class TaskBase {
         };
     }
 
+    /**
+     * Post an Alert to the Layer Alert API
+     *
+     * @returns The Response from the Layer Alert API
+     */
     async alert(alertin: TaskLayerAlert): Promise<object> {
         console.log(`ok - Generating Alert`);
 
@@ -100,6 +122,12 @@ export default class TaskBase {
         }
     }
 
+    /**
+     * Get all information about the layer being processed
+     * most importantly the user-defined `environment` object
+     *
+     * @returns A Layer Config Object
+     */
     async layer(): Promise<TaskLayer> {
         console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
         const layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
@@ -137,6 +165,11 @@ export default class TaskBase {
         }
     }
 
+    /**
+     * Submit a GeoJSON Feature collection to be submitted to the TAK Server as CoTs
+     *
+     * @returns A boolean representing the success state
+     */
     async submit(fc: FeatureCollection): Promise<boolean> {
         console.log(`ok - posting ${fc.features.length} features`);
 
