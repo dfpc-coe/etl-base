@@ -10,10 +10,9 @@
 
 ## Version History
 
-### v1.5.0
+### v2.0.0
 
-- :rocket: Add the ability to specify an output schema
-- :arrow_up: Update Base Deps
+- :rocket: Schema now returns a `JSONSchema6Object` Type
 
 ### v1.4.3
 
