@@ -5,6 +5,11 @@ export interface Event {
     type?: string
 }
 
+export enum SchemaType {
+    Input = 'Input',
+    Output = 'Output'
+}
+
 export interface TaskBaseSettings {
     api: string;
     layer: string;
@@ -35,7 +40,7 @@ export interface TaskLayer {
     task: string;
     cron: string;
     environment: {
-        [k: string]: any
+        [k: string]: unknown
     };
     memory: number;
     timeout: number;
@@ -79,22 +84,36 @@ export default class TaskBase {
 
     /**
      * The extended class should override this function if it needs additional user-defined
-     * config values. By default it simply adds a `DEBUG` boolean which will conditionally print
+     * config values or wants to provide a Schema
+     *
+     * Input: By default it simply adds a `DEBUG` boolean which will conditionally print
      * CoT GeoJSON in the logs if true.
+     *
+     * Output: Does not provide a defined schema. Providing a schema allow the User to perform
+     * mapping and styling operations
      *
      * @returns A JSON Schema Object
      */
-    static schema(): object {
-        return {
-            type: 'object',
-            properties: {
-                'DEBUG': {
-                    type: 'boolean',
-                    default: false,
-                    description: 'Print results in logs'
+    static async schema(type: SchemaType = SchemaType.Input): Promise<object> {
+        if (type === SchemaType.Input) {
+            return {
+                type: 'object',
+                properties: {
+                    'DEBUG': {
+                        type: 'boolean',
+                        default: false,
+                        description: 'Print results in logs'
+                    }
                 }
-            }
-        };
+            };
+        } else {
+            return {
+                type: 'object',
+                required: [],
+                additionalProperties: true,
+                properties: {}
+            };
+        }
     }
 
     /**
