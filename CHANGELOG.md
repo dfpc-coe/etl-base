@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.5.0
+
+- :rocket: Add the ability to specify an output schema
+- :arrow_up: Update Base Deps
+
 ### v1.4.3
 
 - :arrow_up: Update Base Deps
