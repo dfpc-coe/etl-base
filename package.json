@@ -37,6 +37,7 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@types/json-schema": "^7.0.12",
         "jsonwebtoken": "^9.0.0"
     }
 }
