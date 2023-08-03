@@ -1,5 +1,5 @@
 import { FeatureCollection } from 'geojson';
-import { JSONSchema6Object } from 'json-schema';
+import { JSONSchema6 } from 'json-schema';
 import jwt from 'jsonwebtoken';
 
 export interface Event {
@@ -95,7 +95,7 @@ export default class TaskBase {
      *
      * @returns A JSON Schema Object
      */
-    static async schema(type: SchemaType = SchemaType.Input): Promise<JSONSchema6Object> {
+    static async schema(type: SchemaType = SchemaType.Input): Promise<JSONSchema6> {
         if (type === SchemaType.Input) {
             return {
                 type: 'object',

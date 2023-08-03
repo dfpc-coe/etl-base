@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.0.1
+
+- :bug: Misunderstood Object type -> `JSONSchema6`
+
 ### v2.0.0
 
 - :rocket: Schema now returns a `JSONSchema6Object` Type
