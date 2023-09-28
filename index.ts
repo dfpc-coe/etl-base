@@ -73,13 +73,14 @@ export default class TaskBase {
             }
         };
 
+        if (!this.etl.api) throw new Error('No ETL API URL Provided');
+        if (!this.etl.layer) throw new Error('No ETL Layer Provided');
+
         // This is just a helper function for local development, signing with the (unsecure) default secret
         if (!this.etl.token && (new URL(this.etl.api)).hostname === 'localhost') {
             this.etl.token = jwt.sign({ access: 'cot', layer: parseInt(this.etl.layer) }, 'coe-wildland-fire')
         }
 
-        if (!this.etl.api) throw new Error('No ETL API URL Provided');
-        if (!this.etl.layer) throw new Error('No ETL Layer Provided');
         if (!this.etl.token) throw new Error('No ETL Token Provided');
     }
 
