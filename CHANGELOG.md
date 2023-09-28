@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.0.2
+
+- :bug: Fix existance check not being thrown
+
 ### v2.0.1
 
 - :bug: Misunderstood Object type -> `JSONSchema6`
