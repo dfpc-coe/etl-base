@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.1.0
+
+- :tada: Add generic fetch method
+
 ### v2.0.2
 
 - :bug: Fix existance check not being thrown

@@ -118,6 +118,25 @@ export default class TaskBase {
         }
     }
 
+    async fetch(url: string, method: string, body: object): object {
+        console.log(`ok - ${method}: ${url}`);
+        const res = await fetch(new URL(url, this.etl.api), {
+            method,
+            headers: {
+                'Authorization': `Bearer ${this.etl.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            console.error(await res.text());
+            throw new Error('Failed to make request to API');
+        } else {
+            return await res.json();
+        }
+    }
+
     /**
      * Post an Alert to the Layer Alert API
      *
