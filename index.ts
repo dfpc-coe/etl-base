@@ -118,7 +118,7 @@ export default class TaskBase {
         }
     }
 
-    async fetch(url: string, method: string, body: object): object {
+    async fetch(url: string, method: string, body: object): Promise<object> {
         console.log(`ok - ${method}: ${url}`);
         const res = await fetch(new URL(url, this.etl.api), {
             method,
