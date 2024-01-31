@@ -2,7 +2,7 @@
 
 <p align=center>Helper library for building NodeJS based ETL Lambdas</p>
 
-The [ETL Server](https://github.com/tak-ps/etl) is designed to manage and run
+The [ETL Server](https://github.com/dfpc-coe/CloudTAK) is designed to manage and run
 Lambda Container Images that perform various ETL functions to convert data into
 formats that are more easily ingestible via TAK.
 
@@ -68,5 +68,5 @@ export default class Task extends ETL {
 
 The API documentation is generated automatically by any commit to the `main` branch.
 
-Documentation for the API can be found at [tak-ps.github.io/etl-base](https://tak-ps.github.io/etl-base/)
+Documentation for the API can be found at [dfpc-coe.github.io/etl-base](https://dfpc-coe.github.io/etl-base/)
 
