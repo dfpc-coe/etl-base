@@ -73,13 +73,14 @@ export default class TaskBase {
             }
         };
 
+        if (!this.etl.api) throw new Error('No ETL API URL Provided');
+        if (!this.etl.layer) throw new Error('No ETL Layer Provided');
+
         // This is just a helper function for local development, signing with the (unsecure) default secret
         if (!this.etl.token && (new URL(this.etl.api)).hostname === 'localhost') {
             this.etl.token = jwt.sign({ access: 'cot', layer: parseInt(this.etl.layer) }, 'coe-wildland-fire')
         }
 
-        if (!this.etl.api) throw new Error('No ETL API URL Provided');
-        if (!this.etl.layer) throw new Error('No ETL Layer Provided');
         if (!this.etl.token) throw new Error('No ETL Token Provided');
     }
 
@@ -114,6 +115,25 @@ export default class TaskBase {
                 additionalProperties: true,
                 properties: {}
             };
+        }
+    }
+
+    async fetch(url: string, method: string, body: object): Promise<object> {
+        console.log(`ok - ${method}: ${url}`);
+        const res = await fetch(new URL(url, this.etl.api), {
+            method,
+            headers: {
+                'Authorization': `Bearer ${this.etl.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            console.error(await res.text());
+            throw new Error('Failed to make request to API');
+        } else {
+            return await res.json();
         }
     }
 
