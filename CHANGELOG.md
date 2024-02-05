@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v3.0.0
+
+- :rocket: Use new token strategy
+
 ### v2.1.0
 
 - :tada: Add generic fetch method
