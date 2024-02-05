@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v3.0.1
+
+- :bug: Add `internal: true`
+
 ### v3.0.0
 
 - :rocket: Use new token strategy
