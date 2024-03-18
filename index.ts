@@ -215,10 +215,9 @@ export default class TaskBase {
 
         if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
 
-        if (!fc.features.length) return true;
-
         // Store feats as buffers
-        const pre = Buffer.from('{"type":"FeatureCollection","features":[');
+        const uids = JSON.stringify(fc.features.map((f) => { return f.id; }));
+        const pre = Buffer.from(`{"type":"FeatureCollection", "uids": ${uids}, "features":[`);
         const post = Buffer.from(']}')
         let buffs = [pre];
         let submit = false;

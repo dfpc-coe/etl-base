@@ -29,11 +29,11 @@
         "@types/geojson": "^7946.0.10",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/node": "^20.0.0",
-        "@typescript-eslint/eslint-plugin": "^6.0.0",
-        "@typescript-eslint/parser": "^6.0.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
         "eslint": "^8.34.0",
         "ts-node": "^10.9.1",
-        "typedoc": "^0.24.7",
+        "typedoc": "^0.25.0",
         "typescript": "^5.0.0"
     },
     "dependencies": {
