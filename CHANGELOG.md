@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v3.1.0
+
+- :rocket: Add `uid` support to `FeatureCollection`
+- :rocket: Allow submission of empty FeatureCollections to allow for deletions in Data Sync Mission Diff Mode
+- :arrow_up: Update Deps
+
 ### v3.0.1
 
 - :bug: Add `internal: true`
