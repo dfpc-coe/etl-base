@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v4.0.0
+
+- :rocket: `layer() => fetchLayer`
+- :rocket: `layer` now stores the output of `fetchLayer` to support internal operations that require it
+- :tada: The new Config option is now supported - initially with `timezone` override support
+
 ### v3.0.1
 
 - :bug: Add `internal: true`

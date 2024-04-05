@@ -1,5 +1,6 @@
 import { FeatureCollection } from 'geojson';
-import { JSONSchema6 } from 'json-schema';
+import { Type, TSchema } from '@sinclair/typebox';
+import moment from 'moment-timezone';
 import jwt from 'jsonwebtoken';
 
 export interface Event {
@@ -43,6 +44,12 @@ export interface TaskLayer {
     environment: {
         [k: string]: unknown
     };
+    schema: TSchema;
+    config: {
+        timezone?: {
+            timezone: string;
+        }
+    };
     memory: number;
     timeout: number;
 
@@ -52,6 +59,7 @@ export interface TaskLayer {
 
 export default class TaskBase {
     etl: TaskBaseSettings;
+    layer?: TaskLayer
 
     /**
      * Create a new TaskBase instance - Usually not called directly but instead
@@ -96,25 +104,16 @@ export default class TaskBase {
      *
      * @returns A JSON Schema Object
      */
-    static async schema(type: SchemaType = SchemaType.Input): Promise<JSONSchema6> {
+    static async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
         if (type === SchemaType.Input) {
-            return {
-                type: 'object',
-                properties: {
-                    'DEBUG': {
-                        type: 'boolean',
-                        default: false,
-                        description: 'Print results in logs'
-                    }
-                }
-            };
+            return Type.Object({
+                'DEBUG': Type.Boolean({
+                    default: false,
+                    description: 'Print results in logs'
+                })
+            });
         } else {
-            return {
-                type: 'object',
-                required: [],
-                additionalProperties: true,
-                properties: {}
-            };
+            return Type.Object({});
         }
     }
 
@@ -168,22 +167,22 @@ export default class TaskBase {
      *
      * @returns A Layer Config Object
      */
-    async layer(): Promise<TaskLayer> {
+    async fetchLayer(): Promise<TaskLayer> {
         console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
-        const layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
+        const res_layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
             }
         });
 
-        if (!layer.ok) {
-            console.error(await layer.text());
+        if (!res_layer.ok) {
+            console.error(await res_layer.text());
             throw new Error('Failed to get layer from ETL');
         } else {
-            const json = await layer.json();
+            const json = await res_layer.json();
 
-            return {
+            const layer: TaskLayer = {
                 id: json.id,
                 name: json.name,
                 created: json.created,
@@ -197,11 +196,17 @@ export default class TaskBase {
                 task: json.task,
                 cron: json.cron,
                 environment: json.environment,
+                schema: json.schema,
+                config: json.config,
                 memory: json.memory,
                 timeout: json.timeout,
                 data: json.data || null,
                 connection: json.connection || null,
             }
+
+            this.layer = layer;
+
+            return layer;
         }
     }
 
@@ -211,6 +216,26 @@ export default class TaskBase {
      * @returns A boolean representing the success state
      */
     async submit(fc: FeatureCollection): Promise<boolean> {
+        if (!this.layer) await this.fetchLayer();
+
+        const fields = Object.keys(this.layer.schema.properties).filter((k) => {
+            return this.layer.schema.properties[k].format === 'date-time';
+        });
+
+        // Postprocessing Functions have been defined
+        if (Object.keys(this.layer.config).length) {
+            const cnf = this.layer.config;
+            console.error(cnf)
+            if (cnf.timezone) {
+                for (const feat of fc.features) {
+                    for (const field of fields) {
+                        if (!feat.properties[field]) continue;
+                        feat.properties[field] = moment(feat.properties[field]).tz(this.layer.config.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${this.layer.config.timezone.timezone})`;
+                    }
+                }
+            }
+        }
+
         console.log(`ok - posting ${fc.features.length} features`);
 
         if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
