@@ -10,7 +10,12 @@
 
 ## Version History
 
+### v4.1.1
+
+- :arrow_up: Include minimist types
+
 ### v4.1.0
+
 - :tada: Include automatic basic CLI
 - :rocket: Allow `schema:output` or `schema:input` for CLI
 - :rocket: Automatically parse `.env` if current path is given to `.local(path: string)`
