@@ -59,7 +59,7 @@ export interface TaskLayer {
     connection: number | null;
 };
 
-export async function local(Task: TaskBase, current: string) {
+export async function local(task: TaskBase, current: string) {
     try {
         const dotfile = new URL('.env', current);
 
@@ -75,9 +75,9 @@ export async function local(Task: TaskBase, current: string) {
     const args = minimist(process.argv, {})
 
     if (!args._[2] || args._[2] === 'control') {
-        await handler(Task);
+        await handler(task);
     } else if (args._[2] === 'schema:input' || args._[2] === 'schema:output') {
-        const schema = await handler(Task, { type: args._[2] });
+        const schema = await handler(task, { type: args._[2] });
         console.log(JSON.stringify(schema))
     } else {
         console.error('Unknown Command: ' + args._[2])
@@ -85,13 +85,12 @@ export async function local(Task: TaskBase, current: string) {
     }
 }
 
-export async function handler(Task: TaskBase, event: Event = {}) {
+export async function handler(task: TaskBase, event: Event = {}) {
     if (event.type === 'schema:input') {
-        return await this.schema(SchemaType.Input);
+        return await task.schema(SchemaType.Input);
     } else if (event.type === 'schema:output') {
-        return await this.schema(SchemaType.Output);
+        return await task.schema(SchemaType.Output);
     } else {
-        const task = new this();
         await task.control();
     }
 }

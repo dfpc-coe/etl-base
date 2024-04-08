@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.2.2
+
+- :rocket: Squash instanceof bugs
+
 ### v4.2.1
 
 - :rocket: Schema as instance method
