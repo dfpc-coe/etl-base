@@ -62,6 +62,11 @@ export default class Task extends ETL {
         });
     }
 }
+
+const handler = Task.handler;
+// Optionally allows basic CLI
+await Task.local(import.meta.url);
+export { handler };
 ```
 
 ### API

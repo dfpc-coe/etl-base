@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import minimist from 'minimist';
 import { FeatureCollection } from 'geojson';
 import { Type, TSchema } from '@sinclair/typebox';
 import moment from 'moment-timezone';
@@ -60,6 +62,43 @@ export interface TaskLayer {
 export default class TaskBase {
     etl: TaskBaseSettings;
     layer?: TaskLayer
+
+    static async local(current: string) {
+        try {
+            const dotfile = new URL('.env', current);
+
+            fs.accessSync(dotfile);
+
+            Object.assign(process.env, JSON.parse(String(fs.readFileSync(dotfile))));
+        } catch (err) {
+            console.log('ok - no .env file loaded');
+        }
+
+        if (current !== `file://${process.argv[1]}`) return;
+
+        const args = minimist(process.argv, {})
+
+        if (!args._[2] || args._[2] === 'control') {
+            await this.handler();
+        } else if (args._[2] === 'schema:input' || args._[2] === 'schema:output') {
+            const schema = await this.handler({ type: args._[2] });
+            console.log(JSON.stringify(schema))
+        } else {
+            console.error('Unknown Command: ' + args._[2])
+            process.exit()
+        }
+    }
+
+    static async handler(event: Event = {}) {
+        if (event.type === 'schema:input') {
+            return await this.schema(SchemaType.Input);
+        } else if (event.type === 'schema:output') {
+            return await this.schema(SchemaType.Output);
+        } else {
+            const task = new this();
+            await task.control();
+        }
+    }
 
     /**
      * Create a new TaskBase instance - Usually not called directly but instead

@@ -39,6 +39,7 @@
     "dependencies": {
         "@sinclair/typebox": "^0.32.20",
         "jsonwebtoken": "^9.0.0",
+        "minimist": "^1.2.8",
         "moment-timezone": "^0.5.45"
     }
 }
