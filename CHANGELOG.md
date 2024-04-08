@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.2.0
+
+- :bug: Fix use of this
+
 ### v4.1.2
 
 - :arrow_up: Change to deps
