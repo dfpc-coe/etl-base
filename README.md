@@ -20,7 +20,7 @@ The following is an example of as simple an ETL service as possible that shows
 how this extension is performed.
 
 ```ts
-import ETL, { Event } from '@tak-ps/etl';
+import ETL, { Event, handler as internal } from '@tak-ps/etl';
 
 export default class Task extends ETL {
     // The UI is dynamically generated based on the JSON Schema that the Lambda provides in the schema method.
@@ -63,10 +63,11 @@ export default class Task extends ETL {
     }
 }
 
-const handler = Task.handler;
-// Optionally allows basic CLI
-await Task.local(import.meta.url);
-export { handler };
+// Optionally allow CLI calls
+await local(new Task(), import.meta.url);
+export async function handler(event: Event = {}) {
+    return await internal(new Task(), event);
+}
 ```
 
 ### API

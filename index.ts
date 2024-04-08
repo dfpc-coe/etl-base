@@ -147,7 +147,7 @@ export default class TaskBase {
      *
      * @returns A JSON Schema Object
      */
-    static async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
+    async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
         if (type === SchemaType.Input) {
             return Type.Object({
                 'DEBUG': Type.Boolean({
