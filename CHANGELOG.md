@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.1.2
+
+- :arrow_up: Change to deps
+
 ### v4.1.1
 
 - :arrow_up: Include minimist types
