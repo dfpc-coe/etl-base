@@ -131,6 +131,10 @@ export default class TaskBase {
         if (!this.etl.token) throw new Error('No ETL Token Provided');
     }
 
+    async control(): Promise<void> {
+        return;
+    }
+
     /**
      * The extended class should override this function if it needs additional user-defined
      * config values or wants to provide a Schema
