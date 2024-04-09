@@ -57,7 +57,7 @@ export interface TaskLayer {
 
     data: number | null;
     connection: number | null;
-};
+}
 
 export function env(current: string) {
     try {
@@ -270,7 +270,7 @@ export default class TaskBase {
         if (Object.keys(this.layer.config).length) {
             const cnf = this.layer.config;
             console.error(cnf)
-            if (cnf.timezone) {
+            if (cnf.timezone && this.layer.config.timezone.timezone !== 'No TimeZone') {
                 for (const feat of fc.features) {
                     for (const field of fields) {
                         if (!feat.properties[field]) continue;
