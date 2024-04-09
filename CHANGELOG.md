@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.1
+
+- :bug: Ignore `No TimeZone` option in config
+
 ### v4.3.0
 
 - :rocket: Move `env` to it's own fn to allow env to be pop'd before constructor called
