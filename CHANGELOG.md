@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.0
+
+- :rocket: Move `env` to it's own fn to allow env to be pop'd before constructor called
+
 ### v4.2.2
 
 - :rocket: Squash instanceof bugs

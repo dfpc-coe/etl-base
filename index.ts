@@ -59,7 +59,7 @@ export interface TaskLayer {
     connection: number | null;
 };
 
-export async function local(task: TaskBase, current: string) {
+export function env(current: string) {
     try {
         const dotfile = new URL('.env', current);
 
@@ -69,7 +69,9 @@ export async function local(task: TaskBase, current: string) {
     } catch (err) {
         console.log('ok - no .env file loaded');
     }
+}
 
+export async function local(task: TaskBase, current: string) {
     if (current !== `file://${process.argv[1]}`) return;
 
     const args = minimist(process.argv, {})
