@@ -270,7 +270,7 @@ export default class TaskBase {
         // Postprocessing Functions have been defined
         if (Object.keys(this.layer.config).length) {
             const cnf = this.layer.config;
-            if (cnf.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
+            if (cnf.timezone && cnf.timezone.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
                 for (const feat of fc.features) {
                     for (const field of fields) {
                         if (!feat.properties[field]) continue;
