@@ -263,18 +263,18 @@ export default class TaskBase {
         if (!this.layer) await this.fetchLayer();
 
         const fields = Object.keys(this.layer.schema.properties).filter((k) => {
+            if (!this.layer.schema.properties[k]) return false;
             return this.layer.schema.properties[k].format === 'date-time';
         });
 
         // Postprocessing Functions have been defined
         if (Object.keys(this.layer.config).length) {
             const cnf = this.layer.config;
-            console.error(cnf)
-            if (cnf.timezone && this.layer.config.timezone.timezone !== 'No TimeZone') {
+            if (cnf.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
                 for (const feat of fc.features) {
                     for (const field of fields) {
                         if (!feat.properties[field]) continue;
-                        feat.properties[field] = moment(feat.properties[field]).tz(this.layer.config.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${this.layer.config.timezone.timezone})`;
+                        feat.properties[field] = moment(feat.properties[field]).tz(cnf.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${cnf.timezone.timezone})`;
                     }
                 }
             }
