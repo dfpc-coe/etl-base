@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.3
+
+- :bug: Check for length of timezone
+
 ### v4.3.2
 
 - :bug: Additional field checks
