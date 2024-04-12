@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.2
+
+- :bug: Additional field checks
+
 ### v4.3.1
 
 - :bug: Ignore `No TimeZone` option in config
