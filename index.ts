@@ -262,6 +262,10 @@ export default class TaskBase {
     async submit(fc: FeatureCollection): Promise<boolean> {
         if (!this.layer) await this.fetchLayer();
 
+        if (!this.layer.schema || !this.layer.schema.properties) {
+            this.layer.schema = Type.Object({})
+        }
+
         const fields = Object.keys(this.layer.schema.properties).filter((k) => {
             if (!this.layer.schema.properties[k]) return false;
             return this.layer.schema.properties[k].format === 'date-time';

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.4
+
+- :bug: Ensure `schema.properties` is present
+
 ### v4.3.3
 
 - :bug: Check for length of timezone
