@@ -277,8 +277,8 @@ export default class TaskBase {
             if (cnf.timezone && cnf.timezone.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
                 for (const feat of fc.features) {
                     for (const field of fields) {
-                        if (!feat.properties[field]) continue;
-                        feat.properties[field] = moment(feat.properties[field]).tz(cnf.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${cnf.timezone.timezone})`;
+                        if (!feat.properties.metadata || !feat.properties.metadata[field]) continue;
+                        feat.properties.metadata[field] = moment(feat.properties.metadata[field]).tz(cnf.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${cnf.timezone.timezone})`;
                     }
                 }
             }

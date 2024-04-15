@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.5
+
+- :bug: Fix timezone override
+
 ### v4.3.4
 
 - :bug: Ensure `schema.properties` is present
