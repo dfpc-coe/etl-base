@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.6
+
+- :bug: Fix DataSync UIDs Gen
+
 ### v4.3.5
 
 - :bug: Fix timezone override
