@@ -25,22 +25,35 @@ import ETL, { Event, handler as internal } from '@tak-ps/etl';
 export default class Task extends ETL {
     // The UI is dynamically generated based on the JSON Schema that the Lambda provides in the schema method.
 
-    static schema() {
-        return {
-            type: 'object',
-            required: ['CallSign'],
-            properties: {
-                'CallSign': {
-                    type: 'string',
-                    description: 'The CallSign of the returned point'
-                },
+    schema(type) {
+        if (type === 'schema:intput) {
+            return {
+                type: 'object',
+                required: ['Password'],
+                properties: {
+                    'Password': {
+                        type: 'string',
+                        description: 'The password for the service'
+                    },
+                }
+            }
+        } else if (type === 'schema:output') {
+            return {
+                type: 'object',
+                required: ['CallSign'],
+                properties: {
+                    'CallSign': {
+                        type: 'string',
+                        description: 'The CallSign of the returned point'
+                    },
+                }
             }
         }
     }
 
     async control(): Promise<void> {
         // Provided function to obtain all environment config as defined by a user in the UI
-        const layer = await this.layer();
+        const layer = await this.fetchLayer();
 
         // The Layer object contains all the properties as defined by the Get Layer API
         const environment = layer.environent;
