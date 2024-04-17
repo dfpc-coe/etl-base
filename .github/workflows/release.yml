@@ -30,3 +30,11 @@ jobs:
               run: npm publish
               env:
                   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Generate CHANGELOG
+              run: ./release ${{steps.tag.outputs.tag}} > RELEASE
+
+            - name: Github Release
+              uses: softprops/action-gh-release@v2
+              with:
+                body_path: RELEASE

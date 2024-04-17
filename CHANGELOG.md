@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.4.0
+
+- :rocket: Update to flat ESLint Config
+
 ### v4.3.6
 
 - :bug: Fix DataSync UIDs Gen
