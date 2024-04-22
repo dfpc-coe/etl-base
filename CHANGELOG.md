@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.5.0
+
+- :rocket: Hit the API with empty feature collections
+
 ### v4.4.0
 
 - :rocket: Update to flat ESLint Config
