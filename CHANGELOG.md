@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.6.0
+
+- :rocket: Update Alert API
+
 ### v4.5.0
 
 - :rocket: Hit the API with empty feature collections

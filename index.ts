@@ -186,9 +186,10 @@ export default class TaskBase {
      * @returns The Response from the Layer Alert API
      */
     async alert(alertin: TaskLayerAlert): Promise<object> {
-        console.log(`ok - Generating Alert`);
+        if (!this.layer) await this.fetchLayer();
 
-        const alert = await fetch(new URL(`/api/layer/${this.etl.layer}/alert`, this.etl.api), {
+        console.log(`ok - Generating Alert`);
+        const alert = await fetch(new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/alert`, this.etl.api), {
             method: 'post',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
