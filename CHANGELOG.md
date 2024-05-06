@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.7.0
+
+- :rocket: Expose TypedFetch Interface
+
 ### v4.6.0
 
 - :rocket: Update Alert API

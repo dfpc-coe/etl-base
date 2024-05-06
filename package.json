@@ -34,12 +34,14 @@
         "typescript-eslint": "^7.7.0"
     },
     "dependencies": {
+        "@openaddresses/batch-error": "^2.4.0",
         "@sinclair/typebox": "^0.32.20",
         "@types/geojson": "^7946.0.10",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",
         "jsonwebtoken": "^9.0.0",
         "minimist": "^1.2.8",
-        "moment-timezone": "^0.5.45"
+        "moment-timezone": "^0.5.45",
+        "undici": "^6.15.0"
     }
 }

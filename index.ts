@@ -4,6 +4,7 @@ import { FeatureCollection } from 'geojson';
 import { Type, TSchema } from '@sinclair/typebox';
 import moment from 'moment-timezone';
 import jwt from 'jsonwebtoken';
+export * from './src/fetch.js'
 
 export interface Event {
     type?: string
