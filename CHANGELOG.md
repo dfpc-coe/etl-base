@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.7.1
+
+- :rocket: Avoid use of express dependency
+
 ### v4.7.0
 
 - :rocket: Expose TypedFetch Interface

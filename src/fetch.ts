@@ -1,4 +1,3 @@
-import Err from '@openaddresses/batch-error';
 import { Static, TSchema, TUnknown } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { fetch, Response } from 'undici';
@@ -26,7 +25,7 @@ export class TypedResponse extends Response {
         const errors = typeChecker.Errors(body);
         const firstError = errors.First();
 
-        throw new Err(500, null, `Internal Validation Error: ${JSON.stringify(firstError)}`);
+        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)}`);
     }
 }
 
