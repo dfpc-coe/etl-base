@@ -4,7 +4,7 @@ import { FeatureCollection } from 'geojson';
 import { Type, TSchema } from '@sinclair/typebox';
 import moment from 'moment-timezone';
 import jwt from 'jsonwebtoken';
-export * from './src/fetch.js'
+import typedfetch from './src/fetch.js'
 
 export interface Event {
     type?: string
@@ -349,3 +349,8 @@ export default class TaskBase {
         return true;
     }
 }
+
+export {
+    typedfetch as fetch
+};
+

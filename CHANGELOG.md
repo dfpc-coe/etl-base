@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.7.2
+
+- :bug: Avoid clashing with default fetch use used in index
+
 ### v4.7.1
 
 - :rocket: Avoid use of express dependency
