@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.8.0
+
+- :rocket: Add basic support for JSON Schema String Formats
+
 ### v4.7.2
 
 - :bug: Avoid clashing with default fetch use used in index

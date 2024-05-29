@@ -1,10 +1,21 @@
 import fs from 'node:fs';
 import minimist from 'minimist';
 import { FeatureCollection } from 'geojson';
-import { Type, TSchema } from '@sinclair/typebox';
+import { Type, TSchema, FormatRegistry } from '@sinclair/typebox';
 import moment from 'moment-timezone';
 import jwt from 'jsonwebtoken';
+
 import typedfetch from './src/fetch.js'
+import * as formats from './src/formats/index.js';
+
+FormatRegistry.Set('date-time', formats.IsDateTime);
+FormatRegistry.Set('date', formats.IsDate);
+FormatRegistry.Set('time', formats.IsTime);
+FormatRegistry.Set('email', formats.IsEmail);
+FormatRegistry.Set('ipv4', formats.IsIPv4);
+FormatRegistry.Set('ipv6', formats.IsIPv6);
+FormatRegistry.Set('url', formats.IsUrl);
+FormatRegistry.Set('uuid', formats.IsUuid);
 
 export interface Event {
     type?: string
