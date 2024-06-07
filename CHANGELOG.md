@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.9.0
+
+- :rocket: Log Response body if it fails Type Checks
+
 ### v4.8.0
 
 - :rocket: Add basic support for JSON Schema String Formats

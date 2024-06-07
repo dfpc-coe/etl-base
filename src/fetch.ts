@@ -25,7 +25,7 @@ export class TypedResponse extends Response {
         const errors = typeChecker.Errors(body);
         const firstError = errors.First();
 
-        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)}`);
+        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(body)}`);
     }
 }
 
