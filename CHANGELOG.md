@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.11.1
+
+- :rocket: Update Feature
+
 ### v4.11.0
 
 - :rocket: Export node-cot `Feature`
