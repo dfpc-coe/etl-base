@@ -344,6 +344,12 @@ export default class TaskBase {
 }
 
 export {
-    typedfetch as fetch
+    typedfetch as fetch,
+    Event,
+    EventType,
+    SchemaType,
+    TaskBaseSettings,
+    TaskLayer,
+    TaskLayerAlert,
 };
 

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.10.1
+
+- :bug: Maintain previous exports
+
 ### v4.10.0
 
 - :rocket: Add `Task.env()` function to return validated environment
