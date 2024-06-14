@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.10.0
+
+- :rocket: Add `Task.env()` function to return validated environment
+
 ### v4.9.0
 
 - :rocket: Log Response body if it fails Type Checks

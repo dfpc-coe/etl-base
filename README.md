@@ -25,6 +25,17 @@ import ETL, { Event, handler as internal } from '@tak-ps/etl';
 export default class Task extends ETL {
     // The UI is dynamically generated based on the JSON Schema that the Lambda provides in the schema method.
 
+    constructor() {
+        super();
+
+        this.reg = {
+            Name: 'Task Name',
+            Type: [TaskRegistrationType.Connection, TaskRegistrationType.DataSync],
+            Repo: 'https://github.com/dfpc-coe/etl-base',
+            Readme: 'https://github.com/dfpc-coe/etl-base/blob/main/README.md'
+        }
+    }
+
     schema(type) {
         if (type === 'schema:intput) {
             return {

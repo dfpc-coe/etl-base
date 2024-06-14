@@ -1,9 +1,18 @@
 import fs from 'node:fs';
 import minimist from 'minimist';
 import { FeatureCollection } from 'geojson';
-import { Type, TSchema, FormatRegistry } from '@sinclair/typebox';
+import { Static, Type, TSchema, FormatRegistry, TUnknown } from '@sinclair/typebox';
+import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
 import jwt from 'jsonwebtoken';
+import {
+    Event,
+    EventType,
+    SchemaType,
+    TaskBaseSettings,
+    TaskLayer,
+    TaskLayerAlert,
+} from './src/types.js';
 
 import typedfetch from './src/fetch.js'
 import * as formats from './src/formats/index.js';
@@ -16,60 +25,6 @@ FormatRegistry.Set('ipv4', formats.IsIPv4);
 FormatRegistry.Set('ipv6', formats.IsIPv6);
 FormatRegistry.Set('url', formats.IsUrl);
 FormatRegistry.Set('uuid', formats.IsUuid);
-
-export interface Event {
-    type?: string
-}
-
-export enum SchemaType {
-    Input = 'Input',
-    Output = 'Output'
-}
-
-export interface TaskBaseSettings {
-    api: string;
-    layer: string;
-    token: string;
-    config: {
-        submit_size: number;
-    }
-}
-
-export interface TaskLayerAlert {
-    icon?: string;
-    priority?: string;
-    title: string;
-    description?: string;
-}
-
-export interface TaskLayer {
-    id: number;
-    name: string;
-    created: number;
-    updated: number;
-    description: string;
-    enabled: boolean;
-    enabled_styles: boolean;
-    styles: unknown;
-    logging: boolean;
-    stale: number;
-    task: string;
-    cron: string;
-    environment: {
-        [k: string]: unknown
-    };
-    schema: TSchema;
-    config: {
-        timezone?: {
-            timezone: string;
-        }
-    };
-    memory: number;
-    timeout: number;
-
-    data: number | null;
-    connection: number | null;
-}
 
 export function env(current: string) {
     try {
@@ -100,9 +55,9 @@ export async function local(task: TaskBase, current: string) {
 }
 
 export async function handler(task: TaskBase, event: Event = {}) {
-    if (event.type === 'schema:input') {
+    if (event.type === EventType.SchemaInput) {
         return await task.schema(SchemaType.Input);
-    } else if (event.type === 'schema:output') {
+    } else if (event.type === EventType.SchemaOutput) {
         return await task.schema(SchemaType.Output);
     } else {
         await task.control();
@@ -111,7 +66,7 @@ export async function handler(task: TaskBase, event: Event = {}) {
 
 export default class TaskBase {
     etl: TaskBaseSettings;
-    layer?: TaskLayer
+    layer?: TaskLayer;
 
     /**
      * Create a new TaskBase instance - Usually not called directly but instead
@@ -173,6 +128,12 @@ export default class TaskBase {
         }
     }
 
+    /**
+     * Provides a Fetch class with preset Authentication and JSON parsing
+     * For making calls to CloudTAK APIs
+     *
+     * @returns The parsed response body
+     */
     async fetch(url: string, method: string, body: object): Promise<object> {
         console.log(`ok - ${method}: ${url}`);
         const res = await fetch(new URL(url, this.etl.api), {
@@ -216,6 +177,27 @@ export default class TaskBase {
         } else {
             return await alert.json();
         }
+    }
+
+
+
+    /**
+     * Generate a validated Environment object
+     */
+    async env<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
+        if (!this.layer) await this.fetchLayer();
+
+        const env = await this.layer.environment;
+
+        const typeChecker = TypeCompiler.Compile(type)
+        const result = typeChecker.Check(env);
+
+        if (result) return env;
+
+        const errors = typeChecker.Errors(env);
+        const firstError = errors.First();
+
+        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(env)}`);
     }
 
     /**
