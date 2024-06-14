@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.11.0
+
+- :rocket: Export node-cot `Feature`
+
 ### v4.10.2
 
 - :bug: Remove extraneous `await`

@@ -4,6 +4,7 @@ import { FeatureCollection } from 'geojson';
 import { Static, Type, TSchema, FormatRegistry, TUnknown } from '@sinclair/typebox';
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
+import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import {
     Event,
@@ -344,6 +345,7 @@ export default class TaskBase {
 }
 
 export {
+    Feature,
     typedfetch as fetch,
     Event,
     EventType,
