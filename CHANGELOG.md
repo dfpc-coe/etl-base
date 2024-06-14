@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.10.2
+
+- :bug: Remove extraneous `await`
+
 ### v4.10.1
 
 - :bug: Maintain previous exports

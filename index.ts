@@ -187,7 +187,7 @@ export default class TaskBase {
     async env<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
         if (!this.layer) await this.fetchLayer();
 
-        const env = await this.layer.environment;
+        const env = this.layer.environment;
 
         const typeChecker = TypeCompiler.Compile(type)
         const result = typeChecker.Check(env);
