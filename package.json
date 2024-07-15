@@ -29,12 +29,12 @@
         "@types/node": "^20.0.0",
         "eslint": "^8.34.0",
         "ts-node": "^10.9.1",
-        "typedoc": "^0.25.0",
-        "typescript": "^5.0.0",
+        "typedoc": "^0.26.0",
+        "typescript": "^5.5.0",
         "typescript-eslint": "^7.7.0"
     },
     "peerDependencies": {
-        "@tak-ps/node-cot": "^8.5.1"
+        "@tak-ps/node-cot": "^10.0.0"
     },
     "dependencies": {
         "@sinclair/typebox": "^0.32.20",

@@ -147,8 +147,11 @@ export default class TaskBase {
         });
 
         if (!res.ok) {
-            console.error(await res.text());
-            throw new Error('Failed to make request to API');
+            const body = await res.text();
+            console.error(body);
+
+            const json = JSON.parse(body)
+            throw new Error(json.message);
         } else {
             return await res.json();
         }

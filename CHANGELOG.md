@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v4.12.0
+
+- :rocket: Pass `fetch` error messages upstream
+- :arrow_up: Update all core deps
+
 ### v4.11.1
 
 - :rocket: Update Feature
