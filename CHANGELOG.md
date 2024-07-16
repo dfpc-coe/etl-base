@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v5.0.0
+
+- :rocket: Apply default values if present in `Environment`
+
 ### v4.12.0
 
 - :rocket: Pass `fetch` error messages upstream
