@@ -1,8 +1,14 @@
 import fs from 'node:fs';
 import minimist from 'minimist';
 import { FeatureCollection } from 'geojson';
-import { Static, Type, TSchema, FormatRegistry, TUnknown } from '@sinclair/typebox';
-import { TypeCompiler } from "@sinclair/typebox/compiler";
+import {
+    Type,
+    Static,
+    TSchema,
+    TUnknown,
+    FormatRegistry,
+} from '@sinclair/typebox';
+import { Value } from '@sinclair/typebox/value'
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
@@ -193,12 +199,14 @@ export default class TaskBase {
 
         const env = this.layer.environment;
 
-        const typeChecker = TypeCompiler.Compile(type)
-        const result = typeChecker.Check(env);
+        Value.Default(type, env)
+        Value.Clean(type, env)
+        const result = Value.Check(type, env)
 
         if (result) return env;
 
-        const errors = typeChecker.Errors(env);
+        const errors = Value.Errors(type, env);
+
         const firstError = errors.First();
 
         throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(env)}`);

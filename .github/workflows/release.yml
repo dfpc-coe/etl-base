@@ -32,7 +32,7 @@ jobs:
                   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Generate CHANGELOG
-              run: ./release ${{steps.tag.outputs.tag}} > RELEASE
+              run: grep -Pzo "### ${{steps.tag.outputs.tag}}(?s).*?(?=###)" CHANGELOG.md > RELEASE
 
             - name: Github Release
               uses: softprops/action-gh-release@v2
