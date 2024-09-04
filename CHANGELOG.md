@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v5.1.0
+
+- :tada: Expose Ephemeral key/value API
+- :rocket: Use strongly typed Layer Responses
+- :arrow_up: Update to latest deps
+
 ### v5.0.0
 
 - :rocket: Apply default values if present in `Environment`
