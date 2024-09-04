@@ -21,7 +21,7 @@ import {
     TaskLayerAlert,
 } from './src/types.js';
 
-import typedfetch from './src/fetch.js'
+import fetch from './src/fetch.js'
 import * as formats from './src/formats/index.js';
 
 FormatRegistry.Set('date-time', formats.IsDateTime);
@@ -41,7 +41,7 @@ export function env(current: string) {
 
         Object.assign(process.env, JSON.parse(String(fs.readFileSync(dotfile))));
     } catch (err) {
-        console.log('ok - no .env file loaded');
+        console.log(`ok - no .env file loaded: ${err}`);
     }
 }
 
@@ -73,7 +73,7 @@ export async function handler(task: TaskBase, event: Event = {}) {
 
 export default class TaskBase {
     etl: TaskBaseSettings;
-    layer?: TaskLayer;
+    layer?: Static<typeof TaskLayer>;
 
     /**
      * Create a new TaskBase instance - Usually not called directly but instead
@@ -159,7 +159,7 @@ export default class TaskBase {
             const json = JSON.parse(body)
             throw new Error(json.message);
         } else {
-            return await res.json();
+            return await res.json() as object;
         }
     }
 
@@ -185,7 +185,7 @@ export default class TaskBase {
             console.error(await alert.text());
             throw new Error('Failed to post alert to ETL');
         } else {
-            return await alert.json();
+            return await alert.json() as object;
         }
     }
 
@@ -213,12 +213,35 @@ export default class TaskBase {
     }
 
     /**
+     * Set ephemeral key/values
+     * Overwrites existing values, if any
+     *
+     * @returns A Layer Config Object
+     */
+    async setEphemeral(ephem: Record<string, string>): Promise<void> {
+        console.log(`ok - PUT ${new URL(`/api/layer/${this.etl.layer}/ephemeral`, this.etl.api)}`);
+        const res_layer = await fetch(new URL(`/api/layer/${this.etl.layer}/ephemeral`, this.etl.api), {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${this.etl.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ephem)
+        });
+
+        if (!res_layer.ok) {
+            console.error(await res_layer.text());
+            throw new Error('Failed to put ephemeral values to ETL');
+        }
+    }
+
+    /**
      * Get all information about the layer being processed
      * most importantly the user-defined `environment` object
      *
      * @returns A Layer Config Object
      */
-    async fetchLayer(): Promise<TaskLayer> {
+    async fetchLayer(): Promise<Static<typeof TaskLayer>> {
         console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
         const res_layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
@@ -231,33 +254,8 @@ export default class TaskBase {
             console.error(await res_layer.text());
             throw new Error('Failed to get layer from ETL');
         } else {
-            const json = await res_layer.json();
-
-            const layer: TaskLayer = {
-                id: json.id,
-                name: json.name,
-                created: json.created,
-                updated: json.updatd,
-                description: json.description,
-                enabled: json.enabled,
-                enabled_styles: json.enabled_styles,
-                styles: json.styles,
-                logging: json.logging,
-                stale: json.stale,
-                task: json.task,
-                cron: json.cron,
-                environment: json.environment,
-                schema: json.schema,
-                config: json.config,
-                memory: json.memory,
-                timeout: json.timeout,
-                data: json.data || null,
-                connection: json.connection || null,
-            }
-
-            this.layer = layer;
-
-            return layer;
+            this.layer = await res_layer.typed(TaskLayer);
+            return this.layer;
         }
     }
 
@@ -357,7 +355,7 @@ export default class TaskBase {
 
 export {
     Feature,
-    typedfetch as fetch,
+    fetch,
     Event,
     EventType,
     SchemaType,

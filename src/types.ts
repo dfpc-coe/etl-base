@@ -30,31 +30,36 @@ export interface TaskLayerAlert {
     description?: string;
 }
 
-export interface TaskLayer {
-    id: number;
-    name: string;
-    created: number;
-    updated: number;
-    description: string;
-    enabled: boolean;
-    enabled_styles: boolean;
-    styles: unknown;
-    logging: boolean;
-    stale: number;
-    task: string;
-    cron: string;
-    environment: {
-        [k: string]: unknown
-    };
-    schema: TSchema;
-    config: {
-        timezone?: {
-            timezone: string;
-        }
-    };
-    memory: number;
-    timeout: number;
+export const BasicSchema = Type.Object({
+    type: Type.Literal('object'),
+    required: Type.Optional(Type.Array(Type.String())),
+    properties: Type.Record(Type.String(), Type.Any())
+});
 
-    data: number | null;
-    connection: number | null;
-}
+export const TaskLayer = Type.Object({
+    id: Type.Integer(),
+    name: Type.String(),
+    created: Type.String(),
+    updated: Type.String(),
+    description: Type.String(),
+    enabled: Type.Boolean(),
+    enabled_styles: Type.Boolean(),
+    styles: Type.Unknown(),
+    logging: Type.Boolean(),
+    stale: Type.Integer(),
+    task: Type.String(),
+    cron: Type.String(),
+    ephemeral: Type.Record(Type.String(), Type.String()),
+    environment: Type.Record(Type.String(), Type.Unknown()),
+    schema: BasicSchema,
+    config: Type.Object({
+        timezone: Type.Optional(Type.Object({
+            timezone: Type.String()
+        }))
+    }),
+    memory: Type.Number(),
+    timeout: Type.Number(),
+
+    data: Type.Union([Type.Number(), Type.Null()]),
+    connection: Type.Number()
+});
