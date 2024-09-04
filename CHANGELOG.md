@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v5.1.1
+
+- :bug: Fix ephemeral API URL
+
 ### v5.1.0
 
 - :tada: Expose Ephemeral key/value API

@@ -219,8 +219,9 @@ export default class TaskBase {
      * @returns A Layer Config Object
      */
     async setEphemeral(ephem: Record<string, string>): Promise<void> {
-        console.log(`ok - PUT ${new URL(`/api/layer/${this.etl.layer}/ephemeral`, this.etl.api)}`);
-        const res_layer = await fetch(new URL(`/api/layer/${this.etl.layer}/ephemeral`, this.etl.api), {
+        const url = new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/ephemeral`, this.etl.api);
+        console.log(`ok - PUT ${url}`);
+        const res_layer = await fetch(url, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
