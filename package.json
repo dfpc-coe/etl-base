@@ -26,18 +26,18 @@
     },
     "homepage": "https://github.com/tak-ps/etl-base#readme",
     "devDependencies": {
-        "@types/node": "^20.0.0",
-        "eslint": "^8.34.0",
+        "@types/node": "^22.0.0",
+        "eslint": "^9.0.0",
         "ts-node": "^10.9.1",
         "typedoc": "^0.26.0",
         "typescript": "^5.5.0",
-        "typescript-eslint": "^7.7.0"
+        "typescript-eslint": "^8.0.0"
     },
     "peerDependencies": {
-        "@tak-ps/node-cot": "^10.0.0"
+        "@tak-ps/node-cot": "^11.2.0"
     },
     "dependencies": {
-        "@sinclair/typebox": "^0.32.20",
+        "@sinclair/typebox": "^0.33.0",
         "@types/geojson": "^7946.0.10",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",
