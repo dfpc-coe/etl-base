@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v5.2.1
+
+- :rocket: Additional Use ` ofexport type` syntax
+
 ### v5.2.0
 
 - :rocket: Use `export type` syntax

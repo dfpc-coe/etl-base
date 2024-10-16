@@ -13,11 +13,14 @@ import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import {
-    Event,
     EventType,
     SchemaType,
-    TaskBaseSettings,
     TaskLayer,
+} from './src/types.js';
+
+import type {
+    Event,
+    TaskBaseSettings,
     TaskLayerAlert,
 } from './src/types.js';
 
@@ -356,15 +359,15 @@ export default class TaskBase {
 
 export type {
     Event,
-    EventType,
-    SchemaType,
+    TaskBaseSettings,
+    TaskLayerAlert,
 }
 
 export {
+    TaskLayer,
+    EventType,
+    SchemaType,
     Feature,
     fetch,
-    TaskBaseSettings,
-    TaskLayer,
-    TaskLayerAlert,
 };
 
