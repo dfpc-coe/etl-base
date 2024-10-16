@@ -354,12 +354,15 @@ export default class TaskBase {
     }
 }
 
-export {
-    Feature,
-    fetch,
+export type {
     Event,
     EventType,
     SchemaType,
+}
+
+export {
+    Feature,
+    fetch,
     TaskBaseSettings,
     TaskLayer,
     TaskLayerAlert,

@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v5.2.0
+
+- :rocket: Use `export type` syntax
+- :arrow_up: Update all core deps
+- :arrow_up: Update `node-cot@12`
+
 ### v5.1.1
 
 - :bug: Fix ephemeral API URL
