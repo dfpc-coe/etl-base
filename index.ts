@@ -37,7 +37,7 @@ FormatRegistry.Set('uuid', formats.IsUuid);
 
 export const InputFeatureCollection = Type.Object({
     type: Type.Literal('FeatureCollection'),
-    features: Feature.InputFeature
+    features: Type.Array(Feature.InputFeature)
 })
 
 export function env(current: string) {

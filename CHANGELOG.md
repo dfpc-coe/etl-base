@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.0.1
+
+- :bug: Fix array type of InputFeatureCollection
+
 ### v6.0.0
 
 - :rocket: Change `submit(FeatureCollection)` to `submit(InputFeatureCollection)`
