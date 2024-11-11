@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.1.0
+
+- :rocket: Fix node-cot peer dep
+
 ### v6.0.1
 
 - :bug: Fix array type of InputFeatureCollection
