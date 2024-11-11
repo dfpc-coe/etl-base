@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import minimist from 'minimist';
-import { FeatureCollection } from 'geojson';
 import {
     Type,
     Static,
@@ -35,6 +34,11 @@ FormatRegistry.Set('ipv4', formats.IsIPv4);
 FormatRegistry.Set('ipv6', formats.IsIPv6);
 FormatRegistry.Set('url', formats.IsUrl);
 FormatRegistry.Set('uuid', formats.IsUuid);
+
+export const InputFeatureCollection = Type.Object({
+    type: Type.Literal('FeatureCollection'),
+    features: Feature.InputFeature
+})
 
 export function env(current: string) {
     try {
@@ -268,7 +272,7 @@ export default class TaskBase {
      *
      * @returns A boolean representing the success state
      */
-    async submit(fc: FeatureCollection): Promise<boolean> {
+    async submit(fc: Static<typeof InputFeatureCollection>): Promise<boolean> {
         if (!this.layer) await this.fetchLayer();
 
         if (!this.layer.schema || !this.layer.schema.properties) {

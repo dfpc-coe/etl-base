@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.0.0
+
+- :rocket: Change `submit(FeatureCollection)` to `submit(InputFeatureCollection)`
+
 ### v5.2.1
 
 - :rocket: Additional Use ` ofexport type` syntax
