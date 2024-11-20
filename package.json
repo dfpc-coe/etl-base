@@ -37,7 +37,7 @@
         "@tak-ps/node-cot": "^12.14.0"
     },
     "dependencies": {
-        "@sinclair/typebox": "^0.33.0",
+        "@sinclair/typebox": "^0.34.0",
         "@types/geojson": "^7946.0.10",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",

@@ -35,6 +35,8 @@ FormatRegistry.Set('ipv6', formats.IsIPv6);
 FormatRegistry.Set('url', formats.IsUrl);
 FormatRegistry.Set('uuid', formats.IsUuid);
 
+export const InputFeature = Feature.InputFeature;
+
 export const InputFeatureCollection = Type.Object({
     type: Type.Literal('FeatureCollection'),
     features: Type.Array(Feature.InputFeature)

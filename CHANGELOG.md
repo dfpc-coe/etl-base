@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v6.2.0
+
+- :arrow_up: Update Core Deps
+- :rocket: Export `InputFeature` directly
+
 ### v6.1.0
 
 - :rocket: Fix node-cot peer dep
