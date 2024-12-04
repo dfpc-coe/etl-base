@@ -81,6 +81,8 @@ export async function handler(task: TaskBase, event: Event = {}) {
 }
 
 export default class TaskBase {
+    static name: string = 'default';
+
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
 
@@ -94,7 +96,11 @@ export default class TaskBase {
      * `ETL_LAYER` - The Integer Layer ID to get config information and post results to
      * `ETL_TOKEN` - The access token specific to the Layer
      */
-    constructor() {
+    constructor(current?: string) {
+        if (current) {
+            env(current);
+        }
+
         this.etl = {
             api: process.env.ETL_API || '',
             layer: process.env.ETL_LAYER || '',
@@ -265,6 +271,12 @@ export default class TaskBase {
             throw new Error('Failed to get layer from ETL');
         } else {
             this.layer = await res_layer.typed(TaskLayer);
+
+            // Ensure you don't accidently run an ETL against a layer not of the same type - mostly for local dev
+            if (!this.layer.task.startsWith(this.constructor.name)) {
+                throw new Error(`Remote layer is not of type: ${this.constructor.name}`);
+            }
+
             return this.layer;
         }
     }
