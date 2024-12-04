@@ -44,6 +44,6 @@
         "jsonwebtoken": "^9.0.0",
         "minimist": "^1.2.8",
         "moment-timezone": "^0.5.45",
-        "undici": "^6.15.0"
+        "undici": "^7.0.0"
     }
 }
