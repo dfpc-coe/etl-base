@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v6.3.0
+
+- :rocket: Ensure static `name` value matches remote layer
+- :rocket: Automatically apply `end` if a current path is supplied
+- :arrow_up: Update Core Deps
+
 ### v6.2.0
 
 - :arrow_up: Update Core Deps
