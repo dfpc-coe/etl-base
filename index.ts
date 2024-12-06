@@ -50,7 +50,7 @@ export function env(current: string) {
 
         Object.assign(process.env, JSON.parse(String(fs.readFileSync(dotfile))));
     } catch (err) {
-        console.log(`ok - no .env file loaded: ${err}`);
+        console.log(`ok - no .env file loaded: ${err instanceof Error ? err.message : 'unknown reason'}`);
     }
 }
 

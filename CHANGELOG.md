@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.4.0
+
+- :rocket: Avoid printing work `Error` when no env file is present for easier log parsing
+
 ### v6.3.0
 
 - :rocket: Ensure static `name` value matches remote layer
