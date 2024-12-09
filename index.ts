@@ -156,16 +156,36 @@ export default class TaskBase {
      *
      * @returns The parsed response body
      */
-    async fetch(url: string, method: string, body: object): Promise<object> {
-        console.log(`ok - ${method}: ${url}`);
-        const res = await fetch(new URL(url, this.etl.api), {
-            method,
-            headers: {
-                'Authorization': `Bearer ${this.etl.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
+    async fetch(url: string | URL, opts?: RequestInit): Promise<object> {
+        if (!opts) opts = {};
+        if (!opts.method) opts.method = 'GET';
+        console.log(`ok - ${opts.method}: ${url}`);
+
+        if (!opts.headers) {
+            opts.headers = new Headers();
+        } else {
+            if (!(opts.headers instanceof Headers) && Array.isArray(opts.headers)) {
+                opts.headers = new Headers(opts.headers);
+            } else if (!(opts.headers instanceof Headers) && typeof opts.headers === 'object') {
+                const headers = new Headers();
+                for (const header in opts.headers) {
+                    headers.append(header, opts.headers[header]);
+                }
+                opts.headers = headers;
+            }
+        }
+
+        if (!opts.headers.has('Authorization')) {
+            opts.headers.append('Authorization', `Bearer ${this.etl.token}`);
+        }
+
+        if (typeof opts.body === 'object') {
+            opts.body =  JSON.stringify(opts.body)
+            opts.headers.append('Content-Type', 'application/json');
+        }
+
+        // @ts-expect-error Handle Undici vs Node TS complaints around FormData
+        const res = await fetch(url instanceof URL ? url : new URL(url, this.etl.api), opts);
 
         if (!res.ok) {
             const body = await res.text();

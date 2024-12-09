@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.5.0
+
+- :rocket: Update Request init opts
+
 ### v6.4.0
 
 - :rocket: Avoid printing work `Error` when no env file is present for easier log parsing
