@@ -224,10 +224,10 @@ export default class TaskBase {
         }
     }
 
-
+    
 
     /**
-     * Generate a validated Environment object
+     * Validate and provide a validated Environment object
      */
     async env<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
         if (!this.layer) await this.fetchLayer();
