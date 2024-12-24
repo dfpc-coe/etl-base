@@ -8,6 +8,7 @@ import {
     FormatRegistry,
 } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value'
+import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
@@ -151,6 +152,22 @@ export default class TaskBase {
     }
 
     /**
+     * Arbitrary JSON objects occasionally need to get typed as part of an ETL
+     * This function provides the ability to strictly type unknown objects at runtime
+     */
+    type<T extends TSchema = TUnknown>(type: T, body: unknown): Promise<Static<T>> {
+        const typeChecker = TypeCompiler.Compile(type)
+        const result = typeChecker.Check(body);
+
+        if (result) return body;
+
+        const errors = typeChecker.Errors(body);
+        const firstError = errors.First();
+
+        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(body)}`);
+    }
+
+    /**
      * Provides a Fetch class with preset Authentication and JSON parsing
      * For making calls to CloudTAK APIs
      *
@@ -223,8 +240,6 @@ export default class TaskBase {
             return await alert.json() as object;
         }
     }
-
-    
 
     /**
      * Validate and provide a validated Environment object
