@@ -155,7 +155,7 @@ export default class TaskBase {
      * Arbitrary JSON objects occasionally need to get typed as part of an ETL
      * This function provides the ability to strictly type unknown objects at runtime
      */
-    type<T extends TSchema = TUnknown>(type: T, body: unknown): Promise<Static<T>> {
+    type<T extends TSchema = TUnknown>(type: T, body: unknown): Static<T> {
         const typeChecker = TypeCompiler.Compile(type)
         const result = typeChecker.Check(body);
 

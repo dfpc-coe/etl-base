@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.6.1
+
+- :bug: Fix type bug in `type()` fn
+
 ### v6.6.0
 
 - :arrow_up: Update Core Deps
