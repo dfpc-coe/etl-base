@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.7.5
+
+- :bug: Add Context Object for submission
+
 ### v6.7.4
 
 - :bug: Add event/context to serverless API

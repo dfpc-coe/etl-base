@@ -202,7 +202,7 @@ export default class TaskBase {
         // @ts-expect-error Typescript doesn't handle this yet
         if (this.constructor.webhooks) {
             // @ts-expect-error Typescript doesn't handle this yet
-            this.constructor.webhooks(schema);
+            this.constructor.webhooks(schema, this);
         }
 
         return app;
