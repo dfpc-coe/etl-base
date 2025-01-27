@@ -89,8 +89,8 @@ export default class Task extends ETL {
 
 // Optionally allow CLI calls
 await local(new Task(), import.meta.url);
-export async function handler(event: Event = {}) {
-    return await internal(new Task(), event);
+export async function handler(event: Event = {}, context?: unknown) {
+    return await internal(new Task(), event, context);
 }
 ```
 
