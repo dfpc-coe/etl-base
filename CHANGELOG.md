@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.7.3
+
+- :rocket: Check for invocation support
+
 ### v6.7.2
 
 - :arrow_up: Update @openaddresses/batch-schema
