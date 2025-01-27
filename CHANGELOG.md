@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.7.4
+
+- :bug: Add event/context to serverless API
+
 ### v6.7.3
 
 - :rocket: Check for invocation support

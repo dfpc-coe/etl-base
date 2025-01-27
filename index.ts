@@ -59,7 +59,7 @@ export async function local(task: TaskBase, current: string) {
     }
 }
 
-export async function handler(task: TaskBase, event: Event = {}) {
+export async function handler(task: TaskBase, event: Event = {}, context?: unknown) {
     if (event.type === EventType.Capabilities) {
         return await task.capabilities();
     } else if (event.type === EventType.SchemaInput) {
@@ -70,7 +70,7 @@ export async function handler(task: TaskBase, event: Event = {}) {
         if (event.version && event.routeKey) {
             // @ts-expect-error Typescript doesn't handle this yet
             if (task.constructor.invocation.includes(InvocationType.Webhook)) {
-                return serverless(task.webhooks())
+                return serverless(task.webhooks())(event, context);
             } else {
                 throw new Error('Webhook Invocation type is not configured');
             }
