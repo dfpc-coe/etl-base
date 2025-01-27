@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v6.8.1
+
+- :bug: Static `webhooks` property should be optional
+- :bug: Static `webhooks` property should also be passed the context scope
+
 ### v6.8.0
 
 - :bug: Add Context Object for submission

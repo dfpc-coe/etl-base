@@ -89,7 +89,7 @@ export default class TaskBase {
     static name: string = 'default';
     static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
-    static webhooks: (schema: Schema) => void;
+    static webhooks?: (schema: Schema, context: TaskBase) => void;
 
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
