@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.7.1
+
+- :arrow_up: Remove unnecessary dependencies
+
 ### v6.7.0
 
 - :tada: Introduce automatic capabilities API & assoc. types
