@@ -1,12 +1,17 @@
 import { TSchema, Type } from '@sinclair/typebox';
 
 export enum EventType {
+    Capabilities = 'capabilities',
     SchemaInput = 'schema:input',
     SchemaOutput = 'schema:output',
 }
 
 export interface Event {
     type?: string
+
+    // API Gateway call
+    version?: string
+    routeKey?: string
 }
 
 export enum SchemaType {
@@ -29,6 +34,21 @@ export interface TaskLayerAlert {
     title: string;
     description?: string;
 }
+
+export enum InvocationType {
+    Schedule = 'schedule',
+    Webhook = 'webhook'
+}
+
+export const Capabilities = Type.Object({
+    name: Type.String(),
+    version: Type.String(),
+    invocation: Type.Array(Type.Enum(InvocationType)),
+    schema: Type.Object({
+        input: Type.Unknown(),
+        output: Type.Unknown()
+    })
+});
 
 export const BasicSchema = Type.Object({
     type: Type.Literal('object'),

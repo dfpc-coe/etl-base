@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v6.7.0
+
+- :tada: Introduce automatic capabilities API & assoc. types
+- :tada: Add webhooks functions when `InvocationType.Webhook` is configured
+
 ### v6.6.1
 
 - :bug: Fix type bug in `type()` fn

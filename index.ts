@@ -1,28 +1,16 @@
 import fs from 'node:fs';
+import express from 'express';
 import minimist from 'minimist';
-import {
-    Type,
-    Static,
-    TSchema,
-    TUnknown,
-    FormatRegistry,
-} from '@sinclair/typebox';
+import { Type, Static, TSchema, TUnknown, FormatRegistry, } from '@sinclair/typebox';
+import Schema from '@openaddresses/batch-schema';
 import { Value } from '@sinclair/typebox/value'
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
-import {
-    EventType,
-    SchemaType,
-    TaskLayer,
-} from './src/types.js';
-
-import type {
-    Event,
-    TaskBaseSettings,
-    TaskLayerAlert,
-} from './src/types.js';
+import { EventType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
+import serverless from 'serverless-http';
+import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 import fetch from './src/fetch.js'
 import * as formats from './src/formats/index.js';
@@ -62,9 +50,9 @@ export async function local(task: TaskBase, current: string) {
 
     if (!args._[2] || args._[2] === 'control') {
         await handler(task);
-    } else if (args._[2] === 'schema:input' || args._[2] === 'schema:output') {
-        const schema = await handler(task, { type: args._[2] });
-        console.log(JSON.stringify(schema))
+    } else if (['capabilities', 'schema:input', 'schema:output'].includes(args._[2])) {
+        const res = await handler(task, { type: args._[2] });
+        console.log(JSON.stringify(res))
     } else {
         console.error('Unknown Command: ' + args._[2])
         process.exit()
@@ -72,17 +60,26 @@ export async function local(task: TaskBase, current: string) {
 }
 
 export async function handler(task: TaskBase, event: Event = {}) {
-    if (event.type === EventType.SchemaInput) {
+    if (event.type === EventType.Capabilities) {
+        return await task.capabilities();
+    } else if (event.type === EventType.SchemaInput) {
         return await task.schema(SchemaType.Input);
     } else if (event.type === EventType.SchemaOutput) {
         return await task.schema(SchemaType.Output);
     } else {
-        await task.control();
+        if (event.version && event.routeKey) {
+            return serverless(this.webhooks())
+        } else {
+            await task.control();
+        }
     }
 }
 
 export default class TaskBase {
     static name: string = 'default';
+    static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
+    static invocation: InvocationType[] = [ InvocationType.Schedule ];
+    static webhooks: (schema: Schema) => void;
 
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
@@ -126,6 +123,21 @@ export default class TaskBase {
         return;
     }
 
+    async capabilities(): Promise<Static<typeof Capabilities>> {
+        return {
+            name: this.constructor.name,
+            // @ts-expect-error Typescript doesn't handle this yet
+            version: this.constructor.version,
+            // @ts-expect-error Typescript doesn't handle this yet
+            invocation: this.constructor.invocation,
+            schema: {
+                input: await this.schema(SchemaType.Input),
+                output: await this.schema(SchemaType.Output)
+            }
+        }
+    }
+
+
     /**
      * The extended class should override this function if it needs additional user-defined
      * config values or wants to provide a Schema
@@ -165,6 +177,25 @@ export default class TaskBase {
         const firstError = errors.First();
 
         throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(body)}`);
+    }
+
+    webhooks() {
+        const app = express();
+
+        const schema = new Schema(express.Router(), {
+            logging: true,
+            limit: 50
+        });
+
+        app.use(schema.router);
+
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (this.constructor.webhooks) {
+            // @ts-expect-error Typescript doesn't handle this yet
+            this.constructor.webhooks(schema);
+        }
+
+        return app;
     }
 
     /**
@@ -420,6 +451,8 @@ export {
     TaskLayer,
     EventType,
     SchemaType,
+    Capabilities,
+    InvocationType,
     Feature,
     fetch,
 };
