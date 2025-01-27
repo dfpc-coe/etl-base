@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v6.7.2
+
+- :arrow_up: Update @openaddresses/batch-schema
+
 ### v6.7.1
 
 - :arrow_up: Remove unnecessary dependencies
