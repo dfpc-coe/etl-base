@@ -68,9 +68,19 @@ export async function handler(task: TaskBase, event: Event = {}) {
         return await task.schema(SchemaType.Output);
     } else {
         if (event.version && event.routeKey) {
-            return serverless(this.webhooks())
+            // @ts-expect-error Typescript doesn't handle this yet
+            if (task.constructor.invocation.includes(InvocationType.Webhook)) {
+                return serverless(task.webhooks())
+            } else {
+                throw new Error('Webhook Invocation type is not configured');
+            }
         } else {
-            await task.control();
+            // @ts-expect-error Typescript doesn't handle this yet
+            if (task.constructor.invocation.includes(InvocationType.Schedule)) {
+                await task.control();
+            } else {
+                throw new Error('Schedule Invocation type is not configured');
+            }
         }
     }
 }
