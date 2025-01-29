@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v7.1.0
+
+- :rocket: Add `manual` Invocation Type
+
 ### v7.0.0
 
 - :tada: Start to support the concept of Incoming & Outgoing Data Flow types

@@ -41,6 +41,7 @@ export interface TaskLayerAlert {
 }
 
 export enum InvocationType {
+    Manual = 'manual',
     Schedule = 'schedule',
     Webhook = 'webhook'
 }
