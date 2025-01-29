@@ -8,7 +8,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
-import { EventType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
+import { DataFlowType, EventType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
 import serverless from 'serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
@@ -88,6 +88,9 @@ export async function handler(task: TaskBase, event: Event = {}, context?: unkno
 export default class TaskBase {
     static name: string = 'default';
     static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
+
+    static flow: DataFlowType[] = [ DataFlowType.Incoming ];
+
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
     static webhooks?: (schema: Schema, context: TaskBase) => void;
 
@@ -134,17 +137,35 @@ export default class TaskBase {
     }
 
     async capabilities(): Promise<Static<typeof Capabilities>> {
-        return {
+        const base: Static<typeof Capabilities> = {
             name: this.constructor.name,
             // @ts-expect-error Typescript doesn't handle this yet
             version: this.constructor.version,
-            // @ts-expect-error Typescript doesn't handle this yet
-            invocation: this.constructor.invocation,
-            schema: {
-                input: await this.schema(SchemaType.Input),
-                output: await this.schema(SchemaType.Output)
+        };
+
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (this.constructor.flow.includes(DataFlowType.Incoming)) {
+            base.incoming = {
+                // @ts-expect-error Typescript doesn't handle this yet
+                invocation: this.constructor.invocation,
+                schema: {
+                    input: await this.schema(SchemaType.Input, DataFlowType.Incoming),
+                    output: await this.schema(SchemaType.Output, DataFlowType.Incoming)
+                }
             }
         }
+
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (this.constructor.includes(DataFlowType.Outgoing)) {
+            base.outgoing = {
+                schema: {
+                    input: await this.schema(SchemaType.Input, DataFlowType.Outgoing),
+                    output: await this.schema(SchemaType.Output, DataFlowType.Outgoing)
+                }
+            }
+        }
+
+        return base;
     }
 
 
@@ -160,7 +181,10 @@ export default class TaskBase {
      *
      * @returns A JSON Schema Object
      */
-    async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
+    async schema(
+        type: SchemaType = SchemaType.Input,
+        flow: DataFlowType = DataFlowType.Incoming
+    ): Promise<TSchema> {
         if (type === SchemaType.Input) {
             return Type.Object({
                 'DEBUG': Type.Boolean({
@@ -463,6 +487,7 @@ export {
     SchemaType,
     Capabilities,
     InvocationType,
+    DataFlowType,
     Feature,
     fetch,
 };

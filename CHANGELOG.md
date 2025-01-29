@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v7.0.0
+
+- :tada: Start to support the concept of Incoming & Outgoing Data Flow types
+
 ### v6.8.1
 
 - :bug: Static `webhooks` property should be optional

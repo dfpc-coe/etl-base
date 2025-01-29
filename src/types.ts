@@ -6,6 +6,11 @@ export enum EventType {
     SchemaOutput = 'schema:output',
 }
 
+export enum DataFlowType {
+    Incoming = 'incoming',
+    Outgoing = 'outgoing',
+}
+
 export interface Event {
     type?: string
 
@@ -43,11 +48,19 @@ export enum InvocationType {
 export const Capabilities = Type.Object({
     name: Type.String(),
     version: Type.String(),
-    invocation: Type.Array(Type.Enum(InvocationType)),
-    schema: Type.Object({
-        input: Type.Unknown(),
-        output: Type.Unknown()
-    })
+    incoming: Type.Optional(Type.Object({
+        invocation: Type.Array(Type.Enum(InvocationType)),
+        schema: Type.Object({
+            input: Type.Unknown(),
+            output: Type.Unknown()
+        })
+    })),
+    outgoing: Type.Optional(Type.Object({
+        schema: Type.Object({
+            input: Type.Unknown(),
+            output: Type.Unknown()
+        })
+    }))
 });
 
 export const BasicSchema = Type.Object({
