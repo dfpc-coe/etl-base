@@ -156,7 +156,7 @@ export default class TaskBase {
         }
 
         // @ts-expect-error Typescript doesn't handle this yet
-        if (this.constructor.includes(DataFlowType.Outgoing)) {
+        if (this.constructor.flow.includes(DataFlowType.Outgoing)) {
             base.outgoing = {
                 schema: {
                     input: await this.schema(SchemaType.Input, DataFlowType.Outgoing),

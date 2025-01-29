@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v7.1.1
+
+- :bug: Fix flow check
+
 ### v7.1.0
 
 - :rocket: Add `manual` Invocation Type
