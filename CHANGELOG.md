@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.0.2
+
+- :bug: Fix location of `data` prop in Layer Def
+
 ### v8.0.1
 
 - :bug: Fix Ephemeral API URL
