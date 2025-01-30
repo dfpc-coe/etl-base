@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.0.1
+
+- :bug: Fix Ephemeral API URL
+
 ### v8.0.0
 
 - :tada: Update to new `incoming` object on Layer
