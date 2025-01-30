@@ -59,7 +59,7 @@ export async function local(task: TaskBase, current: string) {
     }
 }
 
-export async function handler(task: TaskBase, event: Event = {}, context?: unknown) {
+export async function handler(task: TaskBase, event: Event = {}, context?: object) {
     if (event.type === EventType.Capabilities) {
         return await task.capabilities();
     } else if (event.type === EventType.SchemaInput) {
@@ -70,6 +70,7 @@ export async function handler(task: TaskBase, event: Event = {}, context?: unkno
         if (event.version && event.routeKey) {
             // @ts-expect-error Typescript doesn't handle this yet
             if (task.constructor.invocation.includes(InvocationType.Webhook)) {
+                if (!context) throw new Error('Context must be provided for webhook functionality');
                 return serverless(task.webhooks())(event, context);
             } else {
                 throw new Error('Webhook Invocation type is not configured');
@@ -185,13 +186,17 @@ export default class TaskBase {
         type: SchemaType = SchemaType.Input,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<TSchema> {
-        if (type === SchemaType.Input) {
-            return Type.Object({
-                'DEBUG': Type.Boolean({
-                    default: false,
-                    description: 'Print results in logs'
-                })
-            });
+        if (flow === DataFlowType.Incoming) {
+            if (type === SchemaType.Input) {
+                return Type.Object({
+                    'DEBUG': Type.Boolean({
+                        default: false,
+                        description: 'Print results in logs'
+                    })
+                });
+            } else {
+                return Type.Object({});
+            }
         } else {
             return Type.Object({});
         }
@@ -286,7 +291,7 @@ export default class TaskBase {
      * @returns The Response from the Layer Alert API
      */
     async alert(alertin: TaskLayerAlert): Promise<object> {
-        if (!this.layer) await this.fetchLayer();
+        if (!this.layer) this.layer = await this.fetchLayer();
 
         console.log(`ok - Generating Alert`);
         const alert = await fetch(new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/alert`, this.etl.api), {
@@ -310,9 +315,11 @@ export default class TaskBase {
      * Validate and provide a validated Environment object
      */
     async env<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
-        if (!this.layer) await this.fetchLayer();
+        if (!this.layer) this.layer = await this.fetchLayer();
 
-        const env = this.layer.environment;
+        if (!this.layer.incoming) throw new Error('Cannot call env() without incoming config');
+
+        const env = this.layer.incoming.environment;
 
         Value.Default(type, env)
         Value.Clean(type, env)
@@ -334,6 +341,8 @@ export default class TaskBase {
      * @returns A Layer Config Object
      */
     async setEphemeral(ephem: Record<string, string>): Promise<void> {
+        if (!this.layer) this.layer = await this.fetchLayer();
+
         const url = new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/ephemeral`, this.etl.api);
         console.log(`ok - PUT ${url}`);
         const res_layer = await fetch(url, {
@@ -387,20 +396,21 @@ export default class TaskBase {
      * @returns A boolean representing the success state
      */
     async submit(fc: Static<typeof InputFeatureCollection>): Promise<boolean> {
-        if (!this.layer) await this.fetchLayer();
+        if (!this.layer) this.layer = await this.fetchLayer();
 
-        if (!this.layer.schema || !this.layer.schema.properties) {
-            this.layer.schema = Type.Object({})
-        }
+        if (!this.layer.incoming) throw new Error('Cannot call submit() without incoming config');
 
-        const fields = Object.keys(this.layer.schema.properties).filter((k) => {
-            if (!this.layer.schema.properties[k]) return false;
-            return this.layer.schema.properties[k].format === 'date-time';
+        let schema = await this.schema(SchemaType.Output, DataFlowType.Incoming);
+        if (!schema || !schema.properties) schema = Type.Object({});
+
+        const fields = Object.keys(schema.properties).filter((k) => {
+            if (!schema.properties[k]) return false;
+            return schema.properties[k].format === 'date-time';
         });
 
         // Postprocessing Functions have been defined
-        if (Object.keys(this.layer.config).length) {
-            const cnf = this.layer.config;
+        if (Object.keys(this.layer.incoming.config).length) {
+            const cnf = this.layer.incoming.config;
             if (cnf.timezone && cnf.timezone.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
                 for (const feat of fc.features) {
                     for (const field of fields) {

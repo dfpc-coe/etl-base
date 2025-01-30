@@ -64,12 +64,6 @@ export const Capabilities = Type.Object({
     }))
 });
 
-export const BasicSchema = Type.Object({
-    type: Type.Literal('object'),
-    required: Type.Optional(Type.Array(Type.String())),
-    properties: Type.Record(Type.String(), Type.Any())
-});
-
 export const TaskLayer = Type.Object({
     id: Type.Integer(),
     name: Type.String(),
@@ -77,23 +71,27 @@ export const TaskLayer = Type.Object({
     updated: Type.String(),
     description: Type.String(),
     enabled: Type.Boolean(),
-    enabled_styles: Type.Boolean(),
-    styles: Type.Unknown(),
     logging: Type.Boolean(),
-    stale: Type.Integer(),
     task: Type.String(),
-    cron: Type.String(),
-    ephemeral: Type.Record(Type.String(), Type.String()),
-    environment: Type.Record(Type.String(), Type.Unknown()),
-    schema: BasicSchema,
-    config: Type.Object({
-        timezone: Type.Optional(Type.Object({
-            timezone: Type.String()
-        }))
-    }),
     memory: Type.Number(),
     timeout: Type.Number(),
-
     data: Type.Union([Type.Number(), Type.Null()]),
-    connection: Type.Number()
+    connection: Type.Number(),
+
+    incoming: Type.Optional(Type.Object({
+        created: Type.String(),
+        updated: Type.String(),
+        enabled_styles: Type.Boolean(),
+        styles: Type.Unknown(),
+        stale: Type.Integer(),
+        cron: Type.String(),
+        ephemeral: Type.Record(Type.String(), Type.String()),
+        webhooks: Type.Boolean(),
+        environment: Type.Record(Type.String(), Type.Unknown()),
+        config: Type.Object({
+            timezone: Type.Optional(Type.Object({
+                timezone: Type.String()
+            }))
+        }),
+    }))
 });

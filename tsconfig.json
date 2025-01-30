@@ -1,13 +1,11 @@
 {
-    "ts-node": {
-        "esm": true
-    },
     "compilerOptions": {
-        "module": "es2022",
+        "strict": true,
+        "strictNullChecks": true,
         "esModuleInterop": true,
+        "skipLibCheck": true,
+        "module": "es2022",
         "target": "es2022",
-        "lib": ["es2022", "dom"],
-        "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "dist",
@@ -18,8 +16,10 @@
             ]
         }
     },
+    "exclude": [],
     "include": [
-        "index.ts", 
-        "lib/**/*"
+        "*.ts",
+        "test/",
+        "src/"
     ]
 }
