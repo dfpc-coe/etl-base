@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.1.0
+
+- :tada: Wire up SQS Message => this.outgoing
+
 ### v8.0.2
 
 - :bug: Fix location of `data` prop in Layer Def

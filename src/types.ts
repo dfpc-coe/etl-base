@@ -17,6 +17,9 @@ export interface Event {
     // API Gateway call
     version?: string
     routeKey?: string
+
+    // SQS Record
+    Records?: unknown[]
 }
 
 export enum SchemaType {

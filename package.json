@@ -39,6 +39,7 @@
     "dependencies": {
         "@openaddresses/batch-schema": "^10.12.1",
         "@sinclair/typebox": "^0.34.0",
+        "@types/aws-lambda": "^8.10.147",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",
         "express": "^4.21.2",

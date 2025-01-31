@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import type Lambda from 'aws-lambda';
 import express from 'express';
 import minimist from 'minimist';
 import { Type, Static, TSchema, TUnknown, FormatRegistry, } from '@sinclair/typebox';
@@ -50,7 +51,7 @@ export async function local(task: TaskBase, current: string) {
 
     if (!args._[2] || args._[2] === 'control') {
         await handler(task);
-    } else if (['capabilities', 'schema:input', 'schema:output'].includes(args._[2])) {
+    } else if (['capabilities'].includes(args._[2])) {
         const res = await handler(task, { type: args._[2] });
         console.log(JSON.stringify(res))
     } else {
@@ -62,11 +63,20 @@ export async function local(task: TaskBase, current: string) {
 export async function handler(task: TaskBase, event: Event = {}, context?: object) {
     if (event.type === EventType.Capabilities) {
         return await task.capabilities();
-    } else if (event.type === EventType.SchemaInput) {
-        return await task.schema(SchemaType.Input);
-    } else if (event.type === EventType.SchemaOutput) {
-        return await task.schema(SchemaType.Output);
+    } else if (Array.isArray(event.Records)) {
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (!task.constructor.includes(DataFlowType.Outgoing)) {
+            throw new Error('Outgoing Data flow is not provided by this ETL Layer');
+        }
+
+        // @ts-expect-error Typescript doesn't handle this yet
+        return this.control(event as lambda.SQSEvent)
     } else {
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (!task.constructor.includes(DataFlowType.Incoming)) {
+            throw new Error('Incoming Data flow is not provided by this ETL Layer');
+        }
+
         if (event.version && event.routeKey) {
             // @ts-expect-error Typescript doesn't handle this yet
             if (task.constructor.invocation.includes(InvocationType.Webhook)) {
@@ -131,6 +141,11 @@ export default class TaskBase {
         }
 
         if (!this.etl.token) throw new Error('No ETL Token Provided');
+    }
+
+    async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
+        console.error(event);
+        return true;
     }
 
     async control(): Promise<void> {
