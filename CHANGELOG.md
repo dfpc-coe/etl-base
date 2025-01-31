@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.1.1
+
+- :bug: Outgoing Bugfixes
+
 ### v8.1.0
 
 - :tada: Wire up SQS Message => this.outgoing

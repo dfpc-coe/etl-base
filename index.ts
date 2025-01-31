@@ -69,8 +69,7 @@ export async function handler(task: TaskBase, event: Event = {}, context?: objec
             throw new Error('Outgoing Data flow is not provided by this ETL Layer');
         }
 
-        // @ts-expect-error Typescript doesn't handle this yet
-        return this.control(event as lambda.SQSEvent)
+        return task.outgoing(event as Lambda.SQSEvent)
     } else {
         // @ts-expect-error Typescript doesn't handle this yet
         if (!task.constructor.includes(DataFlowType.Incoming)) {
