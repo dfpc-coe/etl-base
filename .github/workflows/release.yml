@@ -15,9 +15,9 @@ jobs:
               id: tag
               uses: dawidd6/action-get-tag@v1
 
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
-                  node-version: 18
+                  node-version: 22
                   registry-url: https://registry.npmjs.org/
 
             - name: npm install
