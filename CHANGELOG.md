@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.1.2
+
+- :bug: Checking flow compatibility in CLI
+
 ### v8.1.1
 
 - :bug: Outgoing Bugfixes
