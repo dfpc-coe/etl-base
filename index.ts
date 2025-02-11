@@ -4,8 +4,6 @@ import express from 'express';
 import minimist from 'minimist';
 import { Type, Static, TSchema, TUnknown, FormatRegistry, } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
-import { Value } from '@sinclair/typebox/value'
-import { TypeCompiler } from "@sinclair/typebox/compiler";
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
@@ -14,6 +12,7 @@ import serverless from 'serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 import fetch from './src/fetch.js'
+import TypeValidator from './src/type.js'
 import * as formats from './src/formats/index.js';
 
 FormatRegistry.Set('date-time', formats.IsDateTime);
@@ -221,15 +220,7 @@ export default class TaskBase {
      * This function provides the ability to strictly type unknown objects at runtime
      */
     type<T extends TSchema = TUnknown>(type: T, body: unknown): Static<T> {
-        const typeChecker = TypeCompiler.Compile(type)
-        const result = typeChecker.Check(body);
-
-        if (result) return body;
-
-        const errors = typeChecker.Errors(body);
-        const firstError = errors.First();
-
-        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(body)}`);
+        return TypeValidator.type(type, body);
     }
 
     webhooks() {
@@ -335,17 +326,7 @@ export default class TaskBase {
 
         const env = this.layer.incoming.environment;
 
-        Value.Default(type, env)
-        Value.Clean(type, env)
-        const result = Value.Check(type, env)
-
-        if (result) return env;
-
-        const errors = Value.Errors(type, env);
-
-        const firstError = errors.First();
-
-        throw new Error(`Internal Validation Error: ${JSON.stringify(firstError)} -- Body: ${JSON.stringify(env)}`);
+        return TypeValidator.type(type, env);
     }
 
     /**

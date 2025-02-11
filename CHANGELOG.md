@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v8.2.0
+
+- :rocket: Unify Type checking in `TypeValidator` class
+- :rocket: Add typecasting on by default
+
 ### v8.1.2
 
 - :bug: Checking flow compatibility in CLI
