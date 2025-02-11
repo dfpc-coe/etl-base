@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.2.1
+
+- :bug: add src/type.ts
+
 ### v8.2.0
 
 - :rocket: Unify Type checking in `TypeValidator` class
