@@ -80,6 +80,13 @@ export const TaskLayer = Type.Object({
     timeout: Type.Number(),
     connection: Type.Number(),
 
+    outgoing: Type.Optional(Type.Object({
+        created: Type.String(),
+        updated: Type.String(),
+        ephemeral: Type.Record(Type.String(), Type.String()),
+        environment: Type.Record(Type.String(), Type.Unknown()),
+    })),
+
     incoming: Type.Optional(Type.Object({
         created: Type.String(),
         updated: Type.String(),

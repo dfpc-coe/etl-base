@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.3.0
+
+- :rocket: Add support for outgoing env calls
+
 ### v8.2.1
 
 - :bug: add src/type.ts

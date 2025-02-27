@@ -319,14 +319,25 @@ export default class TaskBase {
     /**
      * Validate and provide a validated Environment object
      */
-    async env<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
+    async env<T extends TSchema = TUnknown>(
+        type: T,
+        flow: DataFlowType = DataFlowType.Incoming
+    ): Promise<Static<T>> {
         if (!this.layer) this.layer = await this.fetchLayer();
 
-        if (!this.layer.incoming) throw new Error('Cannot call env() without incoming config');
+        if (flow === DataFlowType.Incoming) {
+            if (!this.layer.incoming) {
+                throw new Error('Cannot call env() without incoming config');
+            }
 
-        const env = this.layer.incoming.environment;
+            return TypeValidator.type(type, this.layer.incoming.environment);
+        } else {
+            if (!this.layer.outgoing) {
+                throw new Error('Cannot call env() without outgoing config');
+            }
 
-        return TypeValidator.type(type, env);
+            return TypeValidator.type(type, this.layer.outgoing.environment);
+        }
     }
 
     /**
