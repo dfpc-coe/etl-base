@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.3.1
+
+- :arrow_up: Bump core deps
+
 ### v8.3.0
 
 - :rocket: Add support for outgoing env calls
