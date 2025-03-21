@@ -6,7 +6,7 @@
     "type": "module",
     "types": "index.ts",
     "engines": {
-        "node": ">= 18"
+        "node": ">= 22"
     },
     "scripts": {
         "test": "exit 0",

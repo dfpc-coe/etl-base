@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.0.0
+
+- :arrow_up: Require NodeJS @ 22
+- :rocket: Return cached Layer object if possible
+
 ### v8.3.1
 
 - :arrow_up: Bump core deps

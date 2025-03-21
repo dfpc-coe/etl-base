@@ -373,6 +373,8 @@ export default class TaskBase {
      * @returns A Layer Config Object
      */
     async fetchLayer(): Promise<Static<typeof TaskLayer>> {
+        if (this.layer) return this.layer;
+
         console.log(`ok - GET ${new URL(`/api/layer/${this.etl.layer}`, this.etl.api)}`);
         const res_layer = await fetch(new URL(`/api/layer/${this.etl.layer}`, this.etl.api), {
             method: 'GET',
