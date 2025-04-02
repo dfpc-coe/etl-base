@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.1.0
+
+- :arrow_up: Update Express@5
+
 ### v9.0.0
 
 - :arrow_up: Require NodeJS @ 22
