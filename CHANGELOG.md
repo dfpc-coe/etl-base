@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.2.0
+
+- :tada: Add ability to set flow type in SetEphem
+
 ### v9.1.0
 
 - :arrow_up: Update Express@5
