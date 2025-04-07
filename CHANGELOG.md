@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.3.1
+
+- :bug: Fix type def alongside Fetch Typed Fn
+
 ### v9.3.0
 
 - :rocket: Add ability to custom verbosity
