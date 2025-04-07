@@ -1,4 +1,5 @@
 import TypeValidator from './type.js';
+import type { TypeOpts } from './type.js';
 import { Static, TSchema, TUnknown } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { fetch, Response } from 'undici';
@@ -15,9 +16,9 @@ export class TypedResponse extends Response {
 
     typed<T extends TSchema>(type: T): Promise<Static<T>>;
 
-    async typed<T extends TSchema = TUnknown>(type: T): Promise<Static<T>> {
+    async typed<T extends TSchema = TUnknown>(type: T, opts?: TypeOpts): Promise<Static<T>> {
         const body = await this.json();
-        return TypeValidator.type(type, body);
+        return TypeValidator.type(type, body, opts);
     }
 }
 

@@ -406,7 +406,13 @@ export default class TaskBase {
      *
      * @returns A boolean representing the success state
      */
-    async submit(fc: Static<typeof InputFeatureCollection>): Promise<boolean> {
+    async submit(
+        fc: Static<typeof InputFeatureCollection>,
+        opts?: { verbose?: boolean }
+    ): Promise<boolean> {
+        if (!opts) opts = {};
+        if (opts.verbose === undefined) opts.verbose = false;
+
         if (!this.layer) this.layer = await this.fetchLayer();
 
         if (!this.layer.incoming) throw new Error('Cannot call submit() without incoming config');
@@ -476,10 +482,8 @@ export default class TaskBase {
                 });
 
                 if (!postreq.ok) {
-                    console.error(await postreq.text());
+                    if (opts.verbose) console.error(await postreq.text());
                     throw new Error('Failed to post layer to ETL');
-                } else {
-                    console.log(await postreq.json());
                 }
 
                 if (tmpbuff) {

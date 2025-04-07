@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.3.0
+
+- :rocket: Add ability to custom verbosity
+
 ### v9.2.0
 
 - :tada: Add ability to set flow type in SetEphem
