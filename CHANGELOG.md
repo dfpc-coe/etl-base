@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.4.0
+
+- :rocket: Include `package.json` in dist/
+
 ### v9.3.1
 
 - :bug: Fix type def alongside Fetch Typed Fn

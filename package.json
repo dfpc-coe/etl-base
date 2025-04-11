@@ -12,7 +12,7 @@
         "test": "exit 0",
         "lint": "eslint index.ts",
         "doc": "typedoc index.ts",
-        "build": "tsc --build",
+        "build": "tsc --build && cp package.json dist/",
         "pretest": "npm run lint"
     },
     "repository": {
