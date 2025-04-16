@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.6.0
+
+- :rocket: Update webhooks to require Promise return
+
 ### v9.5.0
 
 - :rocket: Support running the webhook server locally

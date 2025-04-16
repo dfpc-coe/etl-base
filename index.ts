@@ -52,7 +52,7 @@ export async function local(task: TaskBase, current: string) {
     if (!args._[2] || args._[2] === 'control') {
         await handler(task);
     } else if (['control:webhooks'].includes(args._[2])) {
-        const app = task.controlWebhooks()
+        const app = await task.controlWebhooks()
         app.listen(5002, () => {
             console.log('ok - listening http://localhost:5002');
         })
@@ -85,7 +85,7 @@ export async function handler(task: TaskBase, event: Event = {}, context?: objec
             // @ts-expect-error Typescript doesn't handle this yet
             if (task.constructor.invocation.includes(InvocationType.Webhook)) {
                 if (!context) throw new Error('Context must be provided for webhook functionality');
-                return serverless(task.controlWebhooks())(event, context);
+                return serverless(await task.controlWebhooks())(event, context);
             } else {
                 throw new Error('Webhook Invocation type is not configured');
             }
@@ -108,7 +108,7 @@ export default class TaskBase {
 
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
 
-    static webhooks?: (schema: Schema, context: TaskBase) => void;
+    static webhooks?: (schema: Schema, context: TaskBase) => Promise<void>;
 
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
@@ -230,7 +230,7 @@ export default class TaskBase {
         return TypeValidator.type(type, body);
     }
 
-    controlWebhooks(): Application {
+    async controlWebhooks(): Promise<Application> {
         const app = express();
 
         const schema = new Schema(express.Router(), {
@@ -243,7 +243,7 @@ export default class TaskBase {
         // @ts-expect-error Typescript doesn't handle this yet
         if (this.constructor.webhooks) {
             // @ts-expect-error Typescript doesn't handle this yet
-            this.constructor.webhooks(schema, this);
+            await this.constructor.webhooks(schema, this);
         }
 
         return app;
