@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.5.0
+
+- :rocket: Support running the webhook server locally
+
 ### v9.4.0
 
 - :rocket: Include `package.json` in dist/

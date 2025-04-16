@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import type Lambda from 'aws-lambda';
 import express from 'express';
+import type { Application}  from 'express';
 import minimist from 'minimist';
 import { Type, Static, TSchema, TUnknown, FormatRegistry, } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
@@ -50,6 +51,11 @@ export async function local(task: TaskBase, current: string) {
 
     if (!args._[2] || args._[2] === 'control') {
         await handler(task);
+    } else if (['control:webhooks'].includes(args._[2])) {
+        const app = task.controlWebhooks()
+        app.listen(5002, () => {
+            console.log('ok - listening http://localhost:5002');
+        })
     } else if (['capabilities'].includes(args._[2])) {
         const res = await handler(task, { type: args._[2] });
         console.log(JSON.stringify(res))
@@ -79,7 +85,7 @@ export async function handler(task: TaskBase, event: Event = {}, context?: objec
             // @ts-expect-error Typescript doesn't handle this yet
             if (task.constructor.invocation.includes(InvocationType.Webhook)) {
                 if (!context) throw new Error('Context must be provided for webhook functionality');
-                return serverless(task.webhooks())(event, context);
+                return serverless(task.controlWebhooks())(event, context);
             } else {
                 throw new Error('Webhook Invocation type is not configured');
             }
@@ -101,6 +107,7 @@ export default class TaskBase {
     static flow: DataFlowType[] = [ DataFlowType.Incoming ];
 
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
+
     static webhooks?: (schema: Schema, context: TaskBase) => void;
 
     etl: TaskBaseSettings;
@@ -223,7 +230,7 @@ export default class TaskBase {
         return TypeValidator.type(type, body);
     }
 
-    webhooks() {
+    controlWebhooks(): Application {
         const app = express();
 
         const schema = new Schema(express.Router(), {
@@ -296,7 +303,9 @@ export default class TaskBase {
      * @returns The Response from the Layer Alert API
      */
     async alert(alertin: TaskLayerAlert): Promise<object> {
-        if (!this.layer) this.layer = await this.fetchLayer();
+        if (!this.layer) {
+            this.layer = await this.fetchLayer();
+        }
 
         console.log(`ok - Generating Alert`);
         const alert = await fetch(new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/alert`, this.etl.api), {
