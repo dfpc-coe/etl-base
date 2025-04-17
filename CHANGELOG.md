@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.7.0
+
+- :rocket: Add Logging Functionality
+
 ### v9.6.0
 
 - :rocket: Update webhooks to require Promise return

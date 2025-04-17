@@ -65,7 +65,15 @@ export async function local(task: TaskBase, current: string) {
     }
 }
 
-export async function handler(task: TaskBase, event: Event = {}, context?: object) {
+export async function handler(
+    task: TaskBase,
+    event: Event = {},
+    context?: object
+) {
+    if (task.logging.event) {
+        console.log('Event: ', JSON.stringify(event));
+    } 
+
     if (event.type === EventType.Capabilities) {
         return await task.capabilities();
     } else if (Array.isArray(event.Records)) {
@@ -100,6 +108,11 @@ export async function handler(task: TaskBase, event: Event = {}, context?: objec
     }
 }
 
+export type TaskLogging = {
+    event: boolean
+    webhooks: boolean
+}
+
 export default class TaskBase {
     static name: string = 'default';
     static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
@@ -113,6 +126,8 @@ export default class TaskBase {
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
 
+    logging: TaskLogging
+
     /**
      * Create a new TaskBase instance - Usually not called directly but instead
      * inherited via an `extends TaskBase` call
@@ -123,7 +138,23 @@ export default class TaskBase {
      * `ETL_LAYER` - The Integer Layer ID to get config information and post results to
      * `ETL_TOKEN` - The access token specific to the Layer
      */
-    constructor(current?: string) {
+    constructor(
+        current?: string,
+        opts?: {
+            logging?: {
+                event?: boolean
+                webhooks?: boolean
+            }
+        }
+    ) {
+        if (!opts) opts = {};
+        if (!opts.logging) opts.logging = {};
+
+        this.logging = {
+            event: opts.logging.event === undefined ? false : opts.logging.event,
+            webhooks: opts.logging.webhooks === undefined ? true : opts.logging.webhooks
+        }
+
         if (current) {
             env(current);
         }
@@ -234,7 +265,7 @@ export default class TaskBase {
         const app = express();
 
         const schema = new Schema(express.Router(), {
-            logging: true,
+            logging: this.logging.webhooks,
             limit: 50
         });
 
