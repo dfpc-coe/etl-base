@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.8.0
+
+- :rocket: Fork serverless library to work with express@5
+
 ### v9.7.0
 
 - :rocket: Add Logging Functionality

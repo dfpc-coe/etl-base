@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import { DataFlowType, EventType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
-import serverless from 'serverless-http';
+import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 import fetch from './src/fetch.js'
