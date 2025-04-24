@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.9.0
+
+- :tada: Setup Internal Environment Update calls
+
 ### v9.8.0
 
 - :rocket: Fork serverless library to work with express@5

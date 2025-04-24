@@ -8,7 +8,7 @@ import Schema from '@openaddresses/batch-schema';
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
-import { DataFlowType, EventType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
@@ -57,7 +57,7 @@ export async function local(task: TaskBase, current: string) {
             console.log('ok - listening http://localhost:5002');
         })
     } else if (['capabilities'].includes(args._[2])) {
-        const res = await handler(task, { type: args._[2] });
+        const res = await handler(task, { type: 'capabilities' });
         console.log(JSON.stringify(res))
     } else {
         console.error('Unknown Command: ' + args._[2])
@@ -72,10 +72,14 @@ export async function handler(
 ) {
     if (task.logging.event) {
         console.log('Event: ', JSON.stringify(event));
-    } 
+    }
 
-    if (event.type === EventType.Capabilities) {
+    if (event.type == 'capabilities') {
         return await task.capabilities();
+    } else if (String(event.type) == 'environment:incoming') {
+        return await task.update(DataFlowType.Incoming);
+    } else if (String(event.type) == 'environment:outgoing') {
+        return await task.update(DataFlowType.Outgoing);
     } else if (Array.isArray(event.Records)) {
         // @ts-expect-error Typescript doesn't handle this yet
         if (!task.constructor.flow.includes(DataFlowType.Outgoing)) {
@@ -118,7 +122,6 @@ export default class TaskBase {
     static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
 
     static flow: DataFlowType[] = [ DataFlowType.Incoming ];
-
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
 
     static webhooks?: (schema: Schema, context: TaskBase) => Promise<void>;
@@ -185,6 +188,14 @@ export default class TaskBase {
     }
 
     async control(): Promise<void> {
+        return;
+    }
+
+    /**
+     * Called by CloudTAK when a significant Config Change takes place
+     */
+    async update(flow: DataFlowType): Promise<void> {
+        console.log('update:', flow);
         return;
     }
 
@@ -548,7 +559,6 @@ export type {
 
 export {
     TaskLayer,
-    EventType,
     SchemaType,
     Capabilities,
     InvocationType,

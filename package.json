@@ -34,7 +34,7 @@
         "typescript-eslint": "^8.0.0"
     },
     "peerDependencies": {
-        "@tak-ps/node-cot": "^12.14.0"
+        "@tak-ps/node-cot": "^12.30.0"
     },
     "dependencies": {
         "@openaddresses/batch-schema": "^10.12.1",
@@ -42,7 +42,7 @@
         "@types/aws-lambda": "^8.10.147",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",
-        "express": "^4.0.0",
+        "express": "^5.0.0",
         "jsonwebtoken": "^9.0.0",
         "minimist": "^1.2.8",
         "moment-timezone": "^0.5.45",

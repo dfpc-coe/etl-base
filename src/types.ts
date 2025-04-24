@@ -1,9 +1,6 @@
 import { TSchema, Type } from '@sinclair/typebox';
 
 export enum EventType {
-    Capabilities = 'capabilities',
-    SchemaInput = 'schema:input',
-    SchemaOutput = 'schema:output',
 }
 
 export enum DataFlowType {
@@ -12,7 +9,7 @@ export enum DataFlowType {
 }
 
 export interface Event {
-    type?: string
+    type?: 'capabilities' | 'environment:input' | 'environment:output' | 'schema:input' | 'schema:output'
 
     // API Gateway call
     version?: string
