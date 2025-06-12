@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.10.0
+
+- :arrow_up: Update Core Deps
+
 ### v9.9.0
 
 - :tada: Setup Internal Environment Update calls

@@ -27,7 +27,7 @@
     "homepage": "https://github.com/tak-ps/etl-base#readme",
     "devDependencies": {
         "@eslint/js": "^9.19.0",
-        "@types/node": "^22.0.0",
+        "@types/node": "^24.0.0",
         "eslint": "^9.0.0",
         "typedoc": "^0.28.0",
         "typescript": "^5.5.0",
@@ -45,7 +45,7 @@
         "express": "^5.0.0",
         "jsonwebtoken": "^9.0.0",
         "minimist": "^1.2.8",
-        "moment-timezone": "^0.5.45",
+        "moment-timezone": "^0.6.0",
         "@tak-ps/serverless-http": "^3.4.0",
         "undici": "^7.0.0"
     }
