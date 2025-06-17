@@ -13,6 +13,8 @@ import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationType } fro
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
+export * as APITypes from './src/api-types.js';
+
 import fetch from './src/fetch.js'
 import TypeValidator from './src/type.js'
 import * as formats from './src/formats/index.js';
@@ -217,6 +219,7 @@ export default class TaskBase {
     }
 
     async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
+        console.error(event);
         return true;
     }
 

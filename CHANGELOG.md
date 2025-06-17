@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.12.0
+
+- :rocket: Bundle Type Definitions for CloudTAK API
+
 ### v9.11.0
 
 - :rocket: Retrieve secret value if running locally connected to an AWS environment
