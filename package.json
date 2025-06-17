@@ -37,8 +37,10 @@
         "@tak-ps/node-cot": "^12.30.0"
     },
     "dependencies": {
+        "@aws-sdk/client-secrets-manager": "^3.828.0",
         "@openaddresses/batch-schema": "^10.12.1",
         "@sinclair/typebox": "^0.34.0",
+        "@tak-ps/serverless-http": "^3.4.0",
         "@types/aws-lambda": "^8.10.147",
         "@types/jsonwebtoken": "^9.0.1",
         "@types/minimist": "^1.2.5",
@@ -46,7 +48,6 @@
         "jsonwebtoken": "^9.0.0",
         "minimist": "^1.2.8",
         "moment-timezone": "^0.6.0",
-        "@tak-ps/serverless-http": "^3.4.0",
         "undici": "^7.0.0"
     }
 }

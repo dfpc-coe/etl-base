@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import type Lambda from 'aws-lambda';
+import SecretsManager from '@aws-sdk/client-secrets-manager';
 import express from 'express';
 import type { Application}  from 'express';
 import minimist from 'minimist';
@@ -158,10 +159,6 @@ export default class TaskBase {
             webhooks: opts.logging.webhooks === undefined ? true : opts.logging.webhooks
         }
 
-        if (current) {
-            env(current);
-        }
-
         this.etl = {
             api: process.env.ETL_API || '',
             layer: process.env.ETL_LAYER || '',
@@ -173,17 +170,53 @@ export default class TaskBase {
 
         if (!this.etl.api) throw new Error('No ETL API URL Provided');
         if (!this.etl.layer) throw new Error('No ETL Layer Provided');
-
-        // This is just a helper function for local development, signing with the (unsecure) default secret
-        if (!this.etl.token && (new URL(this.etl.api)).hostname === 'localhost') {
-            this.etl.token = `etl.${jwt.sign({ access: 'layer', id: parseInt(this.etl.layer), internal: true }, 'coe-wildland-fire')}`
-        }
-
         if (!this.etl.token) throw new Error('No ETL Token Provided');
     }
 
+    static async init(
+        current?: string,
+        opts?: {
+            logging?: {
+                event?: boolean
+                webhooks?: boolean
+            }
+        }
+    ): Promise<TaskBase> {
+        if (current) {
+            env(current);
+        }
+
+        // This is just a helper function for local development, signing with the (unsecure) default secret
+        if (!process.env.ETL_TOKEN && process.env.ETL_API && (new URL(process.env.ETL_API)).hostname === 'localhost') {
+            if (!process.env.ETL_LAYER) throw new Error('No ETL_LAYER env var set');
+
+            if (process.env.StackName) {
+                const secrets = new SecretsManager.SecretsManagerClient({ region: process.env.AWS_REGION || 'us-east-1' });
+
+                const secret = await secrets.send(new SecretsManager.GetSecretValueCommand({
+                    SecretId: `${process.env.StackName}/api/secret`
+                }));
+
+                if (!secret.SecretString) throw new Error('No Secret Set');
+
+                process.env.ETL_TOKEN = `etl.${jwt.sign({
+                    access: 'layer',
+                    id: parseInt(process.env.ETL_LAYER),
+                    internal: true
+                }, secret.SecretString)}`
+            } else {
+                process.env.ETL_TOKEN = `etl.${jwt.sign({
+                    access: 'layer',
+                    id: parseInt(process.env.ETL_LAYER),
+                    internal: true
+                }, 'coe-wildland-fire')}`
+            }
+        }
+
+        return new this(current, opts);
+    }
+
     async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
-        console.error(event);
         return true;
     }
 
