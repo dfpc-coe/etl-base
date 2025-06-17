@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.12.1
+
+- :rocket: Update Type Definitions for CloudTAK API
+
 ### v9.12.0
 
 - :rocket: Bundle Type Definitions for CloudTAK API
