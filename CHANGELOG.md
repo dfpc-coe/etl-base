@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.13.0
+
+- :tada: Allow getting typed Ephemeral values
+
 ### v9.12.1
 
 - :rocket: Update Type Definitions for CloudTAK API

@@ -404,7 +404,7 @@ export default class TaskBase {
     }
 
     /**
-     * Validate and provide a validated Environment object
+     * Validate and return a typed Environment object
      */
     async env<T extends TSchema = TUnknown>(
         type: T,
@@ -424,6 +424,30 @@ export default class TaskBase {
             }
 
             return TypeValidator.type(type, this.layer.outgoing.environment);
+        }
+    }
+
+    /**
+     * Validate and return a typed Ephemeral object
+     */
+    async ephemeral<T extends TSchema = TUnknown>(
+        type: T,
+        flow: DataFlowType = DataFlowType.Incoming
+    ): Promise<Static<T>> {
+        if (!this.layer) this.layer = await this.fetchLayer();
+
+        if (flow === DataFlowType.Incoming) {
+            if (!this.layer.incoming) {
+                throw new Error('Cannot call ephemeral() without incoming config');
+            }
+
+            return TypeValidator.type(type, this.layer.incoming.ephemeral);
+        } else {
+            if (!this.layer.outgoing) {
+                throw new Error('Cannot call ephemeral() without outgoing config');
+            }
+
+            return TypeValidator.type(type, this.layer.outgoing.ephemeral);
         }
     }
 
