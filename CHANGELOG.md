@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.14.0
+
+- :arrow_up: Update Core Deps
+
 ### v9.13.0
 
 - :tada: Allow getting typed Ephemeral values
