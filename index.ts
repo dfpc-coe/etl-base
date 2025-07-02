@@ -429,6 +429,7 @@ export default class TaskBase {
 
     /**
      * Validate and return a typed Ephemeral object
+     * If the object fails validation, the store will be reset and an empty store returned
      */
     async ephemeral<T extends TSchema = TUnknown>(
         type: T,
@@ -441,13 +442,25 @@ export default class TaskBase {
                 throw new Error('Cannot call ephemeral() without incoming config');
             }
 
-            return TypeValidator.type(type, this.layer.incoming.ephemeral);
+            try {
+                return TypeValidator.type(type, this.layer.incoming.ephemeral);
+            } catch (err) {
+                console.error(err);
+                await this.setEphemeral({}, DataFlowType.Incoming);
+                return {};
+            }
         } else {
             if (!this.layer.outgoing) {
                 throw new Error('Cannot call ephemeral() without outgoing config');
             }
 
-            return TypeValidator.type(type, this.layer.outgoing.ephemeral);
+            try {
+                return TypeValidator.type(type, this.layer.outgoing.ephemeral);
+            } catch (err) {
+                console.error(err);
+                await this.setEphemeral({}, DataFlowType.Outgoing);
+                return {};
+            }
         }
     }
 

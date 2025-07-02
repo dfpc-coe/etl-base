@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.17.0
+
+- :rocket: Automatically reset ephemeral store if it fails validation
+
 ### v9.16.0
 
 - :rocket: Allow setting arbitrary types in `setEphemeral`
