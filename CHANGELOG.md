@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.18.0
+
+- :rocket: Update Ephemeral Type
+
 ### v9.17.0
 
 - :rocket: Automatically reset ephemeral store if it fails validation

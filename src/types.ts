@@ -80,7 +80,7 @@ export const TaskLayer = Type.Object({
     outgoing: Type.Optional(Type.Object({
         created: Type.String(),
         updated: Type.String(),
-        ephemeral: Type.Record(Type.String(), Type.String()),
+        ephemeral: Type.Record(Type.String(), Type.Unknown()),
         environment: Type.Record(Type.String(), Type.Unknown()),
     })),
 
@@ -92,7 +92,7 @@ export const TaskLayer = Type.Object({
         stale: Type.Integer(),
         data: Type.Union([Type.Number(), Type.Null()]),
         cron: Type.String(),
-        ephemeral: Type.Record(Type.String(), Type.String()),
+        ephemeral: Type.Record(Type.String(), Type.Unknown()),
         webhooks: Type.Boolean(),
         environment: Type.Record(Type.String(), Type.Unknown()),
         config: Type.Object({
