@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.16.0
+
+- :rocket: Allow setting arbitrary types in `setEphemeral`
+
 ### v9.15.0
 
 - :rocket: Add `ephemeral` function for returning typed values
