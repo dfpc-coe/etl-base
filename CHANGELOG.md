@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.15.0
+
+- :rocket: Add `ephemeral` function for returning typed values
+
 ### v9.14.0
 
 - :arrow_up: Update Core Deps
