@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.18.1
+
+- :bug: Fix Type Inference that wasn't loose enough by explicitly setting the type
+- :arrow_up: Update core deps
+
 ### v9.18.0
 
 - :rocket: Update Ephemeral Type
