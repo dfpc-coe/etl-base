@@ -570,7 +570,7 @@ export default class TaskBase {
         const uids = JSON.stringify(fc.features.map((f) => { return f.id; }));
         const pre = Buffer.from(`{"type":"FeatureCollection", "uids": ${uids}, "features":[`);
         const post = Buffer.from(']}')
-        let buffs = [pre];
+        let buffs: Array<Buffer<ArrayBufferLike>> = [pre];
         let submit = false;
         let curr = pre.byteLength + post.byteLength;
 
