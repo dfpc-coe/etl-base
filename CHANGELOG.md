@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.19.0
+
+- :rocket: Use node-cot Type
+
 ### v9.18.1
 
 - :bug: Fix Type Inference that wasn't loose enough by explicitly setting the type
