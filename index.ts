@@ -28,13 +28,6 @@ FormatRegistry.Set('ipv6', formats.IsIPv6);
 FormatRegistry.Set('url', formats.IsUrl);
 FormatRegistry.Set('uuid', formats.IsUuid);
 
-export const InputFeature = Feature.InputFeature;
-
-export const InputFeatureCollection = Type.Object({
-    type: Type.Literal('FeatureCollection'),
-    features: Type.Array(Feature.InputFeature)
-})
-
 export function env(current: string) {
     try {
         const dotfile = new URL('.env', current);
@@ -531,7 +524,7 @@ export default class TaskBase {
      * @returns A boolean representing the success state
      */
     async submit(
-        fc: Static<typeof InputFeatureCollection>,
+        fc: Static<typeof Feature.InputFeatureCollection>,
         opts?: { verbose?: boolean }
     ): Promise<boolean> {
         if (!opts) opts = {};
