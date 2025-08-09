@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.20.0
+
+- :rocket: Move version check inline to allow library use outside of Task context
+
 ### v9.19.0
 
 - :rocket: Use node-cot Type

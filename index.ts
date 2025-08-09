@@ -115,7 +115,6 @@ export type TaskLogging = {
 
 export default class TaskBase {
     static name: string = 'default';
-    static version: string = JSON.parse(String(fs.readFileSync('package.json'))).version;
 
     static flow: DataFlowType[] = [ DataFlowType.Incoming ];
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
@@ -231,8 +230,7 @@ export default class TaskBase {
     async capabilities(): Promise<Static<typeof Capabilities>> {
         const base: Static<typeof Capabilities> = {
             name: this.constructor.name,
-            // @ts-expect-error Typescript doesn't handle this yet
-            version: this.constructor.version,
+            version: JSON.parse(String(fs.readFileSync('package.json'))).version
         };
 
         // @ts-expect-error Typescript doesn't handle this yet
