@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.21.0
+
+- :arrow_up: Update Core Deps
+
 ### v9.20.0
 
 - :rocket: Move version check inline to allow library use outside of Task context
