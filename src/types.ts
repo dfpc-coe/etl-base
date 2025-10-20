@@ -89,7 +89,6 @@ export const TaskLayer = Type.Object({
         updated: Type.String(),
         enabled_styles: Type.Boolean(),
         styles: Type.Unknown(),
-        stale: Type.Integer(),
         data: Type.Union([Type.Number(), Type.Null()]),
         cron: Type.String(),
         ephemeral: Type.Record(Type.String(), Type.Unknown()),

@@ -408,7 +408,9 @@ export default class TaskBase {
                 throw new Error('Cannot call env() without incoming config');
             }
 
-            return TypeValidator.type(type, this.layer.incoming.environment);
+            return TypeValidator.type(type, this.layer.incoming.environment, {
+                verbose: true
+            });
         } else {
             if (!this.layer.outgoing) {
                 throw new Error('Cannot call env() without outgoing config');

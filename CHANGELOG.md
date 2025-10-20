@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.22.0
+
+- :rocket: Update Layer Schema
+
 ### v9.21.0
 
 - :arrow_up: Update Core Deps
