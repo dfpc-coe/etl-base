@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.23.1
+
+- :bug: Fix a build error and add `npm run build` to GH Actions
+
 ### v9.23.0
 
 - :rocket: Allow setting an input or output Schema error on incoming or outgoing schemas
