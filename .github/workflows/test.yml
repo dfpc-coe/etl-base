@@ -22,7 +22,7 @@ jobs:
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: 22
+                  node-version: 24
                   registry-url: https://registry.npmjs.org/
 
             - name: Install
@@ -30,6 +30,9 @@ jobs:
 
             - name: Lint
               run: npm run lint
+
+            - name: Lint
+              run: npm run build
 
             - name: Test
               run: npm test

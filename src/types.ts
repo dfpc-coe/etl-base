@@ -68,7 +68,7 @@ export const Capabilities = Type.Object({
         schema: Type.Object({
             input: Type.Unknown(),
             inputError: Type.Optional(CapabilitiesError),
-            output: Type.Unknown()
+            output: Type.Unknown(),
             outputError: Type.Optional(CapabilitiesError),
         })
     })),
