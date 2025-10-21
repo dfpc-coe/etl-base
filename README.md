@@ -20,45 +20,32 @@ The following is an example of as simple an ETL service as possible that shows
 how this extension is performed.
 
 ```ts
-import ETL, { Event, handler as internal } from '@tak-ps/etl';
+import { Type } from '@sinclair/typebox';
+import ETL, { TaskLayer, Event, SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
 
 export default class Task extends ETL {
-    // The UI is dynamically generated based on the JSON Schema that the Lambda provides in the schema method.
+    static name = 'etl-example';
+    static flow = [ DataFlowType.Incoming, DataFlowType.Outgoing ];
+    static invocation = [ InvocationType.Schedule ];
 
-    constructor() {
-        super();
-
-        this.reg = {
-            Name: 'Task Name',
-            Type: [TaskRegistrationType.Connection, TaskRegistrationType.DataSync],
-            Repo: 'https://github.com/dfpc-coe/etl-base',
-            Readme: 'https://github.com/dfpc-coe/etl-base/blob/main/README.md'
-        }
-    }
-
-    schema(type) {
-        if (type === 'schema:intput) {
-            return {
-                type: 'object',
-                required: ['Password'],
-                properties: {
-                    'Password': {
-                        type: 'string',
-                        description: 'The password for the service'
-                    },
-                }
-            }
-        } else if (type === 'schema:output') {
-            return {
-                type: 'object',
-                required: ['CallSign'],
-                properties: {
-                    'CallSign': {
-                        type: 'string',
-                        description: 'The CallSign of the returned point'
-                    },
-                }
-            }
+    schema(
+        type: SchemaType = SchemaType.Input,
+        flow: DataFlowType = DataFlowType.Incoming
+    ): Promise<TSchema>
+        if (flow === DataFlowType.Incoming && type === SchemaType.Input) {
+            return Type.Object({
+                password: Type.String({
+                    description: 'The password for the service'
+                })
+            });
+        } else if (flow === DataFlowType.Outgoing && type === SchemaType.Input) {
+            return Type.Object({
+                callSign: Type.String({
+                    description: 'The CallSign of the returned point'
+                })
+            });
+        } else {
+            return Type.Object({});
         }
     }
 
