@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.24.0
+
+- :tada: Automatically handle failed Schema generation and populate with schema error
+- :tada: Automatically populate invocationDefaults where available
+
 ### v9.23.1
 
 - :bug: Fix a build error and add `npm run build` to GH Actions

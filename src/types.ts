@@ -51,20 +51,22 @@ export const CapabilitiesError = Type.Object({
     message: Type.String(),
 });
 
+export const InvocationDefaults = Type.Object({
+    webhook: Type.Optional(Type.Object({
+        enabled: Type.Boolean(),
+    })),
+    schedule: Type.Optional(Type.Object({
+        enabled: Type.Boolean(),
+        cron: Type.String(),
+    }))
+});
+
 export const Capabilities = Type.Object({
     name: Type.String(),
     version: Type.String(),
     incoming: Type.Optional(Type.Object({
         invocation: Type.Array(Type.Enum(InvocationType)),
-        invocationDefaults: Type.Optional(Type.Object({
-            webhook: Type.Optional(Type.Object({
-                enabled: Type.Boolean(),
-            })),
-            schedule: Type.Optional(Type.Object({
-                enabled: Type.Boolean(),
-                cron: Type.String(),
-            }))
-        })),
+        invocationDefaults: InvocationDefaults,
         schema: Type.Object({
             input: Type.Unknown(),
             inputError: Type.Optional(CapabilitiesError),

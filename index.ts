@@ -9,7 +9,7 @@ import Schema from '@openaddresses/batch-schema';
 import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
-import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationType } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
@@ -118,6 +118,7 @@ export default class TaskBase {
 
     static flow: DataFlowType[] = [ DataFlowType.Incoming ];
     static invocation: InvocationType[] = [ InvocationType.Schedule ];
+    static invocationDefaults: Static<typeof InvocationDefaults> = {};
 
     static webhooks?: (schema: Schema, context: TaskBase) => Promise<void>;
 
@@ -238,9 +239,29 @@ export default class TaskBase {
             base.incoming = {
                 // @ts-expect-error Typescript doesn't handle this yet
                 invocation: this.constructor.invocation,
+                // @ts-expect-error Typescript doesn't handle this yet
+                invocationDefaults: this.constructor.invocationDefaults,
                 schema: {
-                    input: await this.schema(SchemaType.Input, DataFlowType.Incoming),
-                    output: await this.schema(SchemaType.Output, DataFlowType.Incoming)
+                    input: null,
+                    output: null
+                }
+            }
+
+            try {
+                base.incoming.schema.input = await this.schema(SchemaType.Input, DataFlowType.Incoming);
+            } catch (err) {
+                base.incoming.schema.inputError = {
+                    status: 400,
+                    message: err instanceof Error ? err.message : String(err)
+                }
+            }
+
+            try {
+                base.incoming.schema.output = await this.schema(SchemaType.Output, DataFlowType.Incoming);
+            } catch (err) {
+                base.incoming.schema.outputError = {
+                    status: 400,
+                    message: err instanceof Error ? err.message : String(err)
                 }
             }
         }
@@ -249,8 +270,26 @@ export default class TaskBase {
         if (this.constructor.flow.includes(DataFlowType.Outgoing)) {
             base.outgoing = {
                 schema: {
-                    input: await this.schema(SchemaType.Input, DataFlowType.Outgoing),
-                    output: await this.schema(SchemaType.Output, DataFlowType.Outgoing)
+                    input: null,
+                    output: null
+                }
+            }
+
+            try {
+                base.outgoing.schema.input = await this.schema(SchemaType.Input, DataFlowType.Outgoing);
+            } catch (err) {
+                base.outgoing.schema.inputError = {
+                    status: 400,
+                    message: err instanceof Error ? err.message : String(err)
+                }
+            }
+
+            try {
+                base.outgoing.schema.output = await this.schema(SchemaType.Output, DataFlowType.Outgoing);
+            } catch (err) {
+                base.outgoing.schema.outputError = {
+                    status: 400,
+                    message: err instanceof Error ? err.message : String(err)
                 }
             }
         }
