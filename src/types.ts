@@ -46,20 +46,38 @@ export enum InvocationType {
     Webhook = 'webhook'
 }
 
+export const CapabilitiesError = Type.Object({
+    status: Type.Number(),
+    message: Type.String(),
+});
+
 export const Capabilities = Type.Object({
     name: Type.String(),
     version: Type.String(),
     incoming: Type.Optional(Type.Object({
         invocation: Type.Array(Type.Enum(InvocationType)),
+        invocationDefaults: Type.Optional(Type.Object({
+            webhook: Type.Optional(Type.Object({
+                enabled: Type.Boolean(),
+            })),
+            schedule: Type.Optional(Type.Object({
+                enabled: Type.Boolean(),
+                cron: Type.String(),
+            }))
+        })),
         schema: Type.Object({
             input: Type.Unknown(),
+            inputError: Type.Optional(CapabilitiesError),
             output: Type.Unknown()
+            outputError: Type.Optional(CapabilitiesError),
         })
     })),
     outgoing: Type.Optional(Type.Object({
         schema: Type.Object({
             input: Type.Unknown(),
-            output: Type.Unknown()
+            inputError: Type.Optional(CapabilitiesError),
+            output: Type.Unknown(),
+            outputError: Type.Optional(CapabilitiesError),
         })
     }))
 });
