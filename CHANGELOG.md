@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.23.0
+
+- :rocket: Allow setting an input or output Schema error on incoming or outgoing schemas
+- :rocket: Allow setting invocation defaults for faster layer configuration
+
 ### v9.22.0
 
 - :rocket: Update Layer Schema
