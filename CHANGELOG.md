@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.25.0 - 2025-11-18
+
+- :arrow_up: Update Core Deps
+
 ### v9.24.0
 
 - :tada: Automatically handle failed Schema generation and populate with schema error
