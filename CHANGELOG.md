@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v10.0.0 - 2025-12-08
+
+- :arrow_up: Update Core Deps
+- :rocket: Update Layer Schema
+- :rocket: Require NodeJS 24 as a minimum
+
 ### v9.26.0 - 2025-12-08
 
 - :arrow_up: Update Core Deps

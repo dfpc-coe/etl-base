@@ -86,34 +86,62 @@ export const Capabilities = Type.Object({
 
 export const TaskLayer = Type.Object({
     id: Type.Integer(),
-    name: Type.String(),
+    status: Type.Optional(Type.String()),
     created: Type.String(),
     updated: Type.String(),
+    template: Type.Boolean(),
+    connection: Type.Union([Type.Null(), Type.Integer()]),
+    username: Type.Union([Type.Null(), Type.String()]),
+    uuid: Type.String(),
+    name: Type.String(),
     description: Type.String(),
     enabled: Type.Boolean(),
     logging: Type.Boolean(),
     task: Type.String(),
-    memory: Type.Number(),
-    timeout: Type.Number(),
-    connection: Type.Number(),
+    memory: Type.Integer(),
+    timeout: Type.Integer(),
+    priority: Type.Union([
+        Type.Literal('high'),
+        Type.Literal('low'),
+        Type.Literal('off')
+    ]),
+
+    alarm_period: Type.Integer(),
+    alarm_evals: Type.Integer(),
+    alarm_points: Type.Integer(),
+
+    parent: Type.Optional(Type.Object({
+        id: Type.Integer(),
+        name: Type.String(),
+        enabled: Type.Boolean()
+    })),
 
     outgoing: Type.Optional(Type.Object({
+        layer: Type.Integer(),
         created: Type.String(),
         updated: Type.String(),
         ephemeral: Type.Record(Type.String(), Type.Unknown()),
-        environment: Type.Record(Type.String(), Type.Unknown()),
+        environment: Type.Any(),
+        filters: Type.Object({
+            queries: Type.Optional(Type.Array(Type.Object({
+                name: Type.Optional(Type.String()),
+                query: Type.String()
+            })))
+        }),
     })),
 
     incoming: Type.Optional(Type.Object({
+        layer: Type.Integer(),
         created: Type.String(),
         updated: Type.String(),
         enabled_styles: Type.Boolean(),
         styles: Type.Unknown(),
-        data: Type.Union([Type.Number(), Type.Null()]),
-        cron: Type.String(),
+        data: Type.Union([Type.Integer(), Type.Null()]),
+        cron: Type.Union([Type.String(), Type.Null()]),
         ephemeral: Type.Record(Type.String(), Type.Unknown()),
         webhooks: Type.Boolean(),
-        environment: Type.Record(Type.String(), Type.Unknown()),
+        environment: Type.Any(),
+        groups: Type.Array(Type.String()),
         config: Type.Object({
             timezone: Type.Optional(Type.Object({
                 timezone: Type.String()

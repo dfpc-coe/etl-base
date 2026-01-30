@@ -6,7 +6,7 @@
     "type": "module",
     "types": "index.ts",
     "engines": {
-        "node": ">= 22"
+        "node": ">= 24"
     },
     "scripts": {
         "test": "exit 0",
@@ -28,7 +28,7 @@
     "homepage": "https://github.com/tak-ps/etl-base#readme",
     "devDependencies": {
         "@eslint/js": "^9.19.0",
-        "@types/node": "^24.0.0",
+        "@types/node": "^25.0.0",
         "eslint": "^9.0.0",
         "typedoc": "^0.28.0",
         "typescript": "^5.5.0",
