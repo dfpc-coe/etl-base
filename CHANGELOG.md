@@ -10,7 +10,11 @@
 
 ## Version History
 
-### v10.0.0 - 2025-12-08
+### v10.0.1 - 2026-01-30
+
+- :rocket: Update GH Actions Publisher
+
+### v10.0.0 - 2026-01-30
 
 - :arrow_up: Update Core Deps
 - :rocket: Update Layer Schema
