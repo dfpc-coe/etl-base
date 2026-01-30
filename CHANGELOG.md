@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.0.3 - 2026-01-30
+
+- :rocket: Update GH Actions Publisher
+
 ### v10.0.2 - 2026-01-30
 
 - :rocket: Update GH Actions Publisher
