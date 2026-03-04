@@ -564,10 +564,14 @@ export default class TaskBase {
      */
     async submit(
         fc: Static<typeof Feature.InputFeatureCollection>,
-        opts?: { verbose?: boolean }
+        opts?: {
+            verbose?: boolean,
+            archive?: boolean
+        }
     ): Promise<boolean> {
         if (!opts) opts = {};
         if (opts.verbose === undefined) opts.verbose = false;
+        if (opts.archive === undefined) opts.archive = true;
 
         if (!this.layer) this.layer = await this.fetchLayer();
 
@@ -625,10 +629,14 @@ export default class TaskBase {
             if (submit) {
                 submit = false;
 
-                console.log(`ok - POST ${new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api)}`);
+                const url = new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api);
+                url.searchParams.append('archive', String(opts.archive));
+
+                console.log(`ok - POST ${url}`);
 
                 buffs.push(post);
-                const postreq = await fetch(new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api), {
+
+                const postreq = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.etl.token}`,

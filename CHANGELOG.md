@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.4.0 - 2026-03-04
+
+- :rocket: Add support for opts.archive in this.submit - Ref: https://github.com/dfpc-coe/CloudTAK/pull/1295
+
 ### v10.3.0 - 2026-03-04
 
 - :rocket: Update Upstream OpenAPI Types
