@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.2.0 - 2026-03-04
+
+- :rocket: Update Upstream OpenAPI Types
+
 ### v10.1.0 - 2026-03-04
 
 - :arrow_up: Update Core Deps
