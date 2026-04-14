@@ -1,9 +1,6 @@
 import TypeValidator from './type.js';
 import type { TypeOpts } from './type.js';
-import { Static, TSchema, TUnknown } from "@sinclair/typebox";
-import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { fetch, Response } from 'undici';
-import type { RequestInfo, RequestInit } from 'undici';
+import type { Static, TSchema, TUnknown } from "@sinclair/typebox";
 
 export class TypedResponse extends Response {
     constructor(response: Response) {
@@ -23,7 +20,7 @@ export class TypedResponse extends Response {
 }
 
 export default async function(
-    input: RequestInfo,
+    input: string | URL,
     init?: RequestInit
 ): Promise<TypedResponse> {
     return new TypedResponse(await fetch(input, init));

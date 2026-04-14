@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import type Lambda from 'aws-lambda';
 import SecretsManager from '@aws-sdk/client-secrets-manager';
+import { parseArgs } from 'node:util';
 import express from 'express';
 import type { Application}  from 'express';
-import minimist from 'minimist';
-import { Type, Static, TSchema, TUnknown, FormatRegistry, } from '@sinclair/typebox';
+import { Type, FormatRegistry } from '@sinclair/typebox';
+import type { Static, TSchema, TUnknown } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
-import moment from 'moment-timezone';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType } from './src/types.js';
@@ -43,20 +43,21 @@ export function env(current: string) {
 export async function local(task: TaskBase, current: string) {
     if (current !== `file://${process.argv[1]}`) return;
 
-    const args = minimist(process.argv, {})
+    const { positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true });
+    const command = positionals[0];
 
-    if (!args._[2] || args._[2] === 'control') {
+    if (!command || command === 'control') {
         await handler(task);
-    } else if (['control:webhooks'].includes(args._[2])) {
+    } else if (command === 'control:webhooks') {
         const app = await task.controlWebhooks()
         app.listen(5002, () => {
             console.log('ok - listening http://localhost:5002');
         })
-    } else if (['capabilities'].includes(args._[2])) {
+    } else if (command === 'capabilities') {
         const res = await handler(task, { type: 'capabilities' });
         console.log(JSON.stringify(res))
     } else {
-        console.error('Unknown Command: ' + args._[2])
+        console.error('Unknown Command: ' + command)
         process.exit()
     }
 }
@@ -391,7 +392,6 @@ export default class TaskBase {
             opts.headers.append('Content-Type', 'application/json');
         }
 
-        // @ts-expect-error Handle Undici vs Node TS complaints around FormData
         const res = await fetch(url instanceof URL ? url : new URL(url, this.etl.api), opts);
 
         if (!res.ok) {
@@ -592,7 +592,14 @@ export default class TaskBase {
                 for (const feat of fc.features) {
                     for (const field of fields) {
                         if (!feat.properties.metadata || !feat.properties.metadata[field]) continue;
-                        feat.properties.metadata[field] = moment(feat.properties.metadata[field]).tz(cnf.timezone.timezone).format('YYYY-MM-DD HH:mm') + ` (${cnf.timezone.timezone})`;
+                        const d = new Date(String(feat.properties.metadata[field]));
+                        const parts = new Intl.DateTimeFormat('en-CA', {
+                            timeZone: cnf.timezone.timezone,
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            hour: '2-digit', minute: '2-digit', hour12: false
+                        }).formatToParts(d);
+                        const p = Object.fromEntries(parts.map(p => [p.type, p.value]));
+                        feat.properties.metadata[field] = `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute} (${cnf.timezone.timezone})`;
                     }
                 }
             }

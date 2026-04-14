@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.5.0 - 2026-04-13
+
+- :tada: Migrate to Typescript 6.0
+
 ### v10.4.0 - 2026-03-04
 
 - :rocket: Add support for opts.archive in this.submit - Ref: https://github.com/dfpc-coe/CloudTAK/pull/1295
