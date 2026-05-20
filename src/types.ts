@@ -142,7 +142,6 @@ export const TaskLayer = Type.Object({
         ephemeral: Type.Record(Type.String(), Type.Unknown()),
         webhooks: Type.Boolean(),
         environment: Type.Any(),
-        groups: Type.Array(Type.String()),
         config: Type.Object({
             timezone: Type.Optional(Type.Object({
                 timezone: Type.String()
