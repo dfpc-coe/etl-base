@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.6.0 - 2026-05-20
+
+- :arrow_up: Update Schema to align with CloudTAK@13
+
 ### v10.5.0 - 2026-04-13
 
 - :tada: Migrate to Typescript 6.0
