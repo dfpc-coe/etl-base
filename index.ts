@@ -9,13 +9,12 @@ import type { Static, TSchema, TUnknown } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
+import { fetch } from '@tak-ps/node-safeurl';
 import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
-
-import fetch from './src/fetch.js'
 import TypeValidator from './src/type.js'
 import * as formats from './src/formats/index.js';
 
