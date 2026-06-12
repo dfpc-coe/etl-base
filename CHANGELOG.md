@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.7.0 - 2026-06-11
+
+- :rocket: Introduce anti-SSRF features
+
 ### v10.6.0 - 2026-05-20
 
 - :arrow_up: Update Schema to align with CloudTAK@13
