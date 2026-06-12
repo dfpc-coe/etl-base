@@ -9,13 +9,13 @@ import type { Static, TSchema, TUnknown } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
 import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
+import { fetch } from '@tak-ps/node-safeurl';
+import type { FetchInit } from '@tak-ps/node-safeurl';
 import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
-
-import fetch from './src/fetch.js'
 import TypeValidator from './src/type.js'
 import * as formats from './src/formats/index.js';
 
@@ -364,35 +364,38 @@ export default class TaskBase {
      *
      * @returns The parsed response body
      */
-    async fetch(url: string | URL, opts?: RequestInit): Promise<object> {
+    async fetch(url: string | URL, opts?: FetchInit): Promise<object> {
         if (!opts) opts = {};
         if (!opts.method) opts.method = 'GET';
         console.log(`ok - ${opts.method}: ${url}`);
 
-        if (!opts.headers) {
-            opts.headers = new Headers();
-        } else {
-            if (!(opts.headers instanceof Headers) && Array.isArray(opts.headers)) {
-                opts.headers = new Headers(opts.headers);
-            } else if (!(opts.headers instanceof Headers) && typeof opts.headers === 'object') {
-                const headers = new Headers();
-                for (const header in opts.headers) {
-                    headers.append(header, opts.headers[header]);
+        const headers: Record<string, string> = {};
+
+        if (opts.headers) {
+            if (Array.isArray(opts.headers)) {
+                for (const [key, value] of opts.headers) {
+                    headers[key] = value;
                 }
-                opts.headers = headers;
+            } else if (typeof opts.headers === 'object') {
+                const h = opts.headers as Record<string, string>;
+                for (const key in h) {
+                    headers[key] = h[key];
+                }
             }
         }
 
-        if (!opts.headers.has('Authorization')) {
-            opts.headers.append('Authorization', `Bearer ${this.etl.token}`);
+        if (!headers['Authorization']) {
+            headers['Authorization'] = `Bearer ${this.etl.token}`;
         }
 
         if (typeof opts.body === 'object') {
             opts.body =  JSON.stringify(opts.body)
-            opts.headers.append('Content-Type', 'application/json');
+            headers['Content-Type'] = 'application/json';
         }
 
-        const res = await fetch(url instanceof URL ? url : new URL(url, this.etl.api), opts);
+        opts.headers = headers;
+
+        const res = await fetch(url instanceof URL ? url : new URL(url, this.etl.api), { ...opts, safeUrlAllow: [this.etl.api] });
 
         if (!res.ok) {
             const body = await res.text();
@@ -422,7 +425,8 @@ export default class TaskBase {
                 'Authorization': `Bearer ${this.etl.token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(alertin)
+            body: JSON.stringify(alertin),
+            safeUrlAllow: [this.etl.api]
         });
 
         if (!alert.ok) {
@@ -516,7 +520,8 @@ export default class TaskBase {
                 'Authorization': `Bearer ${this.etl.token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(ephem)
+            body: JSON.stringify(ephem),
+            safeUrlAllow: [this.etl.api]
         });
 
         if (!res_layer.ok) {
@@ -539,7 +544,8 @@ export default class TaskBase {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.etl.token}`,
-            }
+            },
+            safeUrlAllow: [this.etl.api]
         });
 
         if (!res_layer.ok) {
@@ -649,7 +655,8 @@ export default class TaskBase {
                         'Authorization': `Bearer ${this.etl.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: Buffer.concat(buffs)
+                    body: Buffer.concat(buffs),
+                    safeUrlAllow: [this.etl.api]
                 });
 
                 if (!postreq.ok) {
