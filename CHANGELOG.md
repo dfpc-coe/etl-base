@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.8.0 - 2026-07-01
+
+- :arrow_up: Update node-cot to fix XML escape bugs
+
 ### v10.7.0 - 2026-06-11
 
 - :rocket: Introduce anti-SSRF features
