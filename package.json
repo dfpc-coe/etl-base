@@ -41,7 +41,7 @@
         "@aws-sdk/client-secrets-manager": "^3.828.0",
         "@openaddresses/batch-schema": "^10.12.1",
         "@sinclair/typebox": "^0.34.0",
-        "@tak-ps/node-safeurl": "^1.4.0",
+        "@tak-ps/node-safeurl": "^1.6.0",
         "@tak-ps/serverless-http": "^3.4.0",
         "@types/aws-lambda": "^8.10.147",
         "@types/jsonwebtoken": "^9.0.1",

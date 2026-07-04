@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.9.0 - 2026-07-04
+
+- :arrow_up: Update node-safeurl for type coercion
+
 ### v10.8.0 - 2026-07-01
 
 - :arrow_up: Update node-cot to fix XML escape bugs
