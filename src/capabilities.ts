@@ -10,6 +10,35 @@ import Err from '@openaddresses/batch-error';
  */
 export const CAPABILITIES_ANNOTATION = 'com.cloudtak.capabilities';
 
+/**
+ * Known CloudTAK permissions and the levels at which they can be granted.
+ *
+ * A permission is expressed as `<permission>:<level>` - ie `video:read` - where
+ * `<permission>:*` grants every level of the permission
+ */
+export const PERMISSIONS: Record<string, Array<string>> = {
+    feature: ['submit'],
+    video: ['create', 'read', 'update', 'delete'],
+    injector: ['create', 'read', 'update', 'delete']
+};
+
+/**
+ * Ensure a `<permission>:<level>` string refers to a known permission and a
+ * level it can be granted at - `<permission>:*` is valid for every permission
+ */
+export function isValidPermission(resource: string): boolean {
+    const separator = resource.indexOf(':');
+    if (separator === -1) return false;
+
+    const permission = resource.slice(0, separator);
+    const level = resource.slice(separator + 1);
+
+    const levels = PERMISSIONS[permission];
+    if (!levels) return false;
+
+    return level === '*' || levels.includes(level);
+}
+
 export const CapabilitiesPermissionSchema = Type.Object({
     resource: Type.String({
         description: 'The resource the permission applies to - ie feature:*',
@@ -119,17 +148,28 @@ export default class StaticCapabilities {
     }
 
     static is(input: unknown): input is StaticCapabilitiesDocument {
-        return Value.Check(StaticCapabilitiesSchema, input);
+        return Value.Check(StaticCapabilitiesSchema, input)
+            && input.permissions.every((permission) => isValidPermission(permission.resource));
     }
 
     static validate(input: unknown): StaticCapabilitiesDocument {
-        if (StaticCapabilities.is(input)) return input;
+        if (!Value.Check(StaticCapabilitiesSchema, input)) {
+            const errors = [];
+            for (const error of Value.Errors(StaticCapabilitiesSchema, input)) {
+                errors.push(`${error.path}: ${error.message}`);
+            }
 
-        const errors = [];
-        for (const error of Value.Errors(StaticCapabilitiesSchema, input)) {
-            errors.push(`${error.path}: ${error.message}`);
+            throw new Err(400, null, `Invalid Capabilities Document: ${errors.join(', ')}`);
         }
 
-        throw new Err(400, null, `Invalid Capabilities Document: ${errors.join(', ')}`);
+        const invalid = input.permissions
+            .map((permission) => permission.resource)
+            .filter((resource) => !isValidPermission(resource));
+
+        if (invalid.length) {
+            throw new Err(400, null, `Invalid Capabilities Document: Unknown Permissions: ${invalid.join(', ')}`);
+        }
+
+        return input;
     }
 }

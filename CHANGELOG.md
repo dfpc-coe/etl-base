@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v10.11.0 - 2026-08-11
+
+- :tada: Add Permissions Validation
+- :white_check_mark: Add tests for Permissions Validation
+
 ### v10.10.0 - 2026-08-10
 
 - :tada: Add `StaticCapabilities` - the static `capabilities.json` document format authored alongside an ETL task's source code (migrated from CloudTAK `api/common/capabilities.ts`)
