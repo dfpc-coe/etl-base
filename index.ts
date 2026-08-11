@@ -16,6 +16,10 @@ import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
+
+export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilitiesSchema } from './src/capabilities.js';
+export type { StaticCapabilitiesDocument } from './src/capabilities.js';
+
 import TypeValidator from './src/type.js'
 import * as formats from './src/formats/index.js';
 

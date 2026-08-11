@@ -12,6 +12,27 @@ base for removing much of the boilerplate to interacting with the TAK ETL servic
 as well as serving as a (hopefully) straightforward and readable example for how
 services in other languages could be written
 
+## Building & Pushing ETL Containers
+
+This package exposes a `cloudtak-etl` script which builds the ETL Container Image
+in the current directory and pushes it to the AWS ECR repository used by a CloudTAK
+instance to run ETL Tasks.
+
+The ETL repo must contain a `Dockerfile` as well as a `capabilities.json` document
+(validated against the `StaticCapabilities` schema exported by this package) which
+is embedded in the OCI Image Manifest as a `com.cloudtak.capabilities` annotation
+and later read by the CloudTAK API directly from ECR.
+
+```sh
+export AWS_REGION='us-east-1'
+export AWS_ACCOUNT_ID='123456789012'
+export Environment='prod' # Optional - defaults to prod
+
+npx cloudtak-etl
+```
+
+The image is tagged as `tak-vpc-<Environment>-cloudtak-tasks:<repo name>-v<package.json version>`
+
 ## API
 
 The ETL Base Class is designed to be extended by classes performing ETL functions.

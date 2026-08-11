@@ -5,12 +5,15 @@
     "main": "dist/index.js",
     "type": "module",
     "types": "index.ts",
+    "bin": {
+        "cloudtak-etl": "dist/bin/build.js"
+    },
     "engines": {
         "node": ">= 24"
     },
     "scripts": {
         "test": "exit 0",
-        "lint": "eslint index.ts",
+        "lint": "eslint index.ts bin",
         "doc": "typedoc index.ts",
         "typegen": "curl 'https://raw.githubusercontent.com/dfpc-coe/CloudTAK/refs/heads/main/api/web/src/derived-types.d.ts' > src/api-types.ts",
         "build": "tsc --build && cp package.json dist/",
@@ -39,6 +42,7 @@
     },
     "dependencies": {
         "@aws-sdk/client-secrets-manager": "^3.828.0",
+        "@openaddresses/batch-error": "^2.14.1",
         "@openaddresses/batch-schema": "^10.12.1",
         "@sinclair/typebox": "^0.34.0",
         "@tak-ps/node-safeurl": "^1.6.0",

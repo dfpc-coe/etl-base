@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v10.10.0 - 2026-08-10
+
+- :tada: Add `StaticCapabilities` - the static `capabilities.json` document format authored alongside an ETL task's source code (migrated from CloudTAK `api/common/capabilities.ts`)
+- :tada: Add `cloudtak-etl` bin script which builds the ETL container in the current directory, embeds the `capabilities.json` document as an OCI Image Manifest annotation, and pushes it to AWS ECR
+
 ### v10.9.0 - 2026-07-04
 
 - :arrow_up: Update node-safeurl for type coercion
