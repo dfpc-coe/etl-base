@@ -12,6 +12,20 @@ import StaticCapabilities, { CAPABILITIES_ANNOTATION } from '../src/capabilities
  *    npx cloudtak-etl
  */
 
+if (process.argv.slice(2).includes('--help') || process.argv.slice(2).includes('-h')) {
+    console.log('Usage: cloudtak-etl');
+    console.log('');
+    console.log('Build the ETL task container in the current directory and push it to AWS ECR');
+    console.log('');
+    console.log('The current directory must contain a Dockerfile and a capabilities.json');
+    console.log('');
+    console.log('Required Environment Variables:');
+    console.log('  AWS_REGION      The AWS region the CloudTAK deployment lives in');
+    console.log('  AWS_ACCOUNT_ID  The 12 digit AWS account ID hosting the ECR repository');
+    console.log('  Environment     (Optional) Deployment environment - defaults to prod');
+    process.exit(0);
+}
+
 process.env.Environment = process.env.Environment || 'prod';
 
 for (const env of [

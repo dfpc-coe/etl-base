@@ -23,6 +23,12 @@ The ETL repo must contain a `Dockerfile` as well as a `capabilities.json` docume
 is embedded in the OCI Image Manifest as a `com.cloudtak.capabilities` annotation
 and later read by the CloudTAK API directly from ECR.
 
+Note that this static, build-time document is distinct from the live Capabilities
+document (the `Capabilities` export of this package) which a deployed task returns
+when invoked with a `capabilities` event: the static document describes a task
+version before it is ever deployed, while the live document reflects the runtime
+environment schemas of the running image.
+
 ```sh
 export AWS_REGION='us-east-1'
 export AWS_ACCOUNT_ID='123456789012'

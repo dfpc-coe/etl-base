@@ -62,6 +62,17 @@ export const InvocationDefaults = Type.Object({
     }))
 });
 
+/**
+ * The live Capabilities document returned by invoking a deployed task Lambda
+ * with a `capabilities` event. It reflects the runtime environment of the
+ * running image - the invocation modes and the input/output environment
+ * schemas the task currently exposes for each data flow
+ *
+ * Note this format intentionally differs from the static Capabilities document
+ * (the StaticCapabilities export of this package) which is authored alongside
+ * the task's source code as a capabilities.json and embedded in the OCI Image
+ * Manifest at build time, describing the task before it is ever deployed
+ */
 export const Capabilities = Type.Object({
     name: Type.String(),
     version: Type.String(),
