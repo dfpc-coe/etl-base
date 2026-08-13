@@ -70,6 +70,8 @@ test('PERMISSIONS', () => {
         feature: ['submit'],
         video: ['create', 'read', 'update', 'delete'],
         injector: ['create', 'read', 'update', 'delete'],
+        event: ['create', 'read', 'update', 'delete'],
+        device: ['create', 'read', 'update', 'delete'],
     });
 });
 

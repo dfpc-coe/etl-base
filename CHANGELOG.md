@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.12.0 - 2026-08-13
+
+- :tada: Add `event` and `device` Permissions
+
 ### v10.11.0 - 2026-08-11
 
 - :tada: Add Permissions Validation
