@@ -39,6 +39,37 @@ npx cloudtak-etl
 
 The image is tagged as `tak-vpc-<Environment>-cloudtak-tasks:<repo name>-v<package.json version>`
 
+### Outgoing Types
+
+A task that provides the `Outgoing` data flow declares the resource types it
+accepts under `invocations.outgoing.types` in its `capabilities.json`. A type is
+expressed as `<resource>:<action>` and must be one of the `OUTGOING_TYPES` exported
+by this package (see `StaticCapabilities.isValidOutgoingType()` & `StaticCapabilities.isSubscribedOutgoingType()`) (`<resource>:*` covers every action):
+
+| Resource  | Actions                    | Delivered as                                      |
+| --------- | -------------------------- | ------------------------------------------------- |
+| `feature` | `*`                        | Streaming CoT Features from the Layer Connection  |
+| `event`   | `create`, `update`, `delete` | CoreEvents sharing a Channel with the Connection |
+| `device`  | `create`, `update`, `delete` | CoreDevices sharing a Channel with the Connection |
+
+When an Outgoing Layer is created in CloudTAK it subscribes to a subset of the
+declared types (`layer.outgoing.subscriptions`) and only receives SQS records for
+those. Records are parsed into a typed `OutgoingMessage` with `TaskBase.outgoingMessages()`:
+
+```ts
+async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
+    for (const message of Task.outgoingMessages(event)) {
+        if (message.type === OutgoingMessageType.Feature) {
+            // message.xml, message.geojson
+        } else if (message.type === OutgoingMessageType.Event) {
+            // message.action, message.channels, message.data
+        }
+    }
+
+    return true;
+}
+```
+
 ## API
 
 The ETL Base Class is designed to be extended by classes performing ETL functions.

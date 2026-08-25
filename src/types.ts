@@ -1,5 +1,6 @@
 import { Type } from '@sinclair/typebox';
 import type { TSchema } from '@sinclair/typebox';
+import { Feature } from '@tak-ps/node-cot';
 
 export enum EventType {
 }
@@ -101,7 +102,6 @@ export const TaskLayer = Type.Object({
     status: Type.Optional(Type.String()),
     created: Type.String(),
     updated: Type.String(),
-    template: Type.Boolean(),
     connection: Type.Union([Type.Null(), Type.Integer()]),
     username: Type.Union([Type.Null(), Type.String()]),
     uuid: Type.String(),
@@ -134,6 +134,9 @@ export const TaskLayer = Type.Object({
         updated: Type.String(),
         ephemeral: Type.Record(Type.String(), Type.Unknown()),
         environment: Type.Any(),
+        subscriptions: Type.Array(Type.String(), {
+            description: 'Outgoing resource types the Layer is subscribed to - ie feature:* or event:update'
+        }),
         filters: Type.Object({
             queries: Type.Optional(Type.Array(Type.Object({
                 name: Type.Optional(Type.String()),
@@ -160,3 +163,48 @@ export const TaskLayer = Type.Object({
         }),
     }))
 });
+
+export enum OutgoingMessageType {
+    Feature = 'feature',
+    Event = 'event',
+    Device = 'device'
+}
+
+export enum OutgoingAction {
+    Create = 'create',
+    Update = 'update',
+    Delete = 'delete'
+}
+
+/** A streaming CoT Feature delivered to an Outgoing Layer subscribed to `feature:*` */
+export const OutgoingFeatureMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.Feature),
+    xml: Type.String(),
+    geojson: Feature.Feature
+});
+
+/** A CoreEvent lifecycle change delivered to an Outgoing Layer subscribed to `event:<action>` */
+export const OutgoingEventMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.Event),
+    action: Type.Enum(OutgoingAction),
+    channels: Type.Array(Type.Integer(), {
+        description: 'Channels shared by the Event and the Layer Connection that caused delivery'
+    }),
+    data: Type.Record(Type.String(), Type.Unknown())
+});
+
+/** A CoreDevice lifecycle change delivered to an Outgoing Layer subscribed to `device:<action>` */
+export const OutgoingDeviceMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.Device),
+    action: Type.Enum(OutgoingAction),
+    channels: Type.Array(Type.Integer(), {
+        description: 'Channels shared by the Device and the Layer Connection that caused delivery'
+    }),
+    data: Type.Record(Type.String(), Type.Unknown())
+});
+
+export const OutgoingMessage = Type.Union([
+    OutgoingFeatureMessage,
+    OutgoingEventMessage,
+    OutgoingDeviceMessage
+]);

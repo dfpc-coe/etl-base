@@ -10,6 +10,17 @@
 
 ## Version History
 
+### v10.14.0 - 2026-08-25
+
+- :tada: Add `OUTGOING_TYPES` and `StaticCapabilities.isValidOutgoingType/matchesOutgoingType/isSubscribedOutgoingType` and validate `invocations.outgoing.types`
+- :rocket: Move `isValidPermission` to `StaticCapabilities.isValidPermission` (standalone export removed)
+- :tada: Add `subscriptions` to `TaskLayer.outgoing`
+- :tada: Add typed `OutgoingMessage` envelope (`feature`, `event`, `device`) and `TaskBase.outgoingMessages()` parser
+
+### v10.12.1 - 2026-08-13
+
+- :tada: Add `event` and `device` Permissions
+
 ### v10.12.0 - 2026-08-13
 
 - :tada: Add `event` and `device` Permissions

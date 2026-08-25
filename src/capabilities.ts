@@ -25,21 +25,19 @@ export const PERMISSIONS: Record<string, Array<string>> = {
 };
 
 /**
- * Ensure a `<permission>:<level>` string refers to a known permission and a
- * level it can be granted at - `<permission>:*` is valid for every permission
+ * Known Outgoing resource types a task can subscribe to and the actions at
+ * which they can be subscribed.
+ *
+ * A type is expressed as `<resource>:<action>` - ie `event:update` - where
+ * `<resource>:*` subscribes to every action of the resource. `feature` is the
+ * streaming CoT flow and only supports the wildcard
  */
-export function isValidPermission(resource: string): boolean {
-    const separator = resource.indexOf(':');
-    if (separator === -1) return false;
-
-    const permission = resource.slice(0, separator);
-    const level = resource.slice(separator + 1);
-
-    const levels = PERMISSIONS[permission];
-    if (!levels) return false;
-
-    return level === '*' || levels.includes(level);
-}
+export const OUTGOING_TYPES: Record<string, Array<string>> = {
+    feature: [],
+    event: ['create', 'update', 'delete'],
+    device: ['create', 'update', 'delete']
+    board: ['create', 'update', 'delete'],
+};
 
 export const CapabilitiesPermissionSchema = Type.Object({
     resource: Type.String({
@@ -74,7 +72,9 @@ export const CapabilitiesOutgoingTypeSchema = Type.Object({
     resource: Type.String({
         description: 'The resource type the task accepts - ie feature:*',
     }),
-    description: Type.String(),
+    description: Type.String({
+        description: 'Human readable explanation of what the task does with the resource type',
+    }),
 });
 
 export const StaticCapabilitiesSchema = Type.Object({
@@ -124,6 +124,64 @@ export type StaticCapabilitiesDocument = Static<typeof StaticCapabilitiesSchema>
 export default class StaticCapabilities {
     static schema = StaticCapabilitiesSchema;
     static annotation = CAPABILITIES_ANNOTATION;
+    static permissions = PERMISSIONS;
+    static outgoingTypes = OUTGOING_TYPES;
+
+    /**
+     * Ensure a `<permission>:<level>` string refers to a known permission and a
+     * level it can be granted at - `<permission>:*` is valid for every permission
+     */
+    static isValidPermission(resource: string): boolean {
+        const separator = resource.indexOf(':');
+        if (separator === -1) return false;
+
+        const permission = resource.slice(0, separator);
+        const level = resource.slice(separator + 1);
+
+        const levels = PERMISSIONS[permission];
+        if (!levels) return false;
+
+        return level === '*' || levels.includes(level);
+    }
+
+    /**
+     * Ensure a `<resource>:<action>` string refers to a known Outgoing resource
+     * type and an action it can be subscribed at - `<resource>:*` is valid for
+     * every resource type
+     */
+    static isValidOutgoingType(resource: string): boolean {
+        const separator = resource.indexOf(':');
+        if (separator === -1) return false;
+
+        const type = resource.slice(0, separator);
+        const action = resource.slice(separator + 1);
+
+        const actions = OUTGOING_TYPES[type];
+        if (!actions) return false;
+
+        return action === '*' || actions.includes(action);
+    }
+
+    /**
+     * Does a declared or subscribed Outgoing type (which may carry a wildcard
+     * action) cover a concrete `<resource>:<action>` string
+     */
+    static matchesOutgoingType(declared: string, resource: string): boolean {
+        if (declared === resource) return true;
+
+        const separator = declared.indexOf(':');
+        if (separator === -1 || declared.slice(separator + 1) !== '*') return false;
+
+        return resource.startsWith(declared.slice(0, separator + 1));
+    }
+
+    /**
+     * Is a concrete `<resource>:<action>` string covered by any entry of a list of
+     * declared or subscribed Outgoing types
+     */
+    static isSubscribedOutgoingType(subscriptions: Array<string>, resource: string): boolean {
+        return subscriptions.some((subscription) => StaticCapabilities.matchesOutgoingType(subscription, resource));
+    }
 
     /**
      * Read and validate a capabilities.json document from disk, returning null
@@ -151,7 +209,8 @@ export default class StaticCapabilities {
 
     static is(input: unknown): input is StaticCapabilitiesDocument {
         return Value.Check(StaticCapabilitiesSchema, input)
-            && input.permissions.every((permission) => isValidPermission(permission.resource));
+            && input.permissions.every((permission) => StaticCapabilities.isValidPermission(permission.resource))
+            && (input.invocations.outgoing?.types ?? []).every((type) => StaticCapabilities.isValidOutgoingType(type.resource));
     }
 
     static validate(input: unknown): StaticCapabilitiesDocument {
@@ -166,10 +225,18 @@ export default class StaticCapabilities {
 
         const invalid = input.permissions
             .map((permission) => permission.resource)
-            .filter((resource) => !isValidPermission(resource));
+            .filter((resource) => !StaticCapabilities.isValidPermission(resource));
 
         if (invalid.length) {
             throw new Err(400, null, `Invalid Capabilities Document: Unknown Permissions: ${invalid.join(', ')}`);
+        }
+
+        const unknownTypes = (input.invocations.outgoing?.types ?? [])
+            .map((type) => type.resource)
+            .filter((resource) => !StaticCapabilities.isValidOutgoingType(resource));
+
+        if (unknownTypes.length) {
+            throw new Err(400, null, `Invalid Capabilities Document: Unknown Outgoing Types: ${unknownTypes.join(', ')}`);
         }
 
         return input;

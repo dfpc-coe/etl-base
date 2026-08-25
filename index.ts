@@ -11,13 +11,13 @@ import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
-import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
 
-export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilitiesSchema, PERMISSIONS, isValidPermission } from './src/capabilities.js';
+export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilitiesSchema, PERMISSIONS, OUTGOING_TYPES } from './src/capabilities.js';
 export type { StaticCapabilitiesDocument } from './src/capabilities.js';
 
 import TypeValidator from './src/type.js'
@@ -219,6 +219,19 @@ export default class TaskBase {
     async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
         console.error(event);
         return true;
+    }
+
+    /**
+     * Parse the SQS records of an Outgoing invocation into typed messages.
+     * Records predating the `type` field are treated as `feature` messages
+     */
+    static outgoingMessages(event: Lambda.SQSEvent): Array<Static<typeof OutgoingMessage>> {
+        return event.Records.map((record) => {
+            const body = JSON.parse(record.body) as Record<string, unknown>;
+            if (body.type === undefined) body.type = OutgoingMessageType.Feature;
+
+            return TypeValidator.type(OutgoingMessage, body, { convert: false });
+        });
     }
 
     async control(): Promise<void> {
@@ -694,6 +707,12 @@ export {
     Capabilities,
     InvocationType,
     DataFlowType,
+    OutgoingMessageType,
+    OutgoingAction,
+    OutgoingMessage,
+    OutgoingFeatureMessage,
+    OutgoingEventMessage,
+    OutgoingDeviceMessage,
     Feature,
     fetch,
 };

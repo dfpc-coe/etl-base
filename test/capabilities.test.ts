@@ -7,7 +7,7 @@ import Err from '@openaddresses/batch-error';
 import StaticCapabilities, {
     CAPABILITIES_ANNOTATION,
     PERMISSIONS,
-    isValidPermission,
+    OUTGOING_TYPES,
     StaticCapabilitiesSchema,
 } from '../src/capabilities.js';
 import type { StaticCapabilitiesDocument } from '../src/capabilities.js';
@@ -78,32 +78,32 @@ test('PERMISSIONS', () => {
 test('isValidPermission: known permission & level', () => {
     for (const permission of Object.keys(PERMISSIONS)) {
         for (const level of PERMISSIONS[permission]) {
-            assert.equal(isValidPermission(`${permission}:${level}`), true, `${permission}:${level}`);
+            assert.equal(StaticCapabilities.isValidPermission(`${permission}:${level}`), true, `${permission}:${level}`);
         }
     }
 });
 
 test('isValidPermission: wildcard level', () => {
     for (const permission of Object.keys(PERMISSIONS)) {
-        assert.equal(isValidPermission(`${permission}:*`), true, `${permission}:*`);
+        assert.equal(StaticCapabilities.isValidPermission(`${permission}:*`), true, `${permission}:*`);
     }
 });
 
 test('isValidPermission: no separator', () => {
-    assert.equal(isValidPermission('feature'), false);
-    assert.equal(isValidPermission(''), false);
+    assert.equal(StaticCapabilities.isValidPermission('feature'), false);
+    assert.equal(StaticCapabilities.isValidPermission(''), false);
 });
 
 test('isValidPermission: unknown permission', () => {
-    assert.equal(isValidPermission('unknown:read'), false);
-    assert.equal(isValidPermission('unknown:*'), false);
-    assert.equal(isValidPermission(':submit'), false);
+    assert.equal(StaticCapabilities.isValidPermission('unknown:read'), false);
+    assert.equal(StaticCapabilities.isValidPermission('unknown:*'), false);
+    assert.equal(StaticCapabilities.isValidPermission(':submit'), false);
 });
 
 test('isValidPermission: unknown level', () => {
-    assert.equal(isValidPermission('feature:read'), false);
-    assert.equal(isValidPermission('video:'), false);
-    assert.equal(isValidPermission('video:read:extra'), false);
+    assert.equal(StaticCapabilities.isValidPermission('feature:read'), false);
+    assert.equal(StaticCapabilities.isValidPermission('video:'), false);
+    assert.equal(StaticCapabilities.isValidPermission('video:read:extra'), false);
 });
 
 test('is: valid document', () => {
@@ -221,5 +221,53 @@ test('read', async (t) => {
             assert.ok(err instanceof Error && 'code' in err && err.code === 'EISDIR');
             return true;
         });
+    });
+});
+
+test('OUTGOING_TYPES', () => {
+    assert.deepEqual(OUTGOING_TYPES, {
+        feature: [],
+        event: ['create', 'update', 'delete'],
+        device: ['create', 'update', 'delete'],
+    });
+});
+
+test('isValidOutgoingType', () => {
+    for (const type of Object.keys(OUTGOING_TYPES)) {
+        assert.equal(StaticCapabilities.isValidOutgoingType(`${type}:*`), true, `${type}:*`);
+        for (const action of OUTGOING_TYPES[type]) {
+            assert.equal(StaticCapabilities.isValidOutgoingType(`${type}:${action}`), true, `${type}:${action}`);
+        }
+    }
+
+    assert.equal(StaticCapabilities.isValidOutgoingType('feature'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('feature:create'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('event:read'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('unknown:*'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType(''), false);
+});
+
+test('matchesOutgoingType & isSubscribedOutgoingType', () => {
+    assert.equal(StaticCapabilities.matchesOutgoingType('event:*', 'event:update'), true);
+    assert.equal(StaticCapabilities.matchesOutgoingType('event:update', 'event:update'), true);
+    assert.equal(StaticCapabilities.matchesOutgoingType('event:create', 'event:update'), false);
+    assert.equal(StaticCapabilities.matchesOutgoingType('event:*', 'device:update'), false);
+    assert.equal(StaticCapabilities.matchesOutgoingType('event', 'event:update'), false);
+
+    assert.equal(StaticCapabilities.isSubscribedOutgoingType(['feature:*', 'event:update'], 'event:update'), true);
+    assert.equal(StaticCapabilities.isSubscribedOutgoingType(['feature:*', 'event:update'], 'event:delete'), false);
+    assert.equal(StaticCapabilities.isSubscribedOutgoingType([], 'feature:*'), false);
+});
+
+test('validate: unknown outgoing type', () => {
+    const invalid = doc();
+    invalid.invocations.outgoing = { types: [{ resource: 'event:read', description: 'Nope' }] };
+
+    assert.equal(StaticCapabilities.is(invalid), false);
+    assert.throws(() => StaticCapabilities.validate(invalid), (err: unknown) => {
+        assert.ok(err instanceof Err);
+        assert.equal(err.status, 400);
+        assert.equal(err.message, 'Invalid Capabilities Document: Unknown Outgoing Types: event:read');
+        return true;
     });
 });
