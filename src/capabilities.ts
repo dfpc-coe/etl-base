@@ -21,7 +21,8 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     video: ['create', 'read', 'update', 'delete'],
     injector: ['create', 'read', 'update', 'delete'],
     event: ['create', 'read', 'update', 'delete'],
-    device: ['create', 'read', 'update', 'delete']
+    device: ['create', 'read', 'update', 'delete'],
+    search: ['read']
 };
 
 /**
@@ -35,7 +36,7 @@ export const PERMISSIONS: Record<string, Array<string>> = {
 export const OUTGOING_TYPES: Record<string, Array<string>> = {
     feature: [],
     event: ['create', 'update', 'delete'],
-    device: ['create', 'update', 'delete']
+    device: ['create', 'update', 'delete'],
     board: ['create', 'update', 'delete'],
 };
 

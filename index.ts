@@ -524,7 +524,7 @@ export default class TaskBase {
      * @returns A Layer Config Object
      */
     async setEphemeral(
-        ephem: Record<string, any>,
+        ephem: Record<string, unknown>,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<void> {
         if (!this.layer) this.layer = await this.fetchLayer();

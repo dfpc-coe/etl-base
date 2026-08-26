@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.15.0 - 2026-08-26
+
+- :rocket: Add the `search:read` permission
+
 ### v10.14.0 - 2026-08-25
 
 - :tada: Add `OUTGOING_TYPES` and `StaticCapabilities.isValidOutgoingType/matchesOutgoingType/isSubscribedOutgoingType` and validate `invocations.outgoing.types`

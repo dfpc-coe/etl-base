@@ -72,6 +72,7 @@ test('PERMISSIONS', () => {
         injector: ['create', 'read', 'update', 'delete'],
         event: ['create', 'read', 'update', 'delete'],
         device: ['create', 'read', 'update', 'delete'],
+        search: ['read'],
     });
 });
 
@@ -229,6 +230,7 @@ test('OUTGOING_TYPES', () => {
         feature: [],
         event: ['create', 'update', 'delete'],
         device: ['create', 'update', 'delete'],
+        board: ['create', 'update', 'delete'],
     });
 });
 
