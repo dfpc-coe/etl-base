@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.16.0 - 2026-09-01
+
+- :tada: Add suppport for named schemas & the /submit API
+
 ### v10.15.0 - 2026-08-26
 
 - :rocket: Add the `search:read` permission

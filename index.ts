@@ -13,7 +13,7 @@ import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
 import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
-import type { Event, TaskBaseSettings, TaskLayerAlert, } from './src/types.js';
+import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecords } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
 
@@ -326,12 +326,16 @@ export default class TaskBase {
      * Output: Does not provide a defined schema. Providing a schema allow the User to perform
      * mapping and styling operations
      *
-     * @returns A JSON Schema Object
+     * Tasks that submit multiple record shapes via submit({ schema, items }) can
+     * instead return an array of named Output schemas - one `{ id, schema }`
+     * entry per shape, with the id referenced by the submission's `schema` field
+     *
+     * @returns A JSON Schema Object or an array of named JSON Schema Objects
      */
     async schema(
         type: SchemaType = SchemaType.Input,
         flow: DataFlowType = DataFlowType.Incoming
-    ): Promise<TSchema> {
+    ): Promise<TSchema | Array<NamedSchema>> {
         if (flow === DataFlowType.Incoming) {
             if (type === SchemaType.Input) {
                 return Type.Object({
@@ -581,12 +585,19 @@ export default class TaskBase {
     }
 
     /**
-     * Submit a GeoJSON Feature collection to be submitted to the TAK Server as CoTs
+     * Submit a GeoJSON Feature Collection to be submitted to the TAK Server as CoTs
+     * or a `{ schema, items }` record submission to be mapped to CoT Features,
+     * Core Events or Core Devices by the Layer's configured Maps
+     *
+     * A Feature Collection is posted to the /layer/:layer/cot API while a record
+     * submission is posted to the /layer/:layer/submit API. The submission's
+     * `schema` names which of the task's Output schemas the items conform to.
+     * `opts.archive` only applies to Feature Collection submissions
      *
      * @returns A boolean representing the success state
      */
     async submit(
-        fc: Static<typeof Feature.InputFeatureCollection>,
+        input: Static<typeof Feature.InputFeatureCollection> | SubmitRecords,
         opts?: {
             verbose?: boolean,
             archive?: boolean
@@ -600,8 +611,24 @@ export default class TaskBase {
 
         if (!this.layer.incoming) throw new Error('Cannot call submit() without incoming config');
 
+        if (Array.isArray(input)) {
+            throw new Error('Record submissions must be provided as { schema: string, items: [...] }');
+        }
+
+        if ('items' in input) {
+            if (typeof input.schema !== 'string' || input.schema.length === 0) {
+                throw new Error('Record submissions must provide a non-empty schema string');
+            } else if (!Array.isArray(input.items)) {
+                throw new Error('Record submissions must provide an items array');
+            }
+
+            return await this.submitRecords(input, opts);
+        }
+
+        const fc = input;
+
         let schema = await this.schema(SchemaType.Output, DataFlowType.Incoming);
-        if (!schema || !schema.properties) schema = Type.Object({});
+        if (!schema || Array.isArray(schema) || !schema.properties) schema = Type.Object({});
 
         const fields = Object.keys(schema.properties).filter((k) => {
             if (!schema.properties[k]) return false;
@@ -645,7 +672,10 @@ export default class TaskBase {
             if (fc.features.length) {
                 tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(fc.features.pop()))
 
-                if (curr + tmpbuff.byteLength <= this.etl.config.submit_size) {
+                // A Feature that alone exceeds submit_size is posted by itself -
+                // rejecting the first Feature of a batch would post an empty batch
+                // and corrupt the comma-stripping restart below
+                if (curr + tmpbuff.byteLength <= this.etl.config.submit_size || buffs.length === 1) {
                     curr = curr + tmpbuff.byteLength;
                     buffs.push(tmpbuff);
                     tmpbuff = null;
@@ -693,12 +723,101 @@ export default class TaskBase {
 
         return true;
     }
+
+    /**
+     * Submit a `{ schema, items }` record submission to the /layer/:layer/submit
+     * API where the items are mapped to CoT Features, Core Events or Core
+     * Devices by the Layer's configured Maps - usually called via submit()
+     *
+     * Submissions over `submit_size` are split into multiple posts, each
+     * carrying the same `schema`
+     *
+     * @returns A boolean representing the success state
+     */
+    protected async submitRecords(
+        input: SubmitRecords,
+        opts?: {
+            verbose?: boolean
+        }
+    ): Promise<boolean> {
+        if (!opts) opts = {};
+        if (opts.verbose === undefined) opts.verbose = false;
+
+        const records = input.items.slice();
+
+        console.log(`ok - posting ${records.length} ${input.schema} records`);
+
+        if (process.env.DEBUG) for (const record of records) console.error(JSON.stringify(record));
+
+        const pre = Buffer.from(`{"schema":${JSON.stringify(input.schema)},"items":[`);
+        const post = Buffer.from(']}');
+        let buffs: Array<Buffer<ArrayBufferLike>> = [pre];
+        let submit = false;
+        let curr = pre.byteLength + post.byteLength;
+
+        do {
+            let tmpbuff: null | Buffer = null;
+            if (records.length) {
+                tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(records.pop()))
+
+                // A record that alone exceeds submit_size is posted by itself -
+                // rejecting the first record of a batch would post an empty batch
+                // and corrupt the comma-stripping restart below
+                if (curr + tmpbuff.byteLength <= this.etl.config.submit_size || buffs.length === 1) {
+                    curr = curr + tmpbuff.byteLength;
+                    buffs.push(tmpbuff);
+                    tmpbuff = null;
+                } else {
+                    submit = true;
+                }
+            } else {
+                submit = true;
+            }
+
+            if (submit) {
+                submit = false;
+
+                const url = new URL(`/api/layer/${this.etl.layer}/submit`, this.etl.api);
+
+                console.log(`ok - POST ${url}`);
+
+                buffs.push(post);
+
+                const postreq = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.etl.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: Buffer.concat(buffs),
+                    safeUrlAllow: [this.etl.api]
+                });
+
+                if (!postreq.ok) {
+                    if (opts.verbose) console.error(await postreq.text());
+                    throw new Error('Failed to post records to ETL');
+                }
+
+                if (tmpbuff) {
+                    buffs = [pre, tmpbuff.slice(1)]; // Remove the preceding comma if starting the array over
+                    curr = pre.byteLength + post.byteLength + tmpbuff.byteLength;
+                } else {
+                    buffs = [pre];
+                    curr = pre.byteLength + post.byteLength;
+                }
+            }
+        } while (records.length || buffs.length > 1);
+
+        return true;
+    }
 }
 
 export type {
     Event,
     TaskBaseSettings,
     TaskLayerAlert,
+    NamedSchema,
+    SubmitRecords,
 }
 
 export {

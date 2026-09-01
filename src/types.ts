@@ -26,6 +26,26 @@ export enum SchemaType {
     Output = 'Output'
 }
 
+/**
+ * A single named Output schema - tasks that submit multiple record shapes
+ * return one entry per shape from schema(), with the id referenced by the
+ * `schema` field of record submissions
+ */
+export interface NamedSchema {
+    id: string;
+    schema: TSchema;
+}
+
+/**
+ * An arbitrary record submission posted to the /layer/:layer/submit API where
+ * the items are mapped to CoT Features, Core Events or Core Devices by the
+ * Layer's configured Maps
+ */
+export interface SubmitRecords {
+    schema: string;
+    items: Array<Record<string, unknown>>;
+}
+
 export interface TaskBaseSettings {
     api: string;
     layer: string;
