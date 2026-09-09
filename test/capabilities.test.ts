@@ -73,6 +73,7 @@ test('PERMISSIONS', () => {
         event: ['create', 'read', 'update', 'delete'],
         device: ['create', 'read', 'update', 'delete'],
         search: ['read'],
+        group: ['read', 'update'],
     });
 });
 

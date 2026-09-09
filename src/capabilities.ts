@@ -22,7 +22,8 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     injector: ['create', 'read', 'update', 'delete'],
     event: ['create', 'read', 'update', 'delete'],
     device: ['create', 'read', 'update', 'delete'],
-    search: ['read']
+    search: ['read'],
+    group: ['read', 'update']
 };
 
 /**

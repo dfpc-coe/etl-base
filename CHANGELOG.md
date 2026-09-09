@@ -10,6 +10,12 @@
 
 ## Version History
 
+### Pending Release
+
+### v10.17.0 - 2026-09-09
+
+- :tada: Add the `group` permission with `read` & `update` levels for the `/api/marti/group` API
+
 ### v10.16.0 - 2026-09-01
 
 - :tada: Add suppport for named schemas & the /submit API
