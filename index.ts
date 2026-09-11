@@ -11,7 +11,7 @@ import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
-import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecords } from './src/types.js';
 
@@ -832,6 +832,9 @@ export {
     OutgoingFeatureMessage,
     OutgoingEventMessage,
     OutgoingDeviceMessage,
+    OutgoingBoardMessage,
+    OutgoingBoardColumnMessage,
+    OutgoingBoardEventMessage,
     Feature,
     fetch,
 };

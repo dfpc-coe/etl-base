@@ -51,6 +51,32 @@ test('outgoingMessages: event & device records', () => {
     assert.equal(messages[1].action, OutgoingAction.Delete);
 });
 
+test('outgoingMessages: board, board:column & board:event records', () => {
+    const messages = TaskBase.outgoingMessages(sqs([{
+        type: 'board', action: 'create', channels: [7], data: { id: 'board', name: 'Events' },
+    }, {
+        type: 'board:column', action: 'update', channels: [7], data: { id: 'column', board: 'board' },
+    }, {
+        type: 'board:event', action: 'delete', channels: [7], data: { id: 'placement', column: 'column' },
+    }]));
+
+    assert.equal(messages.length, 3);
+    assert.equal(messages[0].type, OutgoingMessageType.Board);
+    if (messages[0].type !== OutgoingMessageType.Board) throw new Error('unreachable');
+    assert.equal(messages[0].action, OutgoingAction.Create);
+    assert.equal(messages[0].data.name, 'Events');
+
+    assert.equal(messages[1].type, OutgoingMessageType.BoardColumn);
+    if (messages[1].type !== OutgoingMessageType.BoardColumn) throw new Error('unreachable');
+    assert.equal(messages[1].action, OutgoingAction.Update);
+    assert.equal(messages[1].data.board, 'board');
+
+    assert.equal(messages[2].type, OutgoingMessageType.BoardEvent);
+    if (messages[2].type !== OutgoingMessageType.BoardEvent) throw new Error('unreachable');
+    assert.equal(messages[2].action, OutgoingAction.Delete);
+    assert.deepEqual(messages[2].channels, [7]);
+});
+
 test('outgoingMessages: invalid record', () => {
     assert.throws(() => TaskBase.outgoingMessages(sqs([{ type: 'event', action: 'read', channels: [], data: {} }])));
     assert.throws(() => TaskBase.outgoingMessages(sqs([{ type: 'unknown' }])));

@@ -12,6 +12,11 @@
 
 ### Pending Release
 
+### v10.18.0 - 2026-09-10
+
+- :tada: Add the `board:column` & `board:event` Outgoing types alongside `board`, with `OutgoingBoardMessage`, `OutgoingBoardColumnMessage` & `OutgoingBoardEventMessage` and the matching `OutgoingMessageType` members
+- :rocket: Outgoing type strings are now split on their last `:` so a resource may be namespaced - a `<resource>:*` wildcard only covers its own resource
+
 ### v10.17.0 - 2026-09-09
 
 - :tada: Add the `group` permission with `read` & `update` levels for the `/api/marti/group` API

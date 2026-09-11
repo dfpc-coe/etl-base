@@ -46,11 +46,17 @@ accepts under `invocations.outgoing.types` in its `capabilities.json`. A type is
 expressed as `<resource>:<action>` and must be one of the `OUTGOING_TYPES` exported
 by this package (see `StaticCapabilities.isValidOutgoingType()` & `StaticCapabilities.isSubscribedOutgoingType()`) (`<resource>:*` covers every action):
 
-| Resource  | Actions                    | Delivered as                                      |
-| --------- | -------------------------- | ------------------------------------------------- |
-| `feature` | `*`                        | Streaming CoT Features from the Layer Connection  |
-| `event`   | `create`, `update`, `delete` | CoreEvents sharing a Channel with the Connection |
-| `device`  | `create`, `update`, `delete` | CoreDevices sharing a Channel with the Connection |
+| Resource       | Actions                      | Delivered as                                                          |
+| -------------- | ---------------------------- | --------------------------------------------------------------------- |
+| `feature`      | `*`                          | Streaming CoT Features from the Layer Connection                      |
+| `event`        | `create`, `update`, `delete` | CoreEvents sharing a Channel with the Connection                      |
+| `device`       | `create`, `update`, `delete` | CoreDevices sharing a Channel with the Connection                     |
+| `board`        | `create`, `update`, `delete` | CoreEvent Boards of a Channel the Connection has active               |
+| `board:column` | `create`, `update`, `delete` | Columns of those Boards                                               |
+| `board:event`  | `create`, `update`, `delete` | CoreEvents placed on, moved between Columns of, or removed from those Boards |
+
+The action is the segment after the last `:` and a wildcard only covers its own
+resource - `board:*` does not deliver `board:column:*` or `board:event:*` messages.
 
 When an Outgoing Layer is created in CloudTAK it subscribes to a subset of the
 declared types (`layer.outgoing.subscriptions`) and only receives SQS records for

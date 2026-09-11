@@ -232,6 +232,8 @@ test('OUTGOING_TYPES', () => {
         event: ['create', 'update', 'delete'],
         device: ['create', 'update', 'delete'],
         board: ['create', 'update', 'delete'],
+        'board:column': ['create', 'update', 'delete'],
+        'board:event': ['create', 'update', 'delete'],
     });
 });
 
@@ -248,6 +250,9 @@ test('isValidOutgoingType', () => {
     assert.equal(StaticCapabilities.isValidOutgoingType('event:read'), false);
     assert.equal(StaticCapabilities.isValidOutgoingType('unknown:*'), false);
     assert.equal(StaticCapabilities.isValidOutgoingType(''), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('board:column'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('board:column:read'), false);
+    assert.equal(StaticCapabilities.isValidOutgoingType('board:unknown:*'), false);
 });
 
 test('matchesOutgoingType & isSubscribedOutgoingType', () => {
@@ -256,6 +261,13 @@ test('matchesOutgoingType & isSubscribedOutgoingType', () => {
     assert.equal(StaticCapabilities.matchesOutgoingType('event:create', 'event:update'), false);
     assert.equal(StaticCapabilities.matchesOutgoingType('event:*', 'device:update'), false);
     assert.equal(StaticCapabilities.matchesOutgoingType('event', 'event:update'), false);
+
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:*', 'board:update'), true);
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:column:*', 'board:column:update'), true);
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:event:delete', 'board:event:delete'), true);
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:*', 'board:column:update'), false);
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:column:*', 'board:update'), false);
+    assert.equal(StaticCapabilities.matchesOutgoingType('board:column:*', 'board:event:create'), false);
 
     assert.equal(StaticCapabilities.isSubscribedOutgoingType(['feature:*', 'event:update'], 'event:update'), true);
     assert.equal(StaticCapabilities.isSubscribedOutgoingType(['feature:*', 'event:update'], 'event:delete'), false);

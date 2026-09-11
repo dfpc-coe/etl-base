@@ -187,7 +187,10 @@ export const TaskLayer = Type.Object({
 export enum OutgoingMessageType {
     Feature = 'feature',
     Event = 'event',
-    Device = 'device'
+    Device = 'device',
+    Board = 'board',
+    BoardColumn = 'board:column',
+    BoardEvent = 'board:event'
 }
 
 export enum OutgoingAction {
@@ -223,8 +226,41 @@ export const OutgoingDeviceMessage = Type.Object({
     data: Type.Record(Type.String(), Type.Unknown())
 });
 
+/** A CoreEvent Board lifecycle change delivered to an Outgoing Layer subscribed to `board:<action>` */
+export const OutgoingBoardMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.Board),
+    action: Type.Enum(OutgoingAction),
+    channels: Type.Array(Type.Integer(), {
+        description: 'Channels shared by the Board and the Layer Connection that caused delivery'
+    }),
+    data: Type.Record(Type.String(), Type.Unknown())
+});
+
+/** A Board Column lifecycle change delivered to an Outgoing Layer subscribed to `board:column:<action>` */
+export const OutgoingBoardColumnMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.BoardColumn),
+    action: Type.Enum(OutgoingAction),
+    channels: Type.Array(Type.Integer(), {
+        description: 'Channels shared by the Board the Column belongs to and the Layer Connection that caused delivery'
+    }),
+    data: Type.Record(Type.String(), Type.Unknown())
+});
+
+/** A CoreEvent placement on a Board being created, moved or removed, delivered to an Outgoing Layer subscribed to `board:event:<action>` */
+export const OutgoingBoardEventMessage = Type.Object({
+    type: Type.Literal(OutgoingMessageType.BoardEvent),
+    action: Type.Enum(OutgoingAction),
+    channels: Type.Array(Type.Integer(), {
+        description: 'Channels shared by the Board the Event is placed on and the Layer Connection that caused delivery'
+    }),
+    data: Type.Record(Type.String(), Type.Unknown())
+});
+
 export const OutgoingMessage = Type.Union([
     OutgoingFeatureMessage,
     OutgoingEventMessage,
-    OutgoingDeviceMessage
+    OutgoingDeviceMessage,
+    OutgoingBoardMessage,
+    OutgoingBoardColumnMessage,
+    OutgoingBoardEventMessage
 ]);

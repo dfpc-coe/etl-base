@@ -31,15 +31,31 @@ export const PERMISSIONS: Record<string, Array<string>> = {
  * which they can be subscribed.
  *
  * A type is expressed as `<resource>:<action>` - ie `event:update` - where
- * `<resource>:*` subscribes to every action of the resource. `feature` is the
- * streaming CoT flow and only supports the wildcard
+ * `<resource>:*` subscribes to every action of the resource. A resource may
+ * itself contain `:` - ie `board:column:create` - the action is always the
+ * segment after the last `:` and a wildcard only covers its own resource, so
+ * `board:*` does not cover `board:column:create`. `feature` is the streaming
+ * CoT flow and only supports the wildcard
  */
 export const OUTGOING_TYPES: Record<string, Array<string>> = {
     feature: [],
     event: ['create', 'update', 'delete'],
     device: ['create', 'update', 'delete'],
     board: ['create', 'update', 'delete'],
+    'board:column': ['create', 'update', 'delete'],
+    'board:event': ['create', 'update', 'delete'],
 };
+
+/** Split a `<resource>:<action>` string on its last `:` - null when it has none */
+function splitOutgoingType(resource: string): { type: string; action: string } | null {
+    const separator = resource.lastIndexOf(':');
+    if (separator === -1) return null;
+
+    return {
+        type: resource.slice(0, separator),
+        action: resource.slice(separator + 1),
+    };
+}
 
 export const CapabilitiesPermissionSchema = Type.Object({
     resource: Type.String({
@@ -152,16 +168,13 @@ export default class StaticCapabilities {
      * every resource type
      */
     static isValidOutgoingType(resource: string): boolean {
-        const separator = resource.indexOf(':');
-        if (separator === -1) return false;
+        const split = splitOutgoingType(resource);
+        if (!split) return false;
 
-        const type = resource.slice(0, separator);
-        const action = resource.slice(separator + 1);
-
-        const actions = OUTGOING_TYPES[type];
+        const actions = OUTGOING_TYPES[split.type];
         if (!actions) return false;
 
-        return action === '*' || actions.includes(action);
+        return split.action === '*' || actions.includes(split.action);
     }
 
     /**
@@ -171,10 +184,11 @@ export default class StaticCapabilities {
     static matchesOutgoingType(declared: string, resource: string): boolean {
         if (declared === resource) return true;
 
-        const separator = declared.indexOf(':');
-        if (separator === -1 || declared.slice(separator + 1) !== '*') return false;
+        const wanted = splitOutgoingType(declared);
+        const actual = splitOutgoingType(resource);
+        if (!wanted || !actual || wanted.action !== '*') return false;
 
-        return resource.startsWith(declared.slice(0, separator + 1));
+        return wanted.type === actual.type;
     }
 
     /**
