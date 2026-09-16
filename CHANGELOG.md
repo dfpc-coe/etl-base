@@ -12,6 +12,8 @@
 
 ### Pending Release
 
+### v10.19.0 - 2026-09-16
+
 - :tada: Add the optional `invocations.incoming.email` entry to the static Capabilities document so a task can declare incoming email as a data source
 
 ### v10.18.0 - 2026-09-10
