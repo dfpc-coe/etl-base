@@ -86,6 +86,15 @@ export const CapabilitiesWebhookInvocationSchema = Type.Object({
     }),
 });
 
+export const CapabilitiesEmailInvocationSchema = Type.Object({
+    description: Type.String({
+        description: 'Human readable explanation of what the task does with incoming email',
+    }),
+    default: Type.Object({
+        enabled: Type.Boolean(),
+    }),
+});
+
 export const CapabilitiesOutgoingTypeSchema = Type.Object({
     resource: Type.String({
         description: 'The resource type the task accepts - ie feature:*',
@@ -118,6 +127,7 @@ export const StaticCapabilitiesSchema = Type.Object({
         incoming: Type.Optional(Type.Object({
             schedule: Type.Optional(CapabilitiesScheduleInvocationSchema),
             webhook: Type.Optional(CapabilitiesWebhookInvocationSchema),
+            email: Type.Optional(CapabilitiesEmailInvocationSchema),
         })),
         outgoing: Type.Optional(Type.Object({
             types: Type.Array(CapabilitiesOutgoingTypeSchema),

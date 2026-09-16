@@ -45,6 +45,12 @@ function doc(): StaticCapabilitiesDocument {
                         enabled: false,
                     },
                 },
+                email: {
+                    description: 'Accept upstream email',
+                    default: {
+                        enabled: false,
+                    },
+                },
             },
             outgoing: {
                 types: [{
@@ -133,6 +139,28 @@ test('validate: valid document', () => {
     const input = doc();
 
     assert.equal(StaticCapabilities.validate(input), input);
+});
+
+test('validate: email invocation', () => {
+    const input = doc();
+    delete input.invocations.incoming?.email;
+    assert.equal(StaticCapabilities.validate(input), input);
+
+    input.invocations.incoming!.email = {
+        description: 'Accept upstream email',
+        default: { enabled: true },
+    };
+    assert.equal(StaticCapabilities.validate(input), input);
+
+    const invalid = doc() as { invocations: { incoming: { email: unknown } } };
+    invalid.invocations.incoming.email = { description: 'Accept upstream email' };
+    assert.equal(StaticCapabilities.is(invalid), false);
+    assert.throws(() => StaticCapabilities.validate(invalid), (err: unknown) => {
+        assert.ok(err instanceof Err);
+        assert.equal(err.status, 400);
+        assert.match(err.message, /email\/default/);
+        return true;
+    });
 });
 
 test('validate: no permissions requested', () => {
