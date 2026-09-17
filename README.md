@@ -135,6 +135,21 @@ export default class Task extends ETL {
                 }
             }]
         });
+
+        // A FeatureCollection with a `schema` is posted to the Connection submit API
+        // where CloudTAK maps its Features by the Layer's Field Mapping for that schema
+        // Features without a geometry are accepted here
+        await this.submit({
+            "type": "FeatureCollection",
+            "schema": "device",
+            "features": [{
+                "id": "device-1",
+                "type": "Feature",
+                "properties": {
+                    callsign: environment.CallSign
+                }
+            }]
+        });
     }
 }
 

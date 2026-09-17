@@ -12,6 +12,14 @@
 
 ### Pending Release
 
+- :tada: `submit()` accepts a FeatureCollection carrying a `schema` naming one of the task's Output schemas - it is posted to `POST /api/connection/:connection/submit` and the geometry of its Features may be omitted or `null`
+- :tada: Export the `SubmitFeature` & `SubmitFeatureCollection` TypeBox schemas describing that submission
+- :rocket: Every post of a batched submission carries the ids of all Features in the submission as `uids` so the API can diff against prior state
+- :rocket: FeatureCollections without a `schema` are still posted to the legacy `POST /api/layer/:layer/cot` API
+- :rocket: `submit()` no longer mutates the submitted `features` array
+- :pencil2: Deprecate the `{ schema, items }` record submission, `submitRecords()` and the `SubmitRecords` type - they still post to `POST /api/layer/:layer/submit` unchanged but CloudTAK never implemented that API
+- :bug: `uids` no longer carries `null` entries for Features without an `id` - those entries failed validation on the CloudTAK CoT API
+
 ### v10.19.0 - 2026-09-16
 
 - :tada: Add the optional `invocations.incoming.email` entry to the static Capabilities document so a task can declare incoming email as a data source

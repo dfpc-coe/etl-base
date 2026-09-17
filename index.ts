@@ -11,7 +11,7 @@ import { Feature } from '@tak-ps/node-cot'
 import jwt from 'jsonwebtoken';
 import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
-import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage, SubmitFeature, SubmitFeatureCollection } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecords } from './src/types.js';
 
@@ -326,9 +326,9 @@ export default class TaskBase {
      * Output: Does not provide a defined schema. Providing a schema allow the User to perform
      * mapping and styling operations
      *
-     * Tasks that submit multiple record shapes via submit({ schema, items }) can
-     * instead return an array of named Output schemas - one `{ id, schema }`
-     * entry per shape, with the id referenced by the submission's `schema` field
+     * Tasks that submit multiple Feature shapes can instead return an array of
+     * named Output schemas - one `{ id, schema }` entry per shape, with the id
+     * referenced by the `schema` field of the submitted FeatureCollection
      *
      * @returns A JSON Schema Object or an array of named JSON Schema Objects
      */
@@ -585,19 +585,26 @@ export default class TaskBase {
     }
 
     /**
-     * Submit a GeoJSON Feature Collection to be submitted to the TAK Server as CoTs
-     * or a `{ schema, items }` record submission to be mapped to CoT Features,
-     * Core Events or Core Devices by the Layer's configured Maps
+     * Submit a GeoJSON Feature Collection to CloudTAK
      *
-     * A Feature Collection is posted to the /layer/:layer/cot API while a record
-     * submission is posted to the /layer/:layer/submit API. The submission's
-     * `schema` names which of the task's Output schemas the items conform to.
-     * `opts.archive` only applies to Feature Collection submissions
+     * A FeatureCollection carrying a `schema` is posted to the
+     * /connection/:connection/submit API where its Features are mapped to CoT
+     * Features, Core Events or Core Devices by the Layer's Maps for that named
+     * Output schema - the geometry of those Features may be omitted or null
+     *
+     * A FeatureCollection without a `schema` is posted to the legacy
+     * /layer/:layer/cot API and every Feature is delivered as CoT
+     *
+     * A deprecated `{ schema, items }` record submission is still posted to
+     * the /layer/:layer/submit API via submitRecords()
+     *
+     * Submissions over `submit_size` are split into multiple posts, each
+     * carrying the same `schema` and the ids of every Feature in the submission
      *
      * @returns A boolean representing the success state
      */
     async submit(
-        input: Static<typeof Feature.InputFeatureCollection> | SubmitRecords,
+        input: Static<typeof Feature.InputFeatureCollection> | Static<typeof SubmitFeatureCollection> | SubmitRecords,
         opts?: {
             verbose?: boolean,
             archive?: boolean
@@ -611,8 +618,8 @@ export default class TaskBase {
 
         if (!this.layer.incoming) throw new Error('Cannot call submit() without incoming config');
 
-        if (Array.isArray(input)) {
-            throw new Error('Record submissions must be provided as { schema: string, items: [...] }');
+        if (!input || Array.isArray(input)) {
+            throw new Error('Submissions must be provided as a GeoJSON FeatureCollection');
         }
 
         if ('items' in input) {
@@ -625,112 +632,84 @@ export default class TaskBase {
             return await this.submitRecords(input, opts);
         }
 
-        const fc = input;
-
-        let schema = await this.schema(SchemaType.Output, DataFlowType.Incoming);
-        if (!schema || Array.isArray(schema) || !schema.properties) schema = Type.Object({});
-
-        const fields = Object.keys(schema.properties).filter((k) => {
-            if (!schema.properties[k]) return false;
-            return schema.properties[k].format === 'date-time';
-        });
-
-        // Postprocessing Functions have been defined
-        if (Object.keys(this.layer.incoming.config).length) {
-            const cnf = this.layer.incoming.config;
-            if (cnf.timezone && cnf.timezone.timezone && cnf.timezone.timezone.toLowerCase() !== 'no timezone') {
-                for (const feat of fc.features) {
-                    for (const field of fields) {
-                        if (!feat.properties.metadata || !feat.properties.metadata[field]) continue;
-                        const d = new Date(String(feat.properties.metadata[field]));
-                        const parts = new Intl.DateTimeFormat('en-CA', {
-                            timeZone: cnf.timezone.timezone,
-                            year: 'numeric', month: '2-digit', day: '2-digit',
-                            hour: '2-digit', minute: '2-digit', hour12: false
-                        }).formatToParts(d);
-                        const p = Object.fromEntries(parts.map(p => [p.type, p.value]));
-                        feat.properties.metadata[field] = `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute} (${cnf.timezone.timezone})`;
-                    }
-                }
-            }
+        if (!Array.isArray(input.features)) {
+            throw new Error('Submissions must be provided as a GeoJSON FeatureCollection');
         }
 
-        console.log(`ok - posting ${fc.features.length} features`);
+        await this.localizeTimestamps(input.features);
 
-        if (process.env.DEBUG) for (const feat of fc.features) console.error(JSON.stringify(feat));
-
-        // Store feats as buffers
-        const uids = JSON.stringify(fc.features.map((f) => { return f.id; }));
-        const pre = Buffer.from(`{"type":"FeatureCollection", "uids": ${uids}, "features":[`);
-        const post = Buffer.from(']}')
-        let buffs: Array<Buffer<ArrayBufferLike>> = [pre];
-        let submit = false;
-        let curr = pre.byteLength + post.byteLength;
-
-        do {
-            let tmpbuff: null | Buffer = null;
-            if (fc.features.length) {
-                tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(fc.features.pop()))
-
-                // A Feature that alone exceeds submit_size is posted by itself -
-                // rejecting the first Feature of a batch would post an empty batch
-                // and corrupt the comma-stripping restart below
-                if (curr + tmpbuff.byteLength <= this.etl.config.submit_size || buffs.length === 1) {
-                    curr = curr + tmpbuff.byteLength;
-                    buffs.push(tmpbuff);
-                    tmpbuff = null;
-                } else {
-                    submit = true;
-                }
-            } else {
-                submit = true;
+        if ('schema' in input && input.schema !== undefined) {
+            if (typeof input.schema !== 'string' || input.schema.length === 0) {
+                throw new Error('Schema submissions must provide a non-empty schema string');
             }
 
-            if (submit) {
-                submit = false;
+            return await this.submitSchema(input, opts);
+        }
 
-                const url = new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api);
-                url.searchParams.append('archive', String(opts.archive));
+        console.log(`ok - posting ${input.features.length} features`);
 
-                console.log(`ok - POST ${url}`);
+        if (process.env.DEBUG) for (const feat of input.features) console.error(JSON.stringify(feat));
 
-                buffs.push(post);
+        const url = new URL(`/api/layer/${this.etl.layer}/cot`, this.etl.api);
+        url.searchParams.append('archive', String(opts.archive));
 
-                const postreq = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.etl.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: Buffer.concat(buffs),
-                    safeUrlAllow: [this.etl.api]
-                });
-
-                if (!postreq.ok) {
-                    if (opts.verbose) console.error(await postreq.text());
-                    throw new Error('Failed to post layer to ETL');
-                }
-
-                if (tmpbuff) {
-                    buffs = [pre, tmpbuff.slice(1)]; // Remove the preceding comma if staring the FC over
-                    curr = pre.byteLength + post.byteLength + tmpbuff.byteLength;
-                } else {
-                    buffs = [pre];
-                    curr = pre.byteLength + post.byteLength;
-                }
-            }
-        } while (fc.features.length || buffs.length > 1);
+        await this.postBatched({
+            url,
+            pre: Buffer.from(`{"type":"FeatureCollection", "uids": ${JSON.stringify(this.featureIds(input.features))}, "features":[`),
+            post: Buffer.from(']}'),
+            items: input.features,
+            error: 'Failed to post layer to ETL',
+            verbose: opts.verbose
+        });
 
         return true;
     }
 
     /**
-     * Submit a `{ schema, items }` record submission to the /layer/:layer/submit
-     * API where the items are mapped to CoT Features, Core Events or Core
-     * Devices by the Layer's configured Maps - usually called via submit()
+     * Post a `schema` FeatureCollection to the /connection/:connection/submit
+     * API of the Connection the Layer belongs to - usually called via submit()
      *
-     * Submissions over `submit_size` are split into multiple posts, each
-     * carrying the same `schema`
+     * @returns A boolean representing the success state
+     */
+    protected async submitSchema(
+        input: Static<typeof SubmitFeatureCollection>,
+        opts?: {
+            verbose?: boolean,
+            archive?: boolean
+        }
+    ): Promise<boolean> {
+        if (!opts) opts = {};
+        if (opts.verbose === undefined) opts.verbose = false;
+        if (opts.archive === undefined) opts.archive = true;
+
+        if (!this.layer) this.layer = await this.fetchLayer();
+
+        if (this.layer.connection === null || this.layer.connection === undefined) {
+            throw new Error('Cannot submit a schema FeatureCollection - Layer is not attached to a Connection');
+        }
+
+        console.log(`ok - posting ${input.features.length} ${input.schema} features`);
+
+        if (process.env.DEBUG) for (const feat of input.features) console.error(JSON.stringify(feat));
+
+        const url = new URL(`/api/connection/${this.layer.connection}/submit`, this.etl.api);
+        url.searchParams.append('archive', String(opts.archive));
+
+        await this.postBatched({
+            url,
+            pre: Buffer.from(`{"type":"FeatureCollection","schema":${JSON.stringify(input.schema)},"uids":${JSON.stringify(this.featureIds(input.features))},"features":[`),
+            post: Buffer.from(']}'),
+            items: input.features,
+            error: 'Failed to post features to ETL',
+            verbose: opts.verbose
+        });
+
+        return true;
+    }
+
+    /**
+     * @deprecated Submit a FeatureCollection carrying a `schema` instead -
+     * CloudTAK never implemented the /layer/:layer/submit API this posts to
      *
      * @returns A boolean representing the success state
      */
@@ -743,26 +722,83 @@ export default class TaskBase {
         if (!opts) opts = {};
         if (opts.verbose === undefined) opts.verbose = false;
 
-        const records = input.items.slice();
+        console.log(`ok - posting ${input.items.length} ${input.schema} records`);
 
-        console.log(`ok - posting ${records.length} ${input.schema} records`);
+        if (process.env.DEBUG) for (const record of input.items) console.error(JSON.stringify(record));
 
-        if (process.env.DEBUG) for (const record of records) console.error(JSON.stringify(record));
+        await this.postBatched({
+            url: new URL(`/api/layer/${this.etl.layer}/submit`, this.etl.api),
+            pre: Buffer.from(`{"schema":${JSON.stringify(input.schema)},"items":[`),
+            post: Buffer.from(']}'),
+            items: input.items,
+            error: 'Failed to post records to ETL',
+            verbose: opts.verbose
+        });
 
-        const pre = Buffer.from(`{"schema":${JSON.stringify(input.schema)},"items":[`);
-        const post = Buffer.from(']}');
-        let buffs: Array<Buffer<ArrayBufferLike>> = [pre];
+        return true;
+    }
+
+    private featureIds(features: Array<Static<typeof SubmitFeature>>): Array<string> {
+        return features.map((f) => f.id).filter((id): id is string => typeof id === 'string');
+    }
+
+    /**
+     * Rewrite `date-time` metadata fields into the timezone configured on the
+     * Layer's incoming config, if any
+     */
+    private async localizeTimestamps(features: Array<Static<typeof SubmitFeature>>): Promise<void> {
+        if (!this.layer || !this.layer.incoming) return;
+
+        const cnf = this.layer.incoming.config;
+        if (!cnf || !cnf.timezone || !cnf.timezone.timezone || cnf.timezone.timezone.toLowerCase() === 'no timezone') return;
+
+        let schema = await this.schema(SchemaType.Output, DataFlowType.Incoming);
+        if (!schema || Array.isArray(schema) || !schema.properties) schema = Type.Object({});
+
+        const fields = Object.keys(schema.properties).filter((k) => {
+            if (!schema.properties[k]) return false;
+            return schema.properties[k].format === 'date-time';
+        });
+
+        for (const feat of features) {
+            for (const field of fields) {
+                if (!feat.properties.metadata || !feat.properties.metadata[field]) continue;
+                const d = new Date(String(feat.properties.metadata[field]));
+                const parts = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: cnf.timezone.timezone,
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).formatToParts(d);
+                const p = Object.fromEntries(parts.map(p => [p.type, p.value]));
+                feat.properties.metadata[field] = `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute} (${cnf.timezone.timezone})`;
+            }
+        }
+    }
+
+    /**
+     * Stream `items` into one or more posts, each wrapped by `pre` and `post`
+     * and kept under `submit_size` - an item that alone exceeds `submit_size`
+     * is posted by itself so a batch is never empty
+     */
+    private async postBatched(opts: {
+        url: URL;
+        pre: Buffer;
+        post: Buffer;
+        items: Array<unknown>;
+        error: string;
+        verbose: boolean;
+    }): Promise<void> {
+        const items = opts.items.slice();
+
+        let buffs: Array<Buffer<ArrayBufferLike>> = [opts.pre];
         let submit = false;
-        let curr = pre.byteLength + post.byteLength;
+        let curr = opts.pre.byteLength + opts.post.byteLength;
 
         do {
             let tmpbuff: null | Buffer = null;
-            if (records.length) {
-                tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(records.pop()))
+            if (items.length) {
+                tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(items.pop()))
 
-                // A record that alone exceeds submit_size is posted by itself -
-                // rejecting the first record of a batch would post an empty batch
-                // and corrupt the comma-stripping restart below
                 if (curr + tmpbuff.byteLength <= this.etl.config.submit_size || buffs.length === 1) {
                     curr = curr + tmpbuff.byteLength;
                     buffs.push(tmpbuff);
@@ -777,13 +813,11 @@ export default class TaskBase {
             if (submit) {
                 submit = false;
 
-                const url = new URL(`/api/layer/${this.etl.layer}/submit`, this.etl.api);
+                console.log(`ok - POST ${opts.url}`);
 
-                console.log(`ok - POST ${url}`);
+                buffs.push(opts.post);
 
-                buffs.push(post);
-
-                const postreq = await fetch(url, {
+                const postreq = await fetch(opts.url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.etl.token}`,
@@ -795,20 +829,18 @@ export default class TaskBase {
 
                 if (!postreq.ok) {
                     if (opts.verbose) console.error(await postreq.text());
-                    throw new Error('Failed to post records to ETL');
+                    throw new Error(opts.error);
                 }
 
                 if (tmpbuff) {
-                    buffs = [pre, tmpbuff.slice(1)]; // Remove the preceding comma if starting the array over
-                    curr = pre.byteLength + post.byteLength + tmpbuff.byteLength;
+                    buffs = [opts.pre, tmpbuff.slice(1)]; // Remove the preceding comma if starting the array over
+                    curr = opts.pre.byteLength + opts.post.byteLength + tmpbuff.byteLength;
                 } else {
-                    buffs = [pre];
-                    curr = pre.byteLength + post.byteLength;
+                    buffs = [opts.pre];
+                    curr = opts.pre.byteLength + opts.post.byteLength;
                 }
             }
-        } while (records.length || buffs.length > 1);
-
-        return true;
+        } while (items.length || buffs.length > 1);
     }
 }
 
@@ -835,6 +867,8 @@ export {
     OutgoingBoardMessage,
     OutgoingBoardColumnMessage,
     OutgoingBoardEventMessage,
+    SubmitFeature,
+    SubmitFeatureCollection,
     Feature,
     fetch,
 };

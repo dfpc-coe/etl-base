@@ -27,9 +27,9 @@ export enum SchemaType {
 }
 
 /**
- * A single named Output schema - tasks that submit multiple record shapes
+ * A single named Output schema - tasks that submit multiple Feature shapes
  * return one entry per shape from schema(), with the id referenced by the
- * `schema` field of record submissions
+ * `schema` field of the submitted FeatureCollection
  */
 export interface NamedSchema {
     id: string;
@@ -37,14 +37,39 @@ export interface NamedSchema {
 }
 
 /**
- * An arbitrary record submission posted to the /layer/:layer/submit API where
- * the items are mapped to CoT Features, Core Events or Core Devices by the
- * Layer's configured Maps
+ * @deprecated Submit a `SubmitFeatureCollection` carrying a `schema` instead -
+ * CloudTAK never implemented the /layer/:layer/submit API this targets
  */
 export interface SubmitRecords {
     schema: string;
     items: Array<Record<string, unknown>>;
 }
+
+/**
+ * A GeoJSON-like Feature whose geometry may be omitted or null - Features
+ * without a geometry can be mapped to Core Devices but never to CoT
+ */
+export const SubmitFeature = Type.Object({
+    id: Type.Optional(Type.String()),
+    type: Type.Literal('Feature'),
+    path: Type.Optional(Type.String()),
+    properties: Feature.InputProperties,
+    geometry: Type.Optional(Type.Union([Type.Null(), Feature.Geometry])),
+});
+
+/**
+ * A FeatureCollection posted to the /connection/:connection/submit API where
+ * the Features are mapped by the Layer's Maps for the named Output `schema`
+ *
+ * `uids` carries the id of every Feature in the full submission, even when the
+ * submission is split across posts, so the API can diff against prior state
+ */
+export const SubmitFeatureCollection = Type.Object({
+    type: Type.Literal('FeatureCollection'),
+    schema: Type.String({ minLength: 1 }),
+    uids: Type.Optional(Type.Array(Type.String())),
+    features: Type.Array(SubmitFeature),
+});
 
 export interface TaskBaseSettings {
     api: string;

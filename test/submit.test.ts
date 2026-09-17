@@ -5,7 +5,7 @@ import type { AddressInfo } from 'node:net';
 import { Type } from '@sinclair/typebox';
 import type { Static, TSchema } from '@sinclair/typebox';
 import TaskBase, { SchemaType, DataFlowType } from '../index.js';
-import type { NamedSchema, SubmitRecords } from '../index.js';
+import type { NamedSchema, SubmitFeatureCollection, SubmitRecords } from '../index.js';
 import { TaskLayer } from '../src/types.js';
 
 type CapturedRequest = {
@@ -14,6 +14,8 @@ type CapturedRequest = {
     auth: string | undefined;
     body: unknown;
 };
+
+type SubmitBody = Static<typeof SubmitFeatureCollection>;
 
 const requests: Array<CapturedRequest> = [];
 
@@ -33,8 +35,9 @@ const server = http.createServer((req, res) => {
     });
 });
 
-function mockLayer(): Static<typeof TaskLayer> {
+function mockLayer(connection: number | null = 5): Static<typeof TaskLayer> {
     return {
+        connection,
         incoming: {
             config: {},
         },
@@ -78,7 +81,217 @@ test('submit: setup mock CloudTAK API', async () => {
     process.env.ETL_TOKEN = 'etl.test-token';
 });
 
-test('submit: a record submission is posted to /layer/:layer/submit', async () => {
+test('submit: a schema FeatureCollection is posted to /connection/:connection/submit', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+
+    const result = await task.submit({
+        type: 'FeatureCollection',
+        schema: 'telemetry',
+        features: [{
+            id: 'DJI-1',
+            type: 'Feature',
+            properties: { callsign: 'DJI-1', metadata: { battery: 88 } },
+        }, {
+            id: 'DJI-2',
+            type: 'Feature',
+            properties: { callsign: 'DJI-2', metadata: { battery: 12 } },
+            geometry: null,
+        }, {
+            id: 'DJI-3',
+            type: 'Feature',
+            properties: { callsign: 'DJI-3' },
+            geometry: { type: 'Point', coordinates: [-105, 40] },
+        }],
+    });
+
+    assert.equal(result, true);
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].method, 'POST');
+    assert.equal(requests[0].url, '/api/connection/5/submit?archive=true');
+    assert.equal(requests[0].auth, 'Bearer etl.test-token');
+
+    const body = requests[0].body as SubmitBody;
+    assert.equal(body.type, 'FeatureCollection');
+    assert.equal(body.schema, 'telemetry');
+    assert.deepEqual(body.uids, ['DJI-1', 'DJI-2', 'DJI-3']);
+
+    const byId = new Map(body.features.map((f) => [f.id, f]));
+    assert.equal(byId.size, 3);
+    assert.equal('geometry' in byId.get('DJI-1')!, false);
+    assert.equal(byId.get('DJI-2')!.geometry, null);
+    assert.deepEqual(byId.get('DJI-3')!.geometry, { type: 'Point', coordinates: [-105, 40] });
+});
+
+test('submit: archive=false is forwarded for schema submissions', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+
+    await task.submit({
+        type: 'FeatureCollection',
+        schema: 'telemetry',
+        features: [],
+    }, { archive: false });
+
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].url, '/api/connection/5/submit?archive=false');
+});
+
+test('submit: schema batches over submit_size are split and every post carries all uids', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+    task.etl.config.submit_size = 160;
+
+    const features = [1, 2, 3].map((i) => ({
+        id: `f-${i}`,
+        type: 'Feature' as const,
+        properties: { callsign: `Feature ${i}` },
+    }));
+
+    const result = await task.submit({
+        type: 'FeatureCollection',
+        schema: 'telemetry',
+        features,
+    });
+
+    assert.equal(result, true);
+    assert.ok(requests.length > 1, 'expected the submission to be split');
+
+    const seen = [];
+    for (const request of requests) {
+        assert.equal(request.url, '/api/connection/5/submit?archive=true');
+
+        const body = request.body as SubmitBody;
+        assert.equal(body.schema, 'telemetry');
+        assert.deepEqual(body.uids, ['f-1', 'f-2', 'f-3']);
+        assert.ok(body.features.length > 0, 'no post should carry an empty features array');
+        seen.push(...body.features.map((f) => f.id));
+    }
+
+    assert.deepEqual(seen.sort(), ['f-1', 'f-2', 'f-3']);
+});
+
+test('submit: the input features array is not mutated', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+
+    const input = {
+        type: 'FeatureCollection' as const,
+        schema: 'telemetry',
+        features: [{
+            id: 'a',
+            type: 'Feature' as const,
+            properties: {},
+        }, {
+            id: 'b',
+            type: 'Feature' as const,
+            properties: {},
+        }],
+    };
+
+    await task.submit(input);
+
+    assert.deepEqual(input.features.map((f) => f.id), ['a', 'b']);
+});
+
+test('submit: a feature larger than submit_size is posted alone as valid JSON', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+    task.etl.config.submit_size = 160;
+
+    const result = await task.submit({
+        type: 'FeatureCollection',
+        schema: 'telemetry',
+        features: [{
+            id: 'small-1',
+            type: 'Feature',
+            properties: {},
+        }, {
+            id: 'small-2',
+            type: 'Feature',
+            properties: {},
+        }, {
+            id: 'large',
+            type: 'Feature',
+            properties: { remarks: 'x'.repeat(256) },
+        }],
+    });
+
+    assert.equal(result, true);
+
+    const seen = [];
+    for (const request of requests) {
+        const body = request.body as SubmitBody;
+        assert.ok(body.features.length > 0, 'no post should carry an empty features array');
+        seen.push(...body.features);
+    }
+
+    assert.equal(seen.length, 3);
+    assert.ok(seen.some((f) => f.properties.remarks === 'x'.repeat(256)));
+});
+
+test('submit: an empty schema string is rejected', async () => {
+    const task = new Task();
+    task.layer = mockLayer();
+
+    await assert.rejects(
+        task.submit({ type: 'FeatureCollection', schema: '', features: [] }),
+        /Schema submissions must provide a non-empty schema string/,
+    );
+});
+
+test('submit: a schema submission requires the Layer to belong to a Connection', async () => {
+    const task = new Task();
+    task.layer = mockLayer(null);
+
+    await assert.rejects(
+        task.submit({ type: 'FeatureCollection', schema: 'telemetry', features: [] }),
+        /Layer is not attached to a Connection/,
+    );
+});
+
+test('submit: non-FeatureCollection input is rejected', async () => {
+    const task = new Task();
+    task.layer = mockLayer();
+
+    await assert.rejects(
+        task.submit([{ i: 1 }] as unknown as SubmitBody),
+        /Submissions must be provided as a GeoJSON FeatureCollection/,
+    );
+
+    await assert.rejects(
+        task.submit({ schema: 'telemetry' } as unknown as SubmitBody),
+        /Submissions must be provided as a GeoJSON FeatureCollection/,
+    );
+});
+
+test('submit: a FeatureCollection without a type field is still accepted', async () => {
+    requests.length = 0;
+
+    const task = new Task();
+    task.layer = mockLayer();
+
+    await task.submit({
+        schema: 'telemetry',
+        features: [{ id: 'untyped', type: 'Feature', properties: {} }],
+    } as unknown as SubmitBody);
+
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].url, '/api/connection/5/submit?archive=true');
+    assert.deepEqual((requests[0].body as SubmitBody).uids, ['untyped']);
+});
+
+test('submit (deprecated): a record submission is still posted to /layer/:layer/submit', async () => {
     requests.length = 0;
 
     const task = new Task();
@@ -100,14 +313,13 @@ test('submit: a record submission is posted to /layer/:layer/submit', async () =
 
     const body = requests[0].body as SubmitRecords;
     assert.equal(body.schema, 'telemetry');
-    assert.ok(Array.isArray(body.items));
     assert.deepEqual(
         body.items.sort((a, b) => String(a.serial).localeCompare(String(b.serial))),
         [{ serial: 'DJI-1', battery: 88 }, { serial: 'DJI-2', battery: 12 }],
     );
 });
 
-test('submit: record batches over submit_size are split across posts', async () => {
+test('submit (deprecated): record batches over submit_size are split across posts', async () => {
     requests.length = 0;
 
     const task = new Task();
@@ -128,61 +340,14 @@ test('submit: record batches over submit_size are split across posts', async () 
 
         const body = request.body as SubmitRecords;
         assert.equal(body.schema, 'telemetry');
-        assert.ok(Array.isArray(body.items));
+        assert.ok(body.items.length > 0, 'no post should carry an empty items array');
         seen.push(...(body.items as unknown as Array<{ i: number }>).map((record) => record.i));
     }
 
     assert.deepEqual(seen.sort(), [1, 2, 3]);
 });
 
-test('submit: the input items array is not mutated', async () => {
-    requests.length = 0;
-
-    const task = new Task();
-    task.layer = mockLayer();
-
-    const input = {
-        schema: 'telemetry',
-        items: [{ i: 1 }, { i: 2 }],
-    };
-
-    await task.submit(input);
-
-    assert.deepEqual(input.items, [{ i: 1 }, { i: 2 }]);
-});
-
-test('submit: a record larger than submit_size is posted alone as valid JSON', async () => {
-    requests.length = 0;
-
-    const task = new Task();
-    task.layer = mockLayer();
-    task.etl.config.submit_size = 40;
-
-    // The oversized record is popped first, hitting an empty batch - without
-    // the batch-of-one handling this posted an empty items array and then
-    // corrupted the record on the comma-stripping restart
-    const result = await task.submit({
-        schema: 'telemetry',
-        items: [{ i: 1 }, { i: 2 }, { blob: 'x'.repeat(64) }],
-    });
-
-    assert.equal(result, true);
-    assert.equal(requests.length, 3);
-
-    const seen = [];
-    for (const request of requests) {
-        const body = request.body as SubmitRecords;
-        assert.equal(body.schema, 'telemetry');
-        assert.ok(Array.isArray(body.items));
-        assert.ok(body.items.length > 0, 'no post should carry an empty items array');
-        seen.push(...body.items);
-    }
-
-    assert.equal(seen.length, 3);
-    assert.ok(seen.some((record) => record.blob === 'x'.repeat(64)));
-});
-
-test('submit: a missing or empty schema is rejected', async () => {
+test('submit (deprecated): a missing or empty schema is rejected', async () => {
     const task = new Task();
     task.layer = mockLayer();
 
@@ -197,7 +362,7 @@ test('submit: a missing or empty schema is rejected', async () => {
     );
 });
 
-test('submit: non-array items are rejected', async () => {
+test('submit (deprecated): non-array items are rejected', async () => {
     const task = new Task();
     task.layer = mockLayer();
 
@@ -207,17 +372,7 @@ test('submit: non-array items are rejected', async () => {
     );
 });
 
-test('submit: a bare array is rejected', async () => {
-    const task = new Task();
-    task.layer = mockLayer();
-
-    await assert.rejects(
-        task.submit([{ i: 1 }] as unknown as SubmitRecords),
-        /Record submissions must be provided as { schema: string, items: \[...\] }/,
-    );
-});
-
-test('submit: a FeatureCollection is still posted to /layer/:layer/cot', async () => {
+test('submit: a FeatureCollection without a schema is still posted to /layer/:layer/cot', async () => {
     requests.length = 0;
 
     const task = new Task();
@@ -272,20 +427,18 @@ test('schema: a FeatureCollection submits under multiple named Output schemas', 
 
     const result = await task.submit({
         type: 'FeatureCollection',
+        schema: 'alerts',
         features: [{
             id: 'feat-2',
             type: 'Feature',
             properties: {},
-            geometry: {
-                type: 'Point',
-                coordinates: [-105, 40],
-            },
         }],
     });
 
     assert.equal(result, true);
     assert.equal(requests.length, 1);
-    assert.equal(requests[0].url, '/api/layer/1/cot?archive=true');
+    assert.equal(requests[0].url, '/api/connection/5/submit?archive=true');
+    assert.equal((requests[0].body as SubmitBody).schema, 'alerts');
 });
 
 test('submit: teardown mock CloudTAK API', async () => {
