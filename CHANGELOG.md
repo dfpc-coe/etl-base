@@ -12,6 +12,8 @@
 
 ### Pending Release
 
+### v10.20.0 - 2026-09-16
+
 - :tada: `submit()` accepts a FeatureCollection carrying a `schema` naming one of the task's Output schemas - it is posted to `POST /api/connection/:connection/submit` and the geometry of its Features may be omitted or `null`
 - :tada: Export the `SubmitFeature` & `SubmitFeatureCollection` TypeBox schemas describing that submission
 - :rocket: Every post of a batched submission carries the ids of all Features in the submission as `uids` so the API can diff against prior state
