@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.21.0 - 2026-09-23
+
+- :tada: Add `assignment` & `effect` permissions for the people assigned to & Devices acting on a Core Event - CloudTAK requires them alongside the `event` permission
+
 ### v10.20.0 - 2026-09-16
 
 - :tada: `submit()` accepts a FeatureCollection carrying a `schema` naming one of the task's Output schemas - it is posted to `POST /api/connection/:connection/submit` and the geometry of its Features may be omitted or `null`

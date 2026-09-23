@@ -21,6 +21,8 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     video: ['create', 'read', 'update', 'delete'],
     injector: ['create', 'read', 'update', 'delete'],
     event: ['create', 'read', 'update', 'delete'],
+    assignment: ['create', 'read', 'update', 'delete'],
+    effect: ['create', 'read', 'update', 'delete'],
     device: ['create', 'read', 'update', 'delete'],
     search: ['read'],
     group: ['read', 'update']
