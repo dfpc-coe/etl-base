@@ -96,6 +96,20 @@ export default class Task extends ETL {
 }
 ```
 
+A task built for a known source can declare the senders a new Layer allows by
+default in its `capabilities.json` - each entry is an address or an `@domain`, and
+an omitted or empty list allows any sender:
+
+```json
+"email": {
+    "description": "Receives dispatch pages by email",
+    "default": {
+        "enabled": true,
+        "senders": ["cad@county.gov", "@agency.org"]
+    }
+}
+```
+
 The allowed senders of a Layer are enforced by CloudTAK against the `From` header
 before the task is invoked. That header is set by the sender, so a task handling
 sensitive data should also check the verdicts in `message.ses.receipt`.

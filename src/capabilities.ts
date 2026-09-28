@@ -88,12 +88,21 @@ export const CapabilitiesWebhookInvocationSchema = Type.Object({
     }),
 });
 
+export const CapabilitiesEmailSendersSchema = Type.Array(Type.String({
+    maxLength: 128,
+    pattern: '^[^\\s@<>]*@[^\\s@<>]+$',
+}), {
+    maxItems: 25,
+    description: 'Addresses or @domains allowed to email the Layer - omitted or empty allows any sender',
+});
+
 export const CapabilitiesEmailInvocationSchema = Type.Object({
     description: Type.String({
         description: 'Human readable explanation of what the task does with incoming email',
     }),
     default: Type.Object({
         enabled: Type.Boolean(),
+        senders: Type.Optional(CapabilitiesEmailSendersSchema),
     }),
 });
 

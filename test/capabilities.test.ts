@@ -154,6 +154,22 @@ test('validate: email invocation', () => {
     };
     assert.equal(StaticCapabilities.validate(input), input);
 
+    input.invocations.incoming!.email = {
+        description: 'Accept upstream email',
+        default: { enabled: true, senders: ['cad@county.gov', '@agency.org'] },
+    };
+    assert.equal(StaticCapabilities.validate(input), input);
+
+    for (const senders of [['not-an-address'], ['CAD <cad@county.gov>'], ['a@b.com c@d.com'], 'cad@county.gov']) {
+        const invalid = doc() as { invocations: { incoming: { email: unknown } } };
+        invalid.invocations.incoming.email = {
+            description: 'Accept upstream email',
+            default: { enabled: true, senders },
+        };
+        assert.equal(StaticCapabilities.is(invalid), false, JSON.stringify(senders));
+        assert.throws(() => StaticCapabilities.validate(invalid), /email\/default\/senders/);
+    }
+
     const invalid = doc() as { invocations: { incoming: { email: unknown } } };
     invalid.invocations.incoming.email = { description: 'Accept upstream email' };
     assert.equal(StaticCapabilities.is(invalid), false);

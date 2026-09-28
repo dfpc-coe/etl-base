@@ -111,6 +111,7 @@ export const InvocationDefaults = Type.Object({
     })),
     email: Type.Optional(Type.Object({
         enabled: Type.Boolean(),
+        senders: Type.Optional(Type.Array(Type.String())),
     })),
     schedule: Type.Optional(Type.Object({
         enabled: Type.Boolean(),

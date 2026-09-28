@@ -18,6 +18,7 @@
 - :tada: Export `Email` with `Email.parse()` & `Email.fetch()`, the `EmailEvent` TypeBox schema and the `EmailMessage`, `EmailAddress` & `EmailAttachment` types
 - :tada: Add the `control:email <path>` local command to deliver a `.eml` file to `email()`
 - :rocket: Add `email` to `InvocationDefaults` and the optional `email` & `email_senders` fields to the `incoming` config of `TaskLayer`
+- :tada: Add the optional `invocations.incoming.email.default.senders` list to the static Capabilities document so a task can ship with the addresses or `@domains` allowed to email it
 - :arrow_up: Add `postal-mime` & `@aws-sdk/client-s3`
 
 ### v10.21.0 - 2026-09-23
