@@ -76,6 +76,39 @@ async outgoing(event: Lambda.SQSEvent): Promise<boolean> {
 }
 ```
 
+### Incoming Email
+
+A task that lists `InvocationType.Email` in its `static invocation`, and declares
+`invocations.incoming.email` in its `capabilities.json`, can be given an email
+address in CloudTAK. Each email sent to that address is parsed and delivered to
+the task's `email()` method:
+
+```ts
+export default class Task extends ETL {
+    static invocation = [ InvocationType.Email ];
+
+    async email(message: EmailMessage): Promise<void> {
+        // message.from, message.to, message.cc, message.subject, message.date
+        // message.text, message.html, message.headers
+        // message.attachments[].filename, .mimeType, .content (Buffer)
+        // message.raw (Buffer), message.ses.mail, message.ses.receipt
+    }
+}
+```
+
+The allowed senders of a Layer are enforced by CloudTAK against the `From` header
+before the task is invoked. That header is set by the sender, so a task handling
+sensitive data should also check the verdicts in `message.ses.receipt`.
+
+CloudTAK may deliver the same email more than once, `message.id` is stable across
+deliveries.
+
+A `.eml` file can be delivered to `email()` locally with:
+
+```sh
+node dist/task.js control:email ./message.eml
+```
+
 ## API
 
 The ETL Base Class is designed to be extended by classes performing ETL functions.

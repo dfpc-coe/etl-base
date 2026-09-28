@@ -21,6 +21,8 @@ export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilit
 export type { StaticCapabilitiesDocument } from './src/capabilities.js';
 
 import TypeValidator from './src/type.js'
+import Email, { EmailEvent } from './src/email.js';
+import type { EmailMessage, EmailAddress, EmailAttachment } from './src/email.js';
 import * as formats from './src/formats/index.js';
 
 FormatRegistry.Set('date-time', formats.IsDateTime);
@@ -57,6 +59,9 @@ export async function local(task: TaskBase, current: string) {
         app.listen(5002, () => {
             console.log('ok - listening http://localhost:5002');
         })
+    } else if (command === 'control:email') {
+        if (!positionals[1]) throw new Error('Usage: control:email <path to .eml file>');
+        await task.email(await Email.parse(fs.readFileSync(positionals[1]), positionals[1]));
     } else if (command === 'capabilities') {
         const res = await handler(task, { type: 'capabilities' });
         console.log(JSON.stringify(res))
@@ -81,6 +86,18 @@ export async function handler(
         return await task.update(DataFlowType.Incoming);
     } else if (String(event.type) == 'environment:outgoing') {
         return await task.update(DataFlowType.Outgoing);
+    } else if (event.type === 'email') {
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (!task.constructor.flow.includes(DataFlowType.Incoming)) {
+            throw new Error('Incoming Data flow is not provided by this ETL Layer');
+        }
+
+        // @ts-expect-error Typescript doesn't handle this yet
+        if (!task.constructor.invocation.includes(InvocationType.Email)) {
+            throw new Error('Email Invocation type is not configured');
+        }
+
+        return await task.email(await Email.fetch(TypeValidator.type(EmailEvent, event, { convert: false })));
     } else if (Array.isArray(event.Records)) {
         // @ts-expect-error Typescript doesn't handle this yet
         if (!task.constructor.flow.includes(DataFlowType.Outgoing)) {
@@ -235,6 +252,14 @@ export default class TaskBase {
     }
 
     async control(): Promise<void> {
+        return;
+    }
+
+    /**
+     * Called for each email received by a Layer with the Email invocation enabled
+     */
+    async email(message: EmailMessage): Promise<void> {
+        console.log(`ok - email ${message.id} not handled`);
         return;
     }
 
@@ -850,9 +875,14 @@ export type {
     TaskLayerAlert,
     NamedSchema,
     SubmitRecords,
+    EmailMessage,
+    EmailAddress,
+    EmailAttachment,
 }
 
 export {
+    Email,
+    EmailEvent,
     TaskLayer,
     SchemaType,
     Capabilities,

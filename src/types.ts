@@ -11,7 +11,7 @@ export enum DataFlowType {
 }
 
 export interface Event {
-    type?: 'capabilities' | 'environment:input' | 'environment:output' | 'schema:input' | 'schema:output'
+    type?: 'capabilities' | 'environment:input' | 'environment:output' | 'schema:input' | 'schema:output' | 'email'
 
     // API Gateway call
     version?: string
@@ -19,6 +19,12 @@ export interface Event {
 
     // SQS Record
     Records?: unknown[]
+
+    // Email
+    bucket?: string
+    key?: string
+    mail?: Record<string, unknown>
+    receipt?: Record<string, unknown>
 }
 
 export enum SchemaType {
@@ -90,7 +96,8 @@ export interface TaskLayerAlert {
 export enum InvocationType {
     Manual = 'manual',
     Schedule = 'schedule',
-    Webhook = 'webhook'
+    Webhook = 'webhook',
+    Email = 'email'
 }
 
 export const CapabilitiesError = Type.Object({
@@ -100,6 +107,9 @@ export const CapabilitiesError = Type.Object({
 
 export const InvocationDefaults = Type.Object({
     webhook: Type.Optional(Type.Object({
+        enabled: Type.Boolean(),
+    })),
+    email: Type.Optional(Type.Object({
         enabled: Type.Boolean(),
     })),
     schedule: Type.Optional(Type.Object({
@@ -200,6 +210,8 @@ export const TaskLayer = Type.Object({
         cron: Type.Union([Type.String(), Type.Null()]),
         ephemeral: Type.Record(Type.String(), Type.Unknown()),
         webhooks: Type.Boolean(),
+        email: Type.Optional(Type.Boolean()),
+        email_senders: Type.Optional(Type.Array(Type.String())),
         environment: Type.Any(),
         config: Type.Object({
             timezone: Type.Optional(Type.Object({

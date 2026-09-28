@@ -12,6 +12,14 @@
 
 ### Pending Release
 
+### v10.22.0 - 2026-09-28
+
+- :tada: Add the `Email` invocation type - a task that lists `InvocationType.Email` in `static invocation` has its `email()` method called with a parsed `EmailMessage` for each email CloudTAK receives for the Layer
+- :tada: Export `Email` with `Email.parse()` & `Email.fetch()`, the `EmailEvent` TypeBox schema and the `EmailMessage`, `EmailAddress` & `EmailAttachment` types
+- :tada: Add the `control:email <path>` local command to deliver a `.eml` file to `email()`
+- :rocket: Add `email` to `InvocationDefaults` and the optional `email` & `email_senders` fields to the `incoming` config of `TaskLayer`
+- :arrow_up: Add `postal-mime` & `@aws-sdk/client-s3`
+
 ### v10.21.0 - 2026-09-23
 
 - :tada: Add `assignment` & `effect` permissions for the people assigned to & Devices acting on a Core Event - CloudTAK requires them alongside the `event` permission
