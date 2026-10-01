@@ -29,6 +29,14 @@ when invoked with a `capabilities` event: the static document describes a task
 version before it is ever deployed, while the live document reflects the runtime
 environment schemas of the running image.
 
+The document's `version` field selects the format version (the `StaticCapabilitiesVersion`
+enum exported by this package):
+
+| Version | Notes                                                                 |
+| ------- | --------------------------------------------------------------------- |
+| `1.0`   | The current default                                                   |
+| `1.1`   | Disables Legacy Styling and enforces the new Layer Field Mapping UI   |
+
 ```sh
 export AWS_REGION='us-east-1'
 export AWS_ACCOUNT_ID='123456789012'

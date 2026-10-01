@@ -9,12 +9,13 @@ import StaticCapabilities, {
     PERMISSIONS,
     OUTGOING_TYPES,
     StaticCapabilitiesSchema,
+    StaticCapabilitiesVersion,
 } from '../src/capabilities.js';
 import type { StaticCapabilitiesDocument } from '../src/capabilities.js';
 
 function doc(): StaticCapabilitiesDocument {
     return {
-        version: '1.0.0',
+        version: StaticCapabilitiesVersion.V1_0,
         name: 'Test Task',
         description: 'A task for testing the Capabilities document',
         permissions: [{
@@ -69,6 +70,33 @@ test('CAPABILITIES_ANNOTATION', () => {
 
 test('StaticCapabilities.schema', () => {
     assert.equal(StaticCapabilities.schema, StaticCapabilitiesSchema);
+});
+
+test('StaticCapabilitiesVersion', () => {
+    assert.deepEqual(Object.values(StaticCapabilitiesVersion), ['1.0', '1.1']);
+    assert.equal(StaticCapabilities.versions, StaticCapabilitiesVersion);
+});
+
+test('validate: every known version', () => {
+    for (const version of Object.values(StaticCapabilitiesVersion)) {
+        const input = doc();
+        input.version = version;
+        assert.equal(StaticCapabilities.validate(input), input, version);
+        assert.equal(StaticCapabilities.is(input), true, version);
+    }
+});
+
+test('validate: unknown version', () => {
+    const input = { ...doc(), version: '1.0.0' };
+    assert.equal(StaticCapabilities.is(input), false);
+    assert.throws(() => {
+        StaticCapabilities.validate(input);
+    }, (err: unknown) => {
+        assert.ok(err instanceof Err);
+        assert.equal(err.status, 400);
+        assert.match(err.message, /^Invalid Capabilities Document: \/version/);
+        return true;
+    });
 });
 
 test('PERMISSIONS', () => {
@@ -190,7 +218,7 @@ test('validate: no permissions requested', () => {
 
 test('validate: schema mismatch', () => {
     assert.throws(() => {
-        StaticCapabilities.validate({ version: '1.0.0' });
+        StaticCapabilities.validate({ version: '1.0' });
     }, (err: unknown) => {
         assert.ok(err instanceof Err);
         assert.equal(err.status, 400);

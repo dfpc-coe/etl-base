@@ -17,7 +17,7 @@ import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecord
 
 export * as APITypes from './src/api-types.js';
 
-export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilitiesSchema, PERMISSIONS, OUTGOING_TYPES } from './src/capabilities.js';
+export { default as StaticCapabilities, CAPABILITIES_ANNOTATION, StaticCapabilitiesSchema, StaticCapabilitiesVersion, PERMISSIONS, OUTGOING_TYPES } from './src/capabilities.js';
 export type { StaticCapabilitiesDocument } from './src/capabilities.js';
 
 import TypeValidator from './src/type.js'
@@ -801,6 +801,28 @@ export default class TaskBase {
     }
 
     /**
+     * Build an error message for a failed POST that carries the HTTP status
+     * and the message CloudTAK returned - a 403 means the Layer token was
+     * rejected or lacks a permission so point at that directly
+     */
+    private postError(prefix: string, status: number, body: string): string {
+        let message: string;
+        try {
+            message = String(JSON.parse(body).message || '');
+        } catch {
+            message = body.slice(0, 200);
+        }
+
+        const detail = `${status}${message ? ` - ${message}` : ''}`;
+
+        if (status === 403) {
+            return `${prefix}: CloudTAK rejected the Layer token (${detail}) - check that the token has the permissions this Layer's Mappings require and that it belongs to this Connection`;
+        }
+
+        return `${prefix} (${detail})`;
+    }
+
+    /**
      * Stream `items` into one or more posts, each wrapped by `pre` and `post`
      * and kept under `submit_size` - an item that alone exceeds `submit_size`
      * is posted by itself so a batch is never empty
@@ -853,8 +875,9 @@ export default class TaskBase {
                 });
 
                 if (!postreq.ok) {
-                    if (opts.verbose) console.error(await postreq.text());
-                    throw new Error(opts.error);
+                    const body = await postreq.text();
+                    if (opts.verbose) console.error(body);
+                    throw new Error(this.postError(opts.error, postreq.status, body));
                 }
 
                 if (tmpbuff) {

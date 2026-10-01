@@ -19,6 +19,8 @@ type SubmitBody = Static<typeof SubmitFeatureCollection>;
 
 const requests: Array<CapturedRequest> = [];
 
+let forced: null | { status: number; body: unknown } = null;
+
 const server = http.createServer((req, res) => {
     const chunks: Array<Buffer> = [];
     req.on('data', (chunk) => chunks.push(chunk));
@@ -31,6 +33,14 @@ const server = http.createServer((req, res) => {
         });
 
         res.setHeader('Content-Type', 'application/json');
+
+        if (forced) {
+            res.statusCode = forced.status;
+            res.end(JSON.stringify(forced.body));
+            forced = null;
+            return;
+        }
+
         res.end(JSON.stringify({ status: 200, message: 'Submitted', errors: [] }));
     });
 });
@@ -439,6 +449,33 @@ test('schema: a FeatureCollection submits under multiple named Output schemas', 
     assert.equal(requests.length, 1);
     assert.equal(requests[0].url, '/api/connection/5/submit?archive=true');
     assert.equal((requests[0].body as SubmitBody).schema, 'alerts');
+});
+
+test('submit: a 403 from CloudTAK names the token problem', async () => {
+    const task = new Task();
+    task.layer = mockLayer();
+
+    forced = {
+        status: 403,
+        body: { status: 403, message: 'Layer token does not have the event:create permission required by its CoreEntity Mappings' },
+    };
+
+    await assert.rejects(
+        task.submit({ type: 'FeatureCollection', schema: 'telemetry', features: [] }),
+        /Failed to post features to ETL: CloudTAK rejected the Layer token \(403 - Layer token does not have the event:create permission required by its CoreEntity Mappings\) - check that the token has the permissions/,
+    );
+});
+
+test('submit: other failed posts include the status and message', async () => {
+    const task = new Task();
+    task.layer = mockLayer();
+
+    forced = { status: 400, body: { status: 400, message: 'Connection is Read-Only mode' } };
+
+    await assert.rejects(
+        task.submit({ type: 'FeatureCollection', schema: 'telemetry', features: [] }),
+        /^Error: Failed to post features to ETL \(400 - Connection is Read-Only mode\)$/,
+    );
 });
 
 test('submit: teardown mock CloudTAK API', async () => {

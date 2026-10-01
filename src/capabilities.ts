@@ -11,6 +11,17 @@ import Err from '@openaddresses/batch-error';
 export const CAPABILITIES_ANNOTATION = 'com.cloudtak.capabilities';
 
 /**
+ * Versions of the static Capabilities document format.
+ *
+ * - `1.0` - the current default
+ * - `1.1` - disables Legacy Styling and enforces the Layer Field Mapping UI
+ */
+export enum StaticCapabilitiesVersion {
+    V1_0 = '1.0',
+    V1_1 = '1.1',
+}
+
+/**
  * Known CloudTAK permissions and the levels at which they can be granted.
  *
  * A permission is expressed as `<permission>:<level>` - ie `video:read` - where
@@ -116,8 +127,8 @@ export const CapabilitiesOutgoingTypeSchema = Type.Object({
 });
 
 export const StaticCapabilitiesSchema = Type.Object({
-    version: Type.String({
-        description: 'Version of the Capabilities document format',
+    version: Type.Enum(StaticCapabilitiesVersion, {
+        description: 'Version of the Capabilities document format - 1.1 disables Legacy Styling and enforces the Layer Field Mapping UI',
     }),
     name: Type.String({
         description: 'Human readable name of the task',
@@ -163,6 +174,7 @@ export type StaticCapabilitiesDocument = Static<typeof StaticCapabilitiesSchema>
 export default class StaticCapabilities {
     static schema = StaticCapabilitiesSchema;
     static annotation = CAPABILITIES_ANNOTATION;
+    static versions = StaticCapabilitiesVersion;
     static permissions = PERMISSIONS;
     static outgoingTypes = OUTGOING_TYPES;
 

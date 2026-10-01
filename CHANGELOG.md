@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.22.1 - 2026-10-01
+
+- :tada: Add the `StaticCapabilitiesVersion` enum (`1.0` & `1.1`) and restrict the static Capabilities document `version` to it - `1.1` disables Legacy Styling and enforces the Layer Field Mapping UI
+
 ### v10.22.0 - 2026-09-28
 
 - :tada: Add the `Email` invocation type - a task that lists `InvocationType.Email` in `static invocation` has its `email()` method called with a parsed `EmailMessage` for each email CloudTAK receives for the Layer
