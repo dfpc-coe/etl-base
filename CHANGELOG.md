@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.22.2 - 2026-10-07
+
+- :bug: Pass `verbose: true` when validating the outgoing `environment` in `env()` so failures name the field and body, matching the incoming branch
+
 ### v10.22.1 - 2026-10-01
 
 - :tada: Add the `StaticCapabilitiesVersion` enum (`1.0` & `1.1`) and restrict the static Capabilities document `version` to it - `1.1` disables Legacy Styling and enforces the Layer Field Mapping UI
