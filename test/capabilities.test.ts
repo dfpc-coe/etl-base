@@ -110,6 +110,7 @@ test('PERMISSIONS', () => {
         device: ['create', 'read', 'update', 'delete'],
         search: ['read'],
         group: ['read', 'update'],
+        attachment: ['create', 'read'],
     });
 });
 

@@ -36,7 +36,8 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     effect: ['create', 'read', 'update', 'delete'],
     device: ['create', 'read', 'update', 'delete'],
     search: ['read'],
-    group: ['read', 'update']
+    group: ['read', 'update'],
+    attachment: ['create', 'read'],
 };
 
 /**

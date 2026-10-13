@@ -12,6 +12,8 @@
 
 ### Pending Release
 
+- :tada: Add `attachment` permission with `create` & `read` levels for the CloudTAK Attachments API
+
 ### v10.22.2 - 2026-10-07
 
 - :bug: Pass `verbose: true` when validating the outgoing `environment` in `env()` so failures name the field and body, matching the incoming branch
