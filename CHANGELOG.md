@@ -12,6 +12,8 @@
 
 ### Pending Release
 
+### v10.23.0 - 2026-10-12
+
 - :tada: Add `attachment` permission with `create` & `read` levels for the CloudTAK Attachments API
 
 ### v10.22.2 - 2026-10-07
