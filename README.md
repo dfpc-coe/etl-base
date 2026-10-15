@@ -215,6 +215,46 @@ export async function handler(event: Event = {}, context?: unknown) {
 }
 ```
 
+### CloudTAK SDK
+
+Every task carries a `CloudTAKAPI` client at `this.api`, authenticated with the
+Layer token the ETL server provides. Its groups mirror the CloudTAK routes and
+their request & response types are derived from the CloudTAK OpenAPI document,
+so a type error here means the API has changed.
+
+```ts
+import type { CoreEvent } from '@tak-ps/etl';
+
+const event: CoreEvent = await this.api.Event.get('<uuid>');
+
+await this.api.Event.update(event.id, { priority: 'high' });
+
+const devices = await this.api.Device.list({ limit: 50, channel: [1, 5] });
+
+// Entity is the kind-agnostic base of Event & Device
+await this.api.Entity.delete(EntityKind.DEVICE, devices.items[0].id);
+
+// People assigned to an Event
+const assignees = await this.api.Assignment.list(event.id);
+await this.api.Assignment.create(event.id, { name: 'Alice', role: 'Incident Commander', remarks: '' });
+```
+
+Outside of a task the client is created directly - `APIAuthToken` sends any
+CloudTAK token as a Bearer and `APIAuthLayer` signs a Layer token for a
+CloudTAK dev server on localhost:
+
+```ts
+import { CloudTAKAPI, APIAuthToken, APIAuthLayer } from '@tak-ps/etl';
+
+const api = await CloudTAKAPI.init('http://localhost:5001', new APIAuthLayer(12));
+// or from the ETL_API & ETL_TOKEN environment variables
+const api = CloudTAKAPI.fromEnv();
+```
+
+Each method documents the Layer permission (`event:read`, `device:update`...)
+the token must carry. A non-2xx response is thrown as a `batch-error` `Err`
+with the API's status and message.
+
 ### API
 
 The API documentation is generated automatically by any commit to the `main` branch.

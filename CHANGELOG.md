@@ -12,6 +12,11 @@
 
 ### Pending Release
 
+### v10.24.0 - 2026-10-15
+
+- :tada: Add a `CloudTAKAPI` SDK (`src/sdk/`) with `Entity`, `Event`, `Device` & Event `Assignment` CRUD typed from the OpenAPI document, `APIAuthToken`/`APIAuthLayer` auth strategies and a `task.api` client on every `TaskBase`
+- :rocket: Regenerate `APITypes` from CloudTAK 13.109.2 - adds the Core Event, Device, Board, Assignment & Effect routes - and point `typegen` at the moved `api/derived-types.d.ts`
+
 ### v10.23.0 - 2026-10-12
 
 - :tada: Add `attachment` permission with `create` & `read` levels for the CloudTAK Attachments API

@@ -8,11 +8,12 @@ import { Type, FormatRegistry } from '@sinclair/typebox';
 import type { Static, TSchema, TUnknown } from '@sinclair/typebox';
 import Schema from '@openaddresses/batch-schema';
 import { Feature } from '@tak-ps/node-cot'
-import jwt from 'jsonwebtoken';
 import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
 import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage, SubmitFeature, SubmitFeatureCollection } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
+import CloudTAKAPI, { EntityKind } from './src/sdk/api.js';
+import { APIAuthToken, APIAuthLayer } from './src/sdk/auth.js';
 import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecords } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
@@ -147,6 +148,9 @@ export default class TaskBase {
     etl: TaskBaseSettings;
     layer?: Static<typeof TaskLayer>;
 
+    /** CloudTAK API client authenticated as the Layer */
+    api: CloudTAKAPI;
+
     logging: TaskLogging
 
     /**
@@ -188,6 +192,8 @@ export default class TaskBase {
         if (!this.etl.api) throw new Error('No ETL API URL Provided');
         if (!this.etl.layer) throw new Error('No ETL Layer Provided');
         if (!this.etl.token) throw new Error('No ETL Token Provided');
+
+        this.api = new CloudTAKAPI(new URL(this.etl.api), new APIAuthToken(this.etl.token));
     }
 
     static async init(
@@ -216,17 +222,9 @@ export default class TaskBase {
 
                 if (!secret.SecretString) throw new Error('No Secret Set');
 
-                process.env.ETL_TOKEN = `etl.${jwt.sign({
-                    access: 'layer',
-                    id: parseInt(process.env.ETL_LAYER),
-                    internal: true
-                }, secret.SecretString)}`
+                process.env.ETL_TOKEN = APIAuthLayer.sign(parseInt(process.env.ETL_LAYER), secret.SecretString)
             } else {
-                process.env.ETL_TOKEN = `etl.${jwt.sign({
-                    access: 'layer',
-                    id: parseInt(process.env.ETL_LAYER),
-                    internal: true
-                }, 'coe-wildland-fire')}`
+                process.env.ETL_TOKEN = APIAuthLayer.sign(parseInt(process.env.ETL_LAYER))
             }
         }
 
@@ -904,6 +902,38 @@ export type {
     EmailAddress,
     EmailAttachment,
 }
+
+export { CloudTAKAPI, EntityKind };
+export { APIAuth, APIAuthToken, APIAuthLayer, DEFAULT_LAYER_SECRET } from './src/sdk/auth.js';
+export type { APIFetchInit } from './src/sdk/api.js';
+export type {
+    CoreEntity,
+    CoreEntityList,
+    CoreEntityListQuery,
+    CoreEntityCreate,
+    CoreEntityUpdate
+} from './src/sdk/api/entity.js';
+export type {
+    APIResponse,
+    APIBody,
+    APIQuery,
+    StandardResponse,
+    CoreEvent,
+    CoreEventList,
+    CoreEventListQuery,
+    CoreEventCreate,
+    CoreEventUpdate,
+    CoreDevice,
+    CoreDeviceList,
+    CoreDeviceListQuery,
+    CoreDeviceCreate,
+    CoreDeviceUpdate,
+    CoreEventAssignment,
+    CoreEventAssignmentList,
+    CoreEventAssignmentListQuery,
+    CoreEventAssignmentCreate,
+    CoreEventAssignmentUpdate
+} from './src/sdk/api/types.js';
 
 export {
     Email,

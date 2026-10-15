@@ -15,7 +15,7 @@
         "test": "c8 --reporter=lcov --reporter html tsx --test test/*.ts",
         "lint": "eslint index.ts bin test",
         "doc": "typedoc index.ts",
-        "typegen": "curl 'https://raw.githubusercontent.com/dfpc-coe/CloudTAK/refs/heads/main/api/web/src/derived-types.d.ts' > src/api-types.ts",
+        "typegen": "curl 'https://raw.githubusercontent.com/dfpc-coe/CloudTAK/refs/heads/main/api/derived-types.d.ts' > src/api-types.ts",
         "build": "tsc --build && cp package.json dist/",
         "pretest": "npm run lint"
     },
