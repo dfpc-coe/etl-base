@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.24.1 - 2026-10-15
+
+- :rocket: Regenerate `APITypes` from CloudTAK main - `channels` is optional on `POST /api/core/event` so `api.Event.create()` called with a Layer token may omit it to share the Event with the Channels of the Layer's Connection
+
 ### v10.24.0 - 2026-10-15
 
 - :tada: Add a `CloudTAKAPI` SDK (`src/sdk/`) with `Entity`, `Event`, `Device` & Event `Assignment` CRUD typed from the OpenAPI document, `APIAuthToken`/`APIAuthLayer` auth strategies and a `task.api` client on every `TaskBase`
