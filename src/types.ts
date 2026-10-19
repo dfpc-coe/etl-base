@@ -173,6 +173,9 @@ export const TaskLayer = Type.Object({
         Type.Literal('low'),
         Type.Literal('off')
     ]),
+    permissions: Type.Array(Type.String(), {
+        description: 'Permissions granted to the Layer as <permission>:<level> pairs - ie video:read or video:*'
+    }),
 
     alarm_period: Type.Integer(),
     alarm_evals: Type.Integer(),

@@ -14,6 +14,7 @@ import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, 
 import serverless from '@tak-ps/serverless-http';
 import CloudTAKAPI, { EntityKind } from './src/sdk/api.js';
 import { APIAuthToken, APIAuthLayer } from './src/sdk/auth.js';
+import StaticCapabilities, { PERMISSIONS } from './src/capabilities.js';
 import type { Event, TaskBaseSettings, TaskLayerAlert, NamedSchema, SubmitRecords } from './src/types.js';
 
 export * as APITypes from './src/api-types.js';
@@ -607,6 +608,23 @@ export default class TaskBase {
 
             return this.layer;
         }
+    }
+
+    /**
+     * Check whether the Layer holds a `<permission>:<level>` scope - ie `video:read`
+     *
+     * A `<permission>:*` grant satisfies every level of that permission. Unknown
+     * scopes throw so a typo is caught rather than silently reported as denied
+     */
+    async hasPermission(scope: string): Promise<boolean> {
+        if (!StaticCapabilities.isValidPermission(scope)) {
+            throw new Error(`Unknown Permission: ${scope} - Permissions must be one of: ${Object.keys(PERMISSIONS).map(p => `${p}:<${PERMISSIONS[p].join('|')}|*>`).join(', ')}`);
+        }
+
+        if (!this.layer) this.layer = await this.fetchLayer();
+
+        const wildcard = `${scope.slice(0, scope.lastIndexOf(':'))}:*`;
+        return this.layer.permissions.includes(scope) || this.layer.permissions.includes(wildcard);
     }
 
     /**

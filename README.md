@@ -175,6 +175,12 @@ export default class Task extends ETL {
         // The Layer object contains all the properties as defined by the Get Layer API
         const environment = layer.environent;
 
+        // Layer permissions are <permission>:<level> pairs - gate optional functionality
+        // on the grants the Layer holds rather than catching a 403 from CloudTAK
+        if (await this.hasPermission('video:create')) {
+            // ...
+        }
+
         // Provided submit function to submit geospatial features to be converted to CoT
         // See format overview: https://github.com/tak-ps/node-cot#geojson-spec
         await this.submit({

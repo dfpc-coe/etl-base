@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.25.0 - 2026-10-19
+
+- :tada: Add `permissions` to `TaskLayer` and a `task.hasPermission('<permission>:<level>')` helper so a Task can enable functionality based on the grants its Layer holds - `<permission>:*` satisfies every level
+
 ### v10.24.1 - 2026-10-15
 
 - :rocket: Regenerate `APITypes` from CloudTAK main - `channels` is optional on `POST /api/core/event` so `api.Event.create()` called with a Layer token may omit it to share the Event with the Channels of the Layer's Connection
