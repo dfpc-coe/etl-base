@@ -137,6 +137,19 @@ export type TaskLogging = {
     webhooks: boolean
 }
 
+export type TaskWebhookOptions = {
+    /** Keep the unparsed request body on `req.rawBody` for signature verification - ie: Slack, Stripe or GitHub HMAC headers */
+    rawBody: boolean
+}
+
+declare module 'express-serve-static-core' {
+    interface Request {
+        rawBody?: Buffer
+    }
+}
+
+const WEBHOOK_BODY_LIMIT = 50;
+
 export default class TaskBase {
     static name: string = 'default';
 
@@ -153,6 +166,7 @@ export default class TaskBase {
     api: CloudTAKAPI;
 
     logging: TaskLogging
+    webhookOptions: TaskWebhookOptions
 
     /**
      * Create a new TaskBase instance - Usually not called directly but instead
@@ -170,15 +184,23 @@ export default class TaskBase {
             logging?: {
                 event?: boolean
                 webhooks?: boolean
+            },
+            webhooks?: {
+                rawBody?: boolean
             }
         }
     ) {
         if (!opts) opts = {};
         if (!opts.logging) opts.logging = {};
+        if (!opts.webhooks) opts.webhooks = {};
 
         this.logging = {
             event: opts.logging.event === undefined ? false : opts.logging.event,
             webhooks: opts.logging.webhooks === undefined ? true : opts.logging.webhooks
+        }
+
+        this.webhookOptions = {
+            rawBody: opts.webhooks.rawBody === undefined ? false : opts.webhooks.rawBody
         }
 
         this.etl = {
@@ -203,6 +225,9 @@ export default class TaskBase {
             logging?: {
                 event?: boolean
                 webhooks?: boolean
+            },
+            webhooks?: {
+                rawBody?: boolean
             }
         }
     ): Promise<TaskBase> {
@@ -384,12 +409,26 @@ export default class TaskBase {
         return TypeValidator.type(type, body);
     }
 
+    /**
+     * Express application serving the routes of the static `webhooks` hook.
+     * With `webhooks.rawBody` set, form & JSON bodies are parsed ahead of the
+     * Schema router with the unparsed bytes kept on `req.rawBody`
+     */
     async controlWebhooks(): Promise<Application> {
         const app = express();
 
+        if (this.webhookOptions.rawBody) {
+            const verify = (req: express.Request, _res: express.Response, buf: Buffer) => {
+                req.rawBody = buf;
+            };
+
+            app.use(express.urlencoded({ extended: true, limit: `${WEBHOOK_BODY_LIMIT}mb`, verify }));
+            app.use(express.json({ limit: `${WEBHOOK_BODY_LIMIT}mb`, verify }));
+        }
+
         const schema = new Schema(express.Router(), {
             logging: this.logging.webhooks,
-            limit: 50
+            limit: WEBHOOK_BODY_LIMIT
         });
 
         app.use(schema.router);

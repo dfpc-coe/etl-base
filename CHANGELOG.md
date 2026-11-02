@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v10.26.0 - 2026-11-01
+
+- :tada: Add a `webhooks.rawBody` option to `TaskBase.init()` & the constructor - when set, `controlWebhooks()` parses form & JSON bodies ahead of the Schema router and keeps the unparsed bytes on `req.rawBody` so a Task can verify an HMAC signature header (ie: Slack, Stripe or GitHub) over the exact body it was computed on
+
 ### v10.25.1 - 2026-10-28
 
 - :arrow_up: Update Batch-Schema to support AJV Discriminator Validation
