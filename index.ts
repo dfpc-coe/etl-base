@@ -10,7 +10,7 @@ import Schema from '@openaddresses/batch-schema';
 import { Feature } from '@tak-ps/node-cot'
 import { fetch } from '@tak-ps/node-safeurl';
 import type { FetchInit } from '@tak-ps/node-safeurl';
-import { DataFlowType, SchemaType, TaskLayer, Capabilities, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage, SubmitFeature, SubmitFeatureCollection } from './src/types.js';
+import { DataFlowType, SchemaType, TaskLayer, Capabilities, DEFAULT_SCHEMA_ID, InvocationDefaults, InvocationType, OutgoingMessageType, OutgoingAction, OutgoingMessage, OutgoingFeatureMessage, OutgoingEventMessage, OutgoingDeviceMessage, OutgoingBoardMessage, OutgoingBoardColumnMessage, OutgoingBoardEventMessage, SubmitFeature, SubmitFeatureCollection } from './src/types.js';
 import serverless from '@tak-ps/serverless-http';
 import CloudTAKAPI, { EntityKind } from './src/sdk/api.js';
 import { APIAuthToken, APIAuthLayer } from './src/sdk/auth.js';
@@ -310,7 +310,7 @@ export default class TaskBase {
                 invocationDefaults: this.constructor.invocationDefaults,
                 schema: {
                     input: null,
-                    output: null
+                    output: []
                 }
             }
 
@@ -324,7 +324,7 @@ export default class TaskBase {
             }
 
             try {
-                base.incoming.schema.output = await this.schema(SchemaType.Output, DataFlowType.Incoming);
+                base.incoming.schema.output = TaskBase.namedSchemas(await this.schema(SchemaType.Output, DataFlowType.Incoming));
             } catch (err) {
                 base.incoming.schema.outputError = {
                     status: 400,
@@ -338,7 +338,7 @@ export default class TaskBase {
             base.outgoing = {
                 schema: {
                     input: null,
-                    output: null
+                    output: []
                 }
             }
 
@@ -352,7 +352,7 @@ export default class TaskBase {
             }
 
             try {
-                base.outgoing.schema.output = await this.schema(SchemaType.Output, DataFlowType.Outgoing);
+                base.outgoing.schema.output = TaskBase.namedSchemas(await this.schema(SchemaType.Output, DataFlowType.Outgoing));
             } catch (err) {
                 base.outgoing.schema.outputError = {
                     status: 400,
@@ -364,6 +364,15 @@ export default class TaskBase {
         return base;
     }
 
+    /**
+     * Output schemas as the array of named schemas CloudTAK requires - a single
+     * unnamed schema is published under the `default` id
+     */
+    static namedSchemas(schema: TSchema | Array<NamedSchema>): Array<NamedSchema> {
+        if (Array.isArray(schema)) return schema;
+
+        return [{ id: DEFAULT_SCHEMA_ID, schema }];
+    }
 
     /**
      * The extended class should override this function if it needs additional user-defined
@@ -373,7 +382,8 @@ export default class TaskBase {
      * CoT GeoJSON in the logs if true.
      *
      * Output: Does not provide a defined schema. Providing a schema allow the User to perform
-     * mapping and styling operations
+     * mapping and styling operations. A single schema is published to CloudTAK
+     * as the named schema `default`
      *
      * Tasks that submit multiple Feature shapes can instead return an array of
      * named Output schemas - one `{ id, schema }` entry per shape, with the id
@@ -834,8 +844,9 @@ export default class TaskBase {
         const cnf = this.layer.incoming.config;
         if (!cnf || !cnf.timezone || !cnf.timezone.timezone || cnf.timezone.timezone.toLowerCase() === 'no timezone') return;
 
-        let schema = await this.schema(SchemaType.Output, DataFlowType.Incoming);
-        if (!schema || Array.isArray(schema) || !schema.properties) schema = Type.Object({});
+        const named = TaskBase.namedSchemas(await this.schema(SchemaType.Output, DataFlowType.Incoming));
+        let schema = (named.find((n) => n.id === DEFAULT_SCHEMA_ID) ?? named[0])?.schema;
+        if (!schema || !schema.properties) schema = Type.Object({});
 
         const fields = Object.keys(schema.properties).filter((k) => {
             if (!schema.properties[k]) return false;
@@ -960,7 +971,7 @@ export type {
     EmailAttachment,
 }
 
-export { CloudTAKAPI, EntityKind };
+export { CloudTAKAPI, EntityKind, DEFAULT_SCHEMA_ID };
 export { APIAuth, APIAuthToken, APIAuthLayer, DEFAULT_LAYER_SECRET } from './src/sdk/auth.js';
 export type { APIFetchInit } from './src/sdk/api.js';
 export type {

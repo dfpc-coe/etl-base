@@ -12,6 +12,11 @@
 
 ### Pending Release
 
+### v11.0.0 - 2026-11-04
+
+- :rocket: **Breaking** `capabilities()` always publishes Output schemas as an array of named schemas - a single schema returned by `schema(SchemaType.Output)` is wrapped as `[{ id: 'default', schema }]` for both flows, `Capabilities.schema.output` is typed accordingly and `DEFAULT_SCHEMA_ID` is exported - CloudTAK v14 rejects Tasks that return a single unnamed Output schema
+- :arrow_up: Regenerate `api-types` from CloudTAK v14 - the deprecated bare string `external_id` is gone from CoreEvent & CoreDevice requests & responses
+
 ### v10.26.0 - 2026-11-01
 
 - :tada: Add a `webhooks.rawBody` option to `TaskBase.init()` & the constructor - when set, `controlWebhooks()` parses form & JSON bodies ahead of the Schema router and keeps the unparsed bytes on `req.rawBody` so a Task can verify an HMAC signature header (ie: Slack, Stripe or GitHub) over the exact body it was computed on

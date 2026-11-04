@@ -164,6 +164,8 @@ export default class Task extends ETL {
                 })
             });
         } else {
+            // A single Output schema is published to CloudTAK as the named schema `default` -
+            // return an array of `{ id, schema }` entries to describe multiple Feature shapes
             return Type.Object({});
         }
     }

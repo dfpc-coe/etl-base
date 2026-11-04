@@ -42,6 +42,14 @@ export interface NamedSchema {
     schema: TSchema;
 }
 
+/** Output schema id a Task returning a single unnamed schema is published under */
+export const DEFAULT_SCHEMA_ID = 'default';
+
+export const CapabilitiesNamedSchema = Type.Object({
+    id: Type.String(),
+    schema: Type.Unknown(),
+});
+
 /**
  * @deprecated Submit a `SubmitFeatureCollection` carrying a `schema` instead -
  * CloudTAK never implemented the /layer/:layer/submit API this targets
@@ -139,7 +147,7 @@ export const Capabilities = Type.Object({
         schema: Type.Object({
             input: Type.Unknown(),
             inputError: Type.Optional(CapabilitiesError),
-            output: Type.Unknown(),
+            output: Type.Array(CapabilitiesNamedSchema),
             outputError: Type.Optional(CapabilitiesError),
         })
     })),
@@ -147,7 +155,7 @@ export const Capabilities = Type.Object({
         schema: Type.Object({
             input: Type.Unknown(),
             inputError: Type.Optional(CapabilitiesError),
-            output: Type.Unknown(),
+            output: Type.Array(CapabilitiesNamedSchema),
             outputError: Type.Optional(CapabilitiesError),
         })
     }))
