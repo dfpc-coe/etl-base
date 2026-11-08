@@ -26,6 +26,10 @@ export enum StaticCapabilitiesVersion {
  *
  * A permission is expressed as `<permission>:<level>` - ie `video:read` - where
  * `<permission>:*` grants every level of the permission
+ *
+ * Sub-resources of a Core Entity are layered on their parent - `assignment`
+ * and `effect` routes also require the matching `event` level, and `timeline`
+ * routes also require `event:read` or `device:read` for the Entity's kind
  */
 export const PERMISSIONS: Record<string, Array<string>> = {
     feature: ['submit'],
@@ -34,6 +38,7 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     event: ['create', 'read', 'update', 'delete'],
     assignment: ['create', 'read', 'update', 'delete'],
     effect: ['create', 'read', 'update', 'delete'],
+    timeline: ['create', 'read', 'update', 'delete'],
     device: ['create', 'read', 'update', 'delete'],
     search: ['read'],
     group: ['read', 'update'],

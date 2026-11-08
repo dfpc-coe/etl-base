@@ -107,6 +107,7 @@ test('PERMISSIONS', () => {
         event: ['create', 'read', 'update', 'delete'],
         assignment: ['create', 'read', 'update', 'delete'],
         effect: ['create', 'read', 'update', 'delete'],
+        timeline: ['create', 'read', 'update', 'delete'],
         device: ['create', 'read', 'update', 'delete'],
         search: ['read'],
         group: ['read', 'update'],

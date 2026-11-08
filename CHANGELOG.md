@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v11.1.0 - 2026-11-08
+
+- :tada: Add the `timeline` permission (`create`, `read`, `update`, `delete`) for Core Entity Timeline entries - CloudTAK also requires `event:read` or `device:read` for the Entity's kind, so a Task declaring `timeline:create` must declare that read scope too
+
 ### v11.0.0 - 2026-11-04
 
 - :rocket: **Breaking** `capabilities()` always publishes Output schemas as an array of named schemas - a single schema returned by `schema(SchemaType.Output)` is wrapped as `[{ id: 'default', schema }]` for both flows, `Capabilities.schema.output` is typed accordingly and `DEFAULT_SCHEMA_ID` is exported - CloudTAK v14 rejects Tasks that return a single unnamed Output schema
