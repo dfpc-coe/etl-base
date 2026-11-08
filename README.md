@@ -245,6 +245,13 @@ await this.api.Entity.delete(EntityKind.DEVICE, devices.items[0].id);
 // People assigned to an Event
 const assignees = await this.api.Assignment.list(event.id);
 await this.api.Assignment.create(event.id, { name: 'Alice', role: 'Incident Commander', remarks: '' });
+
+// Timeline entries of an Event or Device - replaying a source feed with stable
+// external IDs upserts in place, so the same entry is never written twice
+await this.api.Timeline.upsert(event.id, [{
+    type: 'unit', occurred: '2026-11-08T17:02:11Z', author: 'COM7',
+    body: 'En Route', metadata: { unit: 'E1', status: 'En Route' }, external_id: 'cad-log-8812'
+}]);
 ```
 
 Outside of a task the client is created directly - `APIAuthToken` sends any

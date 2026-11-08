@@ -44,3 +44,10 @@ export type CoreEventAssignmentList = APIResponse<'/api/core/event/{:event}/assi
 export type CoreEventAssignmentListQuery = APIQuery<'/api/core/event/{:event}/assignment', 'get'>;
 export type CoreEventAssignmentCreate = APIBody<'/api/core/event/{:event}/assignment', 'post'>;
 export type CoreEventAssignmentUpdate = APIBody<'/api/core/event/{:event}/assignment/{:assignment}', 'patch'>;
+
+export type CoreEntityTimeline = APIResponse<'/api/core/entity/{:entity}/timeline/{:entry}', 'get'>;
+export type CoreEntityTimelineList = APIResponse<'/api/core/entity/{:entity}/timeline', 'get'>;
+export type CoreEntityTimelineListQuery = APIQuery<'/api/core/entity/{:entity}/timeline', 'get'>;
+export type CoreEntityTimelineInput = APIBody<'/api/core/entity/{:entity}/timeline', 'post'>;
+export type CoreEntityTimelineUpsert = APIResponse<'/api/core/entity/{:entity}/timeline', 'put'>;
+export type CoreEntityTimelineUpdate = APIBody<'/api/core/entity/{:entity}/timeline/{:entry}', 'patch'>;

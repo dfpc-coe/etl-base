@@ -12,6 +12,11 @@
 
 ### Pending Release
 
+### v11.2.0 - 2026-11-08
+
+- :tada: Add `api.Timeline` to the CloudTAK SDK - `list`, `get`, `create`, `upsert`, `update` & `delete` on `/api/core/entity/:entity/timeline` with `CoreEntityTimeline*` types; `upsert` sends the batch PUT that updates entries in place by `external_id`
+- :arrow_up: Regenerate `api-types` from CloudTAK v13.122.1
+
 ### v11.1.0 - 2026-11-08
 
 - :tada: Add the `timeline` permission (`create`, `read`, `update`, `delete`) for Core Entity Timeline entries - CloudTAK also requires `event:read` or `device:read` for the Entity's kind, so a Task declaring `timeline:create` must declare that read scope too

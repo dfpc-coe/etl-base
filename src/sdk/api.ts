@@ -5,6 +5,7 @@ import Entity, { EntityKind } from './api/entity.js';
 import Event from './api/event.js';
 import Device from './api/device.js';
 import Assignment from './api/assignment.js';
+import Timeline from './api/timeline.js';
 
 /**
  * Request options accepted by {@link CloudTAKAPI.fetch}
@@ -34,6 +35,7 @@ export default class CloudTAKAPI {
     Event: Event;
     Device: Device;
     Assignment: Assignment;
+    Timeline: Timeline;
 
     constructor(url: URL | string, auth: APIAuth = new APIAuth()) {
         this.url = url instanceof URL ? url : new URL(url);
@@ -43,6 +45,7 @@ export default class CloudTAKAPI {
         this.Event = new Event(this);
         this.Device = new Device(this);
         this.Assignment = new Assignment(this);
+        this.Timeline = new Timeline(this);
     }
 
     /**
@@ -197,5 +200,6 @@ export {
     EntityKind,
     Event,
     Device,
-    Assignment
+    Assignment,
+    Timeline
 };

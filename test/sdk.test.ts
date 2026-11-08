@@ -5,6 +5,7 @@ import type { AddressInfo } from 'node:net';
 import jwt from 'jsonwebtoken';
 import Err from '@openaddresses/batch-error';
 import CloudTAKAPI, { EntityKind } from '../src/sdk/api.js';
+import TimelineCommands from '../src/sdk/api/timeline.js';
 import { APIAuth, APIAuthToken, APIAuthLayer, DEFAULT_LAYER_SECRET } from '../src/sdk/auth.js';
 import type { CoreEvent, CoreDevice, CoreEventAssignment } from '../src/sdk/api/types.js';
 import TaskBase from '../index.js';
@@ -351,6 +352,97 @@ test('Assignment.update & delete', async () => {
     assert.equal(last().url, '/api/core/event/evt-1/assignment/asg-1');
     assert.equal(last().body, null);
     assert.deepEqual(res, { status: 200, message: 'Assignment Deleted' });
+});
+
+test('Timeline.list: GET /api/core/entity/:entity/timeline with query', async () => {
+    const api = new CloudTAKAPI(base, new APIAuthToken('etl.token'));
+
+    await api.Timeline.list('ent 1', { limit: 5, type: 'unit', order: 'asc' });
+
+    const url = new URL(last().url, base);
+    assert.equal(last().method, 'GET');
+    assert.equal(url.pathname, '/api/core/entity/ent%201/timeline');
+    assert.equal(url.searchParams.get('limit'), '5');
+    assert.equal(url.searchParams.get('type'), 'unit');
+    assert.equal(url.searchParams.get('order'), 'asc');
+
+    await api.Timeline.list('ent-1');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline');
+});
+
+test('Timeline.get: GET /api/core/entity/:entity/timeline/:entry', async () => {
+    const api = new CloudTAKAPI(base, new APIAuthToken('etl.token'));
+
+    await api.Timeline.get('ent-1', 'tl/1');
+
+    assert.equal(last().method, 'GET');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline/tl%2F1');
+    assert.equal(last().auth, 'Bearer etl.token');
+});
+
+test('Timeline.create: POST JSON body', async () => {
+    const api = new CloudTAKAPI(base, new APIAuthToken('etl.token'));
+
+    forced = {
+        status: 200,
+        body: {
+            id: 'tl-1', entity: 'ent-1', type: 'unit', occurred: 'o', created: 'c', updated: 'u',
+            username: null, layer: { id: 1, name: 'CAD' }, author: 'COM7', body: 'ADVISED',
+            metadata: { unit: 'E1' }, external_id: 'log-1'
+        }
+    };
+
+    const entry = await api.Timeline.create('ent-1', {
+        type: 'unit', author: 'COM7', body: 'ADVISED', metadata: { unit: 'E1' }, external_id: 'log-1'
+    });
+
+    assert.equal(last().method, 'POST');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline');
+    assert.equal(last().contentType, 'application/json');
+    assert.deepEqual(last().body, { type: 'unit', author: 'COM7', body: 'ADVISED', metadata: { unit: 'E1' }, external_id: 'log-1' });
+    assert.equal(entry.id, 'tl-1');
+    assert.equal(entry.username, null);
+    assert.deepEqual(entry.layer, { id: 1, name: 'CAD' });
+});
+
+test('Timeline.upsert: PUT { entries }', async () => {
+    const api = new CloudTAKAPI(base, new APIAuthToken('etl.token'));
+
+    forced = { status: 200, body: { total: 1, items: [] } };
+
+    const res = await api.Timeline.upsert('ent-1', [
+        { type: 'comment', author: 'COM7', body: 'Hello', metadata: {}, external_id: 'log-1' }
+    ]);
+
+    assert.equal(last().method, 'PUT');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline');
+    assert.deepEqual(last().body, {
+        entries: [{ type: 'comment', author: 'COM7', body: 'Hello', metadata: {}, external_id: 'log-1' }]
+    });
+    assert.equal(res.total, 1);
+    assert.equal(TimelineCommands.UPSERT_MAX, 1000);
+});
+
+test('Timeline.update & delete', async () => {
+    const api = new CloudTAKAPI(base, new APIAuthToken('etl.token'));
+
+    await api.Timeline.update('ent-1', 'tl-1', { body: 'Edited', external_id: null });
+
+    assert.equal(last().method, 'PATCH');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline/tl-1');
+    assert.deepEqual(last().body, { body: 'Edited', external_id: null });
+
+    forced = {
+        status: 200,
+        body: { status: 200, message: 'Timeline Entry Deleted' }
+    };
+
+    const res = await api.Timeline.delete('ent-1', 'tl-1');
+
+    assert.equal(last().method, 'DELETE');
+    assert.equal(last().url, '/api/core/entity/ent-1/timeline/tl-1');
+    assert.equal(last().body, null);
+    assert.deepEqual(res, { status: 200, message: 'Timeline Entry Deleted' });
 });
 
 test('types: responses are typed from the OpenAPI document', () => {

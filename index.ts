@@ -1000,7 +1000,13 @@ export type {
     CoreEventAssignmentList,
     CoreEventAssignmentListQuery,
     CoreEventAssignmentCreate,
-    CoreEventAssignmentUpdate
+    CoreEventAssignmentUpdate,
+    CoreEntityTimeline,
+    CoreEntityTimelineList,
+    CoreEntityTimelineListQuery,
+    CoreEntityTimelineInput,
+    CoreEntityTimelineUpsert,
+    CoreEntityTimelineUpdate
 } from './src/sdk/api/types.js';
 
 export {
