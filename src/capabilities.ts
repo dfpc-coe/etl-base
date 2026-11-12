@@ -29,7 +29,9 @@ export enum StaticCapabilitiesVersion {
  *
  * Sub-resources of a Core Entity are layered on their parent - `assignment`
  * and `effect` routes also require the matching `event` level, and `timeline`
- * routes also require `event:read` or `device:read` for the Entity's kind
+ * routes also require `event:read` or `device:read` for the Entity's kind -
+ * `mission-feature`, `mission-layer`, `mission-log`, `mission-file` and
+ * `mission-user` routes also require `mission:read`
  */
 export const PERMISSIONS: Record<string, Array<string>> = {
     feature: ['submit'],
@@ -43,6 +45,12 @@ export const PERMISSIONS: Record<string, Array<string>> = {
     search: ['read'],
     group: ['read', 'update'],
     attachment: ['create', 'read'],
+    mission: ['create', 'read', 'update', 'delete'],
+    'mission-feature': ['create', 'read', 'delete'],
+    'mission-layer': ['create', 'read', 'update', 'delete'],
+    'mission-log': ['create', 'read', 'update', 'delete'],
+    'mission-file': ['create', 'delete'],
+    'mission-user': ['create', 'read', 'update', 'delete'],
 };
 
 /**

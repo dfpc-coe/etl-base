@@ -112,6 +112,12 @@ test('PERMISSIONS', () => {
         search: ['read'],
         group: ['read', 'update'],
         attachment: ['create', 'read'],
+        mission: ['create', 'read', 'update', 'delete'],
+        'mission-feature': ['create', 'read', 'delete'],
+        'mission-layer': ['create', 'read', 'update', 'delete'],
+        'mission-log': ['create', 'read', 'update', 'delete'],
+        'mission-file': ['create', 'delete'],
+        'mission-user': ['create', 'read', 'update', 'delete'],
     });
 });
 

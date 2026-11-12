@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v11.3.0 - 2026-11-12
+
+- :rocket: Introduce Comprehensive Mission Permissions
+
 ### v11.2.0 - 2026-11-08
 
 - :tada: Add `api.Timeline` to the CloudTAK SDK - `list`, `get`, `create`, `upsert`, `update` & `delete` on `/api/core/entity/:entity/timeline` with `CoreEntityTimeline*` types; `upsert` sends the batch PUT that updates entries in place by `external_id`
