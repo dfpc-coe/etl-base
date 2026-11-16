@@ -4,229 +4,6 @@
  */
 
 export interface paths {
-    "/api/schema": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List all JSON Schemas in use
-         *                 With no parameters this API will return a list of all the endpoints that have a form of schema validation
-         *                 If the url/method params are used, the schemas themselves are returned
-         *
-         *                 Note: If url or method params are used, they must be used together
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description No Description */
-                    method?: "GET" | "PUT" | "POST" | "DELETE" | "OPTIONS" | "HEAD" | "PATCH" | "TRACE";
-                    /** @description No Description */
-                    url?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successful Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Error Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/openapi": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Return a OpenAPI Schema for the API */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successful Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Error Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-                /** @description Error Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: number;
-                            message: string;
-                            /** @description Extended error details (ie: TAK Server exception trace) */
-                            details?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/agency": {
         parameters: {
             query?: never;
@@ -5521,7 +5298,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -5542,6 +5319,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -6149,7 +5934,7 @@ export interface paths {
                                 after?: string;
                                 path?: string;
                             }[];
-                            /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                            /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                             marti_archive?: boolean;
                             icon?: string;
                             droid?: string;
@@ -6170,6 +5955,14 @@ export interface paths {
                             precisionlocation?: {
                                 geopointsrc?: string;
                                 altsrc?: string;
+                            };
+                            address?: {
+                                /** @description Geocoded street address shown in the ATAK point details panel */
+                                text: string;
+                                /** @description Name of the geocoder that produced the address */
+                                geocoder?: string;
+                                /** @description Lookup time of the address */
+                                time?: string;
                             };
                             flow?: {
                                 [key: string]: string;
@@ -6698,7 +6491,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -6719,6 +6512,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -7448,7 +7249,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -7469,6 +7270,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -8201,7 +8010,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -8222,6 +8031,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -8756,7 +8573,7 @@ export interface paths {
                                             after?: string;
                                             path?: string;
                                         }[];
-                                        /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                        /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                         marti_archive?: boolean;
                                         icon?: string;
                                         droid?: string;
@@ -8777,6 +8594,14 @@ export interface paths {
                                         precisionlocation?: {
                                             geopointsrc?: string;
                                             altsrc?: string;
+                                        };
+                                        address?: {
+                                            /** @description Geocoded street address shown in the ATAK point details panel */
+                                            text: string;
+                                            /** @description Name of the geocoder that produced the address */
+                                            geocoder?: string;
+                                            /** @description Lookup time of the address */
+                                            time?: string;
                                         };
                                         flow?: {
                                             [key: string]: string;
@@ -9408,7 +9233,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -9429,6 +9254,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -10069,7 +9902,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -10090,6 +9923,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -16411,7 +16252,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -16432,6 +16273,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -16973,7 +16822,7 @@ export interface paths {
                                             after?: string;
                                             path?: string;
                                         }[];
-                                        /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                        /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                         marti_archive?: boolean;
                                         icon?: string;
                                         droid?: string;
@@ -16994,6 +16843,14 @@ export interface paths {
                                         precisionlocation?: {
                                             geopointsrc?: string;
                                             altsrc?: string;
+                                        };
+                                        address?: {
+                                            /** @description Geocoded street address shown in the ATAK point details panel */
+                                            text: string;
+                                            /** @description Name of the geocoder that produced the address */
+                                            geocoder?: string;
+                                            /** @description Lookup time of the address */
+                                            time?: string;
                                         };
                                         flow?: {
                                             [key: string]: string;
@@ -17517,7 +17374,7 @@ export interface paths {
                                             after?: string;
                                             path?: string;
                                         }[];
-                                        /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                        /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                         marti_archive?: boolean;
                                         icon?: string;
                                         droid?: string;
@@ -17538,6 +17395,14 @@ export interface paths {
                                         precisionlocation?: {
                                             geopointsrc?: string;
                                             altsrc?: string;
+                                        };
+                                        address?: {
+                                            /** @description Geocoded street address shown in the ATAK point details panel */
+                                            text: string;
+                                            /** @description Name of the geocoder that produced the address */
+                                            geocoder?: string;
+                                            /** @description Lookup time of the address */
+                                            time?: string;
                                         };
                                         flow?: {
                                             [key: string]: string;
@@ -20715,6 +20580,8 @@ export interface paths {
                                 /** @description Can users other than the creator edit the Device */
                                 editable: boolean;
                                 battery: null | number;
+                                /** @description Seconds after its last update the Device stops being broadcast to TAK clients - null never expires */
+                                stale: null | number;
                                 /** @description User defined key/value Device metadata */
                                 metadata: {
                                     [key: string]: unknown;
@@ -20892,6 +20759,8 @@ export interface paths {
                          * @default false
                          */
                         simulated: boolean;
+                        /** @description Seconds after its last update the Device stops being broadcast to TAK clients - null never expires */
+                        stale?: null | number;
                         external_id?: {
                             /** @description External system the ID belongs to - ie: active911, caltopo, cad */
                             system: string;
@@ -21023,6 +20892,8 @@ export interface paths {
                             /** @description Can users other than the creator edit the Device */
                             editable: boolean;
                             battery: null | number;
+                            /** @description Seconds after its last update the Device stops being broadcast to TAK clients - null never expires */
+                            stale: null | number;
                             /** @description User defined key/value Device metadata */
                             metadata: {
                                 [key: string]: unknown;
@@ -21241,6 +21112,8 @@ export interface paths {
                             /** @description Can users other than the creator edit the Device */
                             editable: boolean;
                             battery: null | number;
+                            /** @description Seconds after its last update the Device stops being broadcast to TAK clients - null never expires */
+                            stale: null | number;
                             /** @description User defined key/value Device metadata */
                             metadata: {
                                 [key: string]: unknown;
@@ -21495,6 +21368,7 @@ export interface paths {
                         status?: string;
                         battery?: null | number;
                         simulated?: boolean;
+                        stale?: null | number;
                         external_id?: {
                             /** @description External system the ID belongs to - ie: active911, caltopo, cad */
                             system: string;
@@ -21616,6 +21490,8 @@ export interface paths {
                             /** @description Can users other than the creator edit the Device */
                             editable: boolean;
                             battery: null | number;
+                            /** @description Seconds after its last update the Device stops being broadcast to TAK clients - null never expires */
+                            stale: null | number;
                             /** @description User defined key/value Device metadata */
                             metadata: {
                                 [key: string]: unknown;
@@ -21744,7 +21620,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List the Timeline entries of a Core Entity */
+        /** List the Timeline entries of a Core Entity - tokens also need read access to the Entity kind (event:read or device:read) */
         get: {
             parameters: {
                 query: {
@@ -21888,7 +21764,7 @@ export interface paths {
                 };
             };
         };
-        /** Add many Timeline entries to a Core Entity in one call - entries with an external_id already present on the Entity are updated in place */
+        /** Add many Timeline entries to a Core Entity in one call - entries with an external_id already present on the Entity are updated in place. Tokens also need read access to the Entity kind (event:read or device:read) */
         put: {
             parameters: {
                 query?: never;
@@ -22040,7 +21916,7 @@ export interface paths {
                 };
             };
         };
-        /** Add a Timeline entry to a Core Entity */
+        /** Add a Timeline entry to a Core Entity - tokens also need read access to the Entity kind (event:read or device:read) */
         post: {
             parameters: {
                 query?: never;
@@ -22200,7 +22076,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a Timeline entry of a Core Entity */
+        /** Get a Timeline entry of a Core Entity - tokens also need read access to the Entity kind (event:read or device:read) */
         get: {
             parameters: {
                 query?: never;
@@ -22323,7 +22199,7 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        /** Remove a Timeline entry from a Core Entity */
+        /** Remove a Timeline entry from a Core Entity - tokens also need read access to the Entity kind (event:read or device:read) */
         delete: {
             parameters: {
                 query?: never;
@@ -22426,7 +22302,7 @@ export interface paths {
         };
         options?: never;
         head?: never;
-        /** Update a Timeline entry of a Core Entity */
+        /** Update a Timeline entry of a Core Entity - tokens also need read access to the Entity kind (event:read or device:read) */
         patch: {
             parameters: {
                 query?: never;
@@ -35906,7 +35782,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -35927,6 +35803,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -36555,7 +36439,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -36576,6 +36460,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -37214,7 +37106,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -37235,6 +37127,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -40521,7 +40421,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -40542,6 +40442,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -41160,7 +41068,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -41181,6 +41089,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -45663,12 +45579,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Helper API to list groups that the client is part of. Pass connection to list the groups a Connection is part of, or connection=0 for the server certificate. Resource tokens require the `group:read` permission */
+        /** Helper API to list groups that the client is part of. Pass connection to list the groups a Connection is part of, connection=0 for the server certificate, or impersonate for another user (System Admin only). Resource tokens require the `group:read` permission */
         get: {
             parameters: {
                 query?: {
                     /** @description User tokens only - act as this Connection, or 0 for the server certificate (System Admin only). Connection & Layer tokens infer the Connection from the token */
                     connection?: number;
+                    /** @description System Admin only - act as the given username */
+                    impersonate?: string;
                     /** @description This tells TAK server to return the users cached group selection vs the groups that came directly from the auth backend. */
                     useCache?: boolean;
                 };
@@ -45781,6 +45699,8 @@ export interface paths {
                     clientUid?: string;
                     /** @description User tokens only - act as this Connection, or 0 for the server certificate (System Admin only). Connection & Layer tokens infer the Connection from the token */
                     connection?: number;
+                    /** @description System Admin only - act as the given username */
+                    impersonate?: string;
                 };
                 header?: never;
                 path?: never;
@@ -49567,7 +49487,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -49588,6 +49508,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;
@@ -50205,7 +50133,7 @@ export interface paths {
                                 after?: string;
                                 path?: string;
                             }[];
-                            /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                            /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                             marti_archive?: boolean;
                             icon?: string;
                             droid?: string;
@@ -50226,6 +50154,14 @@ export interface paths {
                             precisionlocation?: {
                                 geopointsrc?: string;
                                 altsrc?: string;
+                            };
+                            address?: {
+                                /** @description Geocoded street address shown in the ATAK point details panel */
+                                text: string;
+                                /** @description Name of the geocoder that produced the address */
+                                geocoder?: string;
+                                /** @description Lookup time of the address */
+                                time?: string;
                             };
                             flow?: {
                                 [key: string]: string;
@@ -50754,7 +50690,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -50775,6 +50711,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -51501,7 +51445,7 @@ export interface paths {
                                     after?: string;
                                     path?: string;
                                 }[];
-                                /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                 marti_archive?: boolean;
                                 icon?: string;
                                 droid?: string;
@@ -51522,6 +51466,14 @@ export interface paths {
                                 precisionlocation?: {
                                     geopointsrc?: string;
                                     altsrc?: string;
+                                };
+                                address?: {
+                                    /** @description Geocoded street address shown in the ATAK point details panel */
+                                    text: string;
+                                    /** @description Name of the geocoder that produced the address */
+                                    geocoder?: string;
+                                    /** @description Lookup time of the address */
+                                    time?: string;
                                 };
                                 flow?: {
                                     [key: string]: string;
@@ -55623,6 +55575,12 @@ export interface paths {
                             display_speed: "m/s" | "km/h" | "mi/h";
                             display_radiation_dose: "sieverts" | "rems";
                             display_wakelock: "Default" | "Charging" | "Always On";
+                            notification_contact: boolean;
+                            notification_import: boolean;
+                            notification_alert: boolean;
+                            notification_medical: boolean;
+                            notification_mission: boolean;
+                            notification_chat: boolean;
                             geometry_point_type?: string;
                             geometry_point_color?: string;
                             geometry_point_icon?: string;
@@ -55751,6 +55709,12 @@ export interface paths {
                         display_speed?: "m/s" | "km/h" | "mi/h";
                         display_radiation_dose?: "sieverts" | "rems";
                         display_wakelock?: "Default" | "Charging" | "Always On";
+                        notification_contact?: boolean;
+                        notification_import?: boolean;
+                        notification_alert?: boolean;
+                        notification_medical?: boolean;
+                        notification_mission?: boolean;
+                        notification_chat?: boolean;
                         geometry_point_type?: string;
                         geometry_point_color?: string;
                         geometry_point_icon?: string;
@@ -55810,6 +55774,12 @@ export interface paths {
                             display_speed: "m/s" | "km/h" | "mi/h";
                             display_radiation_dose: "sieverts" | "rems";
                             display_wakelock: "Default" | "Charging" | "Always On";
+                            notification_contact: boolean;
+                            notification_import: boolean;
+                            notification_alert: boolean;
+                            notification_medical: boolean;
+                            notification_mission: boolean;
+                            notification_chat: boolean;
                             geometry_point_type?: string;
                             geometry_point_color?: string;
                             geometry_point_icon?: string;
@@ -59217,6 +59187,229 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all JSON Schemas in use
+         *                 With no parameters this API will return a list of all the endpoints that have a form of schema validation
+         *                 If the url/method params are used, the schemas themselves are returned
+         *
+         *                 Note: If url or method params are used, they must be used together
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description No Description */
+                    method?: "GET" | "PUT" | "POST" | "DELETE" | "OPTIONS" | "HEAD" | "PATCH" | "TRACE";
+                    /** @description No Description */
+                    url?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Error Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/openapi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Return a OpenAPI Schema for the API */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Error Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+                /** @description Error Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            status: number;
+                            message: string;
+                            /** @description Extended error details (ie: TAK Server exception trace) */
+                            details?: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/swagger": {
         parameters: {
             query?: never;
@@ -59544,6 +59737,12 @@ export interface paths {
                             display_speed: "m/s" | "km/h" | "mi/h";
                             display_radiation_dose: "sieverts" | "rems";
                             display_wakelock: "Default" | "Charging" | "Always On";
+                            notification_contact: boolean;
+                            notification_import: boolean;
+                            notification_alert: boolean;
+                            notification_medical: boolean;
+                            notification_mission: boolean;
+                            notification_chat: boolean;
                             geometry_point_type?: string;
                             geometry_point_color?: string;
                             geometry_point_icon?: string;
@@ -59826,6 +60025,12 @@ export interface paths {
                             display_speed: "m/s" | "km/h" | "mi/h";
                             display_radiation_dose: "sieverts" | "rems";
                             display_wakelock: "Default" | "Charging" | "Always On";
+                            notification_contact: boolean;
+                            notification_import: boolean;
+                            notification_alert: boolean;
+                            notification_medical: boolean;
+                            notification_mission: boolean;
+                            notification_chat: boolean;
                             geometry_point_type?: string;
                             geometry_point_color?: string;
                             geometry_point_icon?: string;
@@ -63659,7 +63864,7 @@ export interface paths {
                                         after?: string;
                                         path?: string;
                                     }[];
-                                    /** @description Presence of marti._attributes.archive - instructs the TAK Server to archive this message */
+                                    /** @description Value of marti._attributes.archive - true instructs the TAK Server to archive this message, false instructs it not to regardless of the input default */
                                     marti_archive?: boolean;
                                     icon?: string;
                                     droid?: string;
@@ -63680,6 +63885,14 @@ export interface paths {
                                     precisionlocation?: {
                                         geopointsrc?: string;
                                         altsrc?: string;
+                                    };
+                                    address?: {
+                                        /** @description Geocoded street address shown in the ATAK point details panel */
+                                        text: string;
+                                        /** @description Name of the geocoder that produced the address */
+                                        geocoder?: string;
+                                        /** @description Lookup time of the address */
+                                        time?: string;
                                     };
                                     flow?: {
                                         [key: string]: string;

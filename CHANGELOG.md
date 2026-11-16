@@ -12,6 +12,11 @@
 
 ### Pending Release
 
+### v11.3.1 - 2026-11-16
+
+- :tada: Add `stale` to the `CoreDevice` types - seconds after its last update a Device stops being broadcast to TAK clients
+- :arrow_up: Regenerate `api-types` from CloudTAK
+
 ### v11.3.0 - 2026-11-12
 
 - :rocket: Introduce Comprehensive Mission Permissions
