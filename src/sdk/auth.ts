@@ -20,7 +20,7 @@ export class APIAuth {
     }
 
     async fetch(api: CloudTAKAPI, url: URL, opts: FetchInit): Promise<TypedResponse> {
-        return await fetch(url, {
+        return fetch(url, {
             ...opts,
             safeUrlAllow: [api.url.origin]
         });
@@ -41,16 +41,17 @@ export class APIAuthToken extends APIAuth {
     }
 
     async fetch(api: CloudTAKAPI, url: URL, opts: FetchInit): Promise<TypedResponse> {
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- CloudTAKAPI.fetch always passes a plain header object
         const headers = opts.headers as Record<string, string> | undefined;
 
         if (!headers || !headers['Authorization']) {
             opts.headers = {
-                ...(headers || {}),
+                ...headers,
                 Authorization: `Bearer ${this.token}`
             };
         }
 
-        return await super.fetch(api, url, opts);
+        return super.fetch(api, url, opts);
     }
 }
 

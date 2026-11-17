@@ -19,7 +19,7 @@ export default class EventCommands extends Commands {
      * Layer tokens require `event:read`
      */
     async list(query: Partial<CoreEventListQuery> = {}): Promise<CoreEventList> {
-        return await this.api.Entity.list(EntityKind.EVENT, query);
+        return this.api.Entity.list(EntityKind.EVENT, query);
     }
 
     /**
@@ -28,7 +28,7 @@ export default class EventCommands extends Commands {
      * Layer tokens require `event:read`
      */
     async get(id: string): Promise<CoreEvent> {
-        return await this.api.Entity.get(EntityKind.EVENT, id);
+        return this.api.Entity.get(EntityKind.EVENT, id);
     }
 
     /**
@@ -37,7 +37,7 @@ export default class EventCommands extends Commands {
      * Layer tokens require `event:create`
      */
     async create(body: CoreEventCreate): Promise<CoreEvent> {
-        return await this.api.Entity.create(EntityKind.EVENT, body);
+        return this.api.Entity.create(EntityKind.EVENT, body);
     }
 
     /**
@@ -46,7 +46,7 @@ export default class EventCommands extends Commands {
      * Layer tokens require `event:update`
      */
     async update(id: string, body: CoreEventUpdate): Promise<CoreEvent> {
-        return await this.api.Entity.update(EntityKind.EVENT, id, body);
+        return this.api.Entity.update(EntityKind.EVENT, id, body);
     }
 
     /**
@@ -55,6 +55,6 @@ export default class EventCommands extends Commands {
      * Layer tokens require `event:delete`
      */
     async delete(id: string): Promise<StandardResponse> {
-        return await this.api.Entity.delete(EntityKind.EVENT, id);
+        return this.api.Entity.delete(EntityKind.EVENT, id);
     }
 }

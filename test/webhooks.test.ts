@@ -43,10 +43,10 @@ class WebhookTask extends TaskBase {
 async function serve(task: TaskBase): Promise<{ server: Server, url: string }> {
     const app = await task.controlWebhooks();
 
-    return await new Promise((resolve) => {
+    return new Promise((resolve) => {
         const server = app.listen(0, () => {
             const address = server.address();
-            if (!address || typeof address === 'string') throw new Error('No port');
+            if (address === null || typeof address === 'string') throw new Error('No port');
             resolve({ server, url: `http://127.0.0.1:${address.port}` });
         });
     });

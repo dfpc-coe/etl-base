@@ -23,7 +23,7 @@ let forced: null | { status: number; body: unknown } = null;
 
 const server = http.createServer((req, res) => {
     const chunks: Array<Buffer> = [];
-    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('data', (chunk: Buffer) => { chunks.push(chunk); });
     req.on('end', () => {
         requests.push({
             method: req.method || '',
@@ -78,12 +78,12 @@ class MultiSchemaTask extends TaskBase {
             ];
         }
 
-        return await super.schema(type, flow);
+        return super.schema(type, flow);
     }
 }
 
 test('submit: setup mock CloudTAK API', async () => {
-    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', resolve); });
     const address = server.address() as AddressInfo;
 
     process.env.ETL_API = `http://127.0.0.1:${address.port}`;
@@ -479,5 +479,10 @@ test('submit: other failed posts include the status and message', async () => {
 });
 
 test('submit: teardown mock CloudTAK API', async () => {
-    await new Promise<void>((resolve, reject) => server.close((err) => err ? reject(err) : resolve()));
+    await new Promise<void>((resolve, reject) => {
+        server.close((err) => {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
 });

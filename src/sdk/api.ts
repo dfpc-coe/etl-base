@@ -93,7 +93,7 @@ export default class CloudTAKAPI {
      * @param opts - Fetch options
      */
     async fetch<T = unknown>(url: string | URL, opts: APIFetchInit = {}): Promise<T> {
-        const headers: Record<string, string> = { ...(opts.headers || {}) };
+        const headers: Record<string, string> = { ...opts.headers };
 
         let body = opts.body;
 
@@ -109,6 +109,7 @@ export default class CloudTAKAPI {
             res = await this.auth.fetch(this, this.stdurl(url), {
                 ...opts,
                 headers,
+                // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- objects & arrays are stringified above
                 body: body as FetchInit['body']
             });
         } catch (err) {
@@ -118,15 +119,15 @@ export default class CloudTAKAPI {
 
         if (!res.ok) throw await CloudTAKAPI.error(res);
 
-        if (res.status === 204) return undefined as T;
+        let parsed: unknown;
 
-        const type = res.headers.get('content-type') || '';
-
-        if (type.startsWith('application/json')) {
-            return await res.json() as T;
-        } else {
-            return await res.text() as T;
+        if (res.status !== 204) {
+            const type = res.headers.get('content-type') || '';
+            parsed = type.startsWith('application/json') ? await res.json() : await res.text();
         }
+
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the response type is chosen by the caller
+        return parsed as T;
     }
 
     /**
@@ -142,9 +143,9 @@ export default class CloudTAKAPI {
         }
 
         try {
-            const json = JSON.parse(text);
+            const json: unknown = JSON.parse(text);
 
-            if (json && typeof json.message === 'string') {
+            if (isPlainObject(json) && typeof json.message === 'string') {
                 return new Err(res.status, null, json.message);
             }
         } catch {
@@ -171,7 +172,7 @@ function formatFetchError(err: unknown): string {
     const messages = new Set<string>();
 
     const push = (value: unknown) => {
-        if (!value) return;
+        if (typeof value !== 'string' && typeof value !== 'number') return;
 
         const message = String(value).trim();
 
@@ -189,9 +190,9 @@ function formatFetchError(err: unknown): string {
         current = nested.cause;
     }
 
-    if (current) push(current);
+    push(current);
 
-    if (messages.size) return Array.from(messages).join(': ');
+    if (messages.size > 0) return Array.from(messages).join(': ');
     return err.message;
 }
 

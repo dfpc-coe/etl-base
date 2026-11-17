@@ -24,7 +24,7 @@ let forced: null | { status: number; body: unknown; contentType?: string } = nul
 
 const server = http.createServer((req, res) => {
     const chunks: Array<Buffer> = [];
-    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('data', (chunk: Buffer) => { chunks.push(chunk); });
     req.on('end', () => {
         const raw = Buffer.concat(chunks).toString();
 
@@ -58,7 +58,7 @@ function last(): CapturedRequest {
 }
 
 test('start server', async () => {
-    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', resolve); });
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 });
 
@@ -79,7 +79,7 @@ test('CloudTAKAPI.fromEnv: reads ETL_API & ETL_TOKEN', () => {
     const api = CloudTAKAPI.fromEnv({ ETL_API: base, ETL_TOKEN: 'etl.abc' });
     assert.equal(api.url.href, `${base}/`);
     assert.ok(api.auth instanceof APIAuthToken);
-    assert.equal((api.auth as APIAuthToken).token, 'etl.abc');
+    assert.equal((api.auth).token, 'etl.abc');
 
     assert.throws(() => CloudTAKAPI.fromEnv({ ETL_TOKEN: 'etl.abc' }), /No ETL_API Provided/);
     assert.throws(() => CloudTAKAPI.fromEnv({ ETL_API: base }), /No ETL_TOKEN Provided/);
@@ -465,11 +465,16 @@ test('types: responses are typed from the OpenAPI document', () => {
         role: 'IC'
     };
 
-    assert.ok(event);
-    assert.ok(device);
-    assert.ok(assignment);
+    assert.equal(typeof event, 'object');
+    assert.equal(typeof device, 'object');
+    assert.equal(typeof assignment, 'object');
 });
 
 test('stop server', async () => {
-    await new Promise<void>((resolve, reject) => server.close((err) => err ? reject(err) : resolve()));
+    await new Promise<void>((resolve, reject) => {
+        server.close((err) => {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
 });

@@ -55,8 +55,8 @@ export interface EmailMessage {
 function mailboxes(addresses?: Array<Address>): Array<EmailAddress> {
     const flat: Array<EmailAddress> = [];
 
-    for (const address of addresses || []) {
-        for (const mailbox of address.group || [address]) {
+    for (const address of addresses ?? []) {
+        for (const mailbox of address.group ?? [address]) {
             if (mailbox.address) flat.push({ name: mailbox.name, address: mailbox.address });
         }
     }
@@ -71,7 +71,7 @@ export default class Email {
 
         return {
             id,
-            from: mailboxes(parsed.from ? [parsed.from] : [])[0] || null,
+            from: mailboxes(parsed.from ? [parsed.from] : []).at(0) ?? null,
             to: mailboxes(parsed.to),
             cc: mailboxes(parsed.cc),
             subject: parsed.subject || '',
@@ -86,7 +86,7 @@ export default class Email {
                 contentId: attachment.contentId || null,
                 content: typeof attachment.content === 'string'
                     ? Buffer.from(attachment.content, attachment.encoding === 'base64' ? 'base64' : 'utf8')
-                    : Buffer.from(attachment.content as Uint8Array),
+                    : Buffer.from(new Uint8Array(attachment.content)),
             })),
             raw: buffer,
         };

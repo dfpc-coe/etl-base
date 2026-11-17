@@ -73,63 +73,82 @@ export async function local(task: TaskBase, current: string) {
     }
 }
 
+type TaskStatics = Pick<typeof TaskBase, 'flow' | 'invocation' | 'invocationDefaults' | 'webhooks'>;
+
+function statics(task: TaskBase): TaskStatics {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- constructor is typed as Function
+    return task.constructor as typeof TaskBase;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+function isSQSEvent(event: Event): event is Lambda.SQSEvent {
+    return Array.isArray(event.Records);
+}
+
+function verifyRawBody(req: express.Request, _res: express.Response, buf: Buffer): void {
+    req.rawBody = buf;
+}
+
 export async function handler(
     task: TaskBase,
     event: Event = {},
     context?: object
 ) {
+    const { flow, invocation } = statics(task);
+
     if (task.logging.event) {
         console.log('Event: ', JSON.stringify(event));
     }
 
-    if (event.type == 'capabilities') {
-        return await task.capabilities();
-    } else if (String(event.type) == 'environment:incoming') {
-        return await task.update(DataFlowType.Incoming);
-    } else if (String(event.type) == 'environment:outgoing') {
-        return await task.update(DataFlowType.Outgoing);
+    if (event.type === 'capabilities') {
+        return task.capabilities();
+    } else if (String(event.type) === 'environment:incoming') {
+        await task.update(DataFlowType.Incoming);
+        return undefined;
+    } else if (String(event.type) === 'environment:outgoing') {
+        await task.update(DataFlowType.Outgoing);
+        return undefined;
     } else if (event.type === 'email') {
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (!task.constructor.flow.includes(DataFlowType.Incoming)) {
+        if (!flow.includes(DataFlowType.Incoming)) {
             throw new Error('Incoming Data flow is not provided by this ETL Layer');
         }
 
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (!task.constructor.invocation.includes(InvocationType.Email)) {
+        if (!invocation.includes(InvocationType.Email)) {
             throw new Error('Email Invocation type is not configured');
         }
 
-        return await task.email(await Email.fetch(TypeValidator.type(EmailEvent, event, { convert: false })));
-    } else if (Array.isArray(event.Records)) {
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (!task.constructor.flow.includes(DataFlowType.Outgoing)) {
+        await task.email(await Email.fetch(TypeValidator.type(EmailEvent, event, { convert: false })));
+        return undefined;
+    } else if (isSQSEvent(event)) {
+        if (!flow.includes(DataFlowType.Outgoing)) {
             throw new Error('Outgoing Data flow is not provided by this ETL Layer');
         }
 
-        return task.outgoing(event as Lambda.SQSEvent)
-    } else {
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (!task.constructor.flow.includes(DataFlowType.Incoming)) {
-            throw new Error('Incoming Data flow is not provided by this ETL Layer');
+        return task.outgoing(event);
+    }
+
+    if (!flow.includes(DataFlowType.Incoming)) {
+        throw new Error('Incoming Data flow is not provided by this ETL Layer');
+    }
+
+    if (event.version && event.routeKey) {
+        if (!invocation.includes(InvocationType.Webhook)) {
+            throw new Error('Webhook Invocation type is not configured');
         }
 
-        if (event.version && event.routeKey) {
-            // @ts-expect-error Typescript doesn't handle this yet
-            if (task.constructor.invocation.includes(InvocationType.Webhook)) {
-                if (!context) throw new Error('Context must be provided for webhook functionality');
-                return serverless(await task.controlWebhooks())(event, context);
-            } else {
-                throw new Error('Webhook Invocation type is not configured');
-            }
-        } else {
-            // @ts-expect-error Typescript doesn't handle this yet
-            if (task.constructor.invocation.includes(InvocationType.Schedule)) {
-                await task.control();
-            } else {
-                throw new Error('Schedule Invocation type is not configured');
-            }
-        }
+        if (!context) throw new Error('Context must be provided for webhook functionality');
+        return serverless(await task.controlWebhooks())(event, context);
     }
+
+    if (!invocation.includes(InvocationType.Schedule)) {
+        throw new Error('Schedule Invocation type is not configured');
+    }
+
+    await task.control();
+    return undefined;
 }
 
 export type TaskLogging = {
@@ -190,17 +209,13 @@ export default class TaskBase {
             }
         }
     ) {
-        if (!opts) opts = {};
-        if (!opts.logging) opts.logging = {};
-        if (!opts.webhooks) opts.webhooks = {};
-
         this.logging = {
-            event: opts.logging.event === undefined ? false : opts.logging.event,
-            webhooks: opts.logging.webhooks === undefined ? true : opts.logging.webhooks
+            event: opts?.logging?.event ?? false,
+            webhooks: opts?.logging?.webhooks ?? true
         }
 
         this.webhookOptions = {
-            rawBody: opts.webhooks.rawBody === undefined ? false : opts.webhooks.rawBody
+            rawBody: opts?.webhooks?.rawBody ?? false
         }
 
         this.etl = {
@@ -248,9 +263,9 @@ export default class TaskBase {
 
                 if (!secret.SecretString) throw new Error('No Secret Set');
 
-                process.env.ETL_TOKEN = APIAuthLayer.sign(parseInt(process.env.ETL_LAYER), secret.SecretString)
+                process.env.ETL_TOKEN = APIAuthLayer.sign(Number(process.env.ETL_LAYER), secret.SecretString)
             } else {
-                process.env.ETL_TOKEN = APIAuthLayer.sign(parseInt(process.env.ETL_LAYER))
+                process.env.ETL_TOKEN = APIAuthLayer.sign(Number(process.env.ETL_LAYER))
             }
         }
 
@@ -268,23 +283,20 @@ export default class TaskBase {
      */
     static outgoingMessages(event: Lambda.SQSEvent): Array<Static<typeof OutgoingMessage>> {
         return event.Records.map((record) => {
-            const body = JSON.parse(record.body) as Record<string, unknown>;
-            if (body.type === undefined) body.type = OutgoingMessageType.Feature;
+            const body: unknown = JSON.parse(record.body);
+            if (isRecord(body) && body.type === undefined) body.type = OutgoingMessageType.Feature;
 
             return TypeValidator.type(OutgoingMessage, body, { convert: false });
         });
     }
 
-    async control(): Promise<void> {
-        return;
-    }
+    async control(): Promise<void> {}
 
     /**
      * Called for each email received by a Layer with the Email invocation enabled
      */
     async email(message: EmailMessage): Promise<void> {
         console.log(`ok - email ${message.id} not handled`);
-        return;
     }
 
     /**
@@ -292,22 +304,21 @@ export default class TaskBase {
      */
     async update(flow: DataFlowType): Promise<void> {
         console.log('update:', flow);
-        return;
     }
 
     async capabilities(): Promise<Static<typeof Capabilities>> {
+        const { flow, invocation, invocationDefaults } = statics(this);
+        const pkg: unknown = JSON.parse(String(fs.readFileSync('package.json')));
+
         const base: Static<typeof Capabilities> = {
             name: this.constructor.name,
-            version: JSON.parse(String(fs.readFileSync('package.json'))).version
+            version: this.type(Type.Object({ version: Type.String() }), pkg).version
         };
 
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (this.constructor.flow.includes(DataFlowType.Incoming)) {
+        if (flow.includes(DataFlowType.Incoming)) {
             base.incoming = {
-                // @ts-expect-error Typescript doesn't handle this yet
-                invocation: this.constructor.invocation,
-                // @ts-expect-error Typescript doesn't handle this yet
-                invocationDefaults: this.constructor.invocationDefaults,
+                invocation,
+                invocationDefaults,
                 schema: {
                     input: null,
                     output: []
@@ -333,8 +344,7 @@ export default class TaskBase {
             }
         }
 
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (this.constructor.flow.includes(DataFlowType.Outgoing)) {
+        if (flow.includes(DataFlowType.Outgoing)) {
             base.outgoing = {
                 schema: {
                     input: null,
@@ -395,20 +405,16 @@ export default class TaskBase {
         type: SchemaType = SchemaType.Input,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<TSchema | Array<NamedSchema>> {
-        if (flow === DataFlowType.Incoming) {
-            if (type === SchemaType.Input) {
-                return Type.Object({
-                    'DEBUG': Type.Boolean({
-                        default: false,
-                        description: 'Print results in logs'
-                    })
-                });
-            } else {
-                return Type.Object({});
-            }
-        } else {
-            return Type.Object({});
+        if (flow === DataFlowType.Incoming && type === SchemaType.Input) {
+            return Type.Object({
+                'DEBUG': Type.Boolean({
+                    default: false,
+                    description: 'Print results in logs'
+                })
+            });
         }
+
+        return Type.Object({});
     }
 
     /**
@@ -428,12 +434,8 @@ export default class TaskBase {
         const app = express();
 
         if (this.webhookOptions.rawBody) {
-            const verify = (req: express.Request, _res: express.Response, buf: Buffer) => {
-                req.rawBody = buf;
-            };
-
-            app.use(express.urlencoded({ extended: true, limit: `${WEBHOOK_BODY_LIMIT}mb`, verify }));
-            app.use(express.json({ limit: `${WEBHOOK_BODY_LIMIT}mb`, verify }));
+            app.use(express.urlencoded({ extended: true, limit: `${WEBHOOK_BODY_LIMIT}mb`, verify: verifyRawBody }));
+            app.use(express.json({ limit: `${WEBHOOK_BODY_LIMIT}mb`, verify: verifyRawBody }));
         }
 
         const schema = new Schema(express.Router(), {
@@ -443,11 +445,8 @@ export default class TaskBase {
 
         app.use(schema.router);
 
-        // @ts-expect-error Typescript doesn't handle this yet
-        if (this.constructor.webhooks) {
-            // @ts-expect-error Typescript doesn't handle this yet
-            await this.constructor.webhooks(schema, this);
-        }
+        const { webhooks } = statics(this);
+        if (webhooks) await webhooks(schema, this);
 
         return app;
     }
@@ -459,8 +458,8 @@ export default class TaskBase {
      * @returns The parsed response body
      */
     async fetch(url: string | URL, opts?: FetchInit): Promise<object> {
-        if (!opts) opts = {};
-        if (!opts.method) opts.method = 'GET';
+        opts ??= {};
+        opts.method ??= 'GET';
         console.log(`ok - ${opts.method}: ${url}`);
 
         const headers: Record<string, string> = {};
@@ -471,6 +470,7 @@ export default class TaskBase {
                     headers[key] = value;
                 }
             } else if (typeof opts.headers === 'object') {
+                // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- remaining header shapes are iterated as plain objects
                 const h = opts.headers as Record<string, string>;
                 for (const key in h) {
                     headers[key] = h[key];
@@ -495,11 +495,12 @@ export default class TaskBase {
             const body = await res.text();
             console.error(body);
 
-            const json = JSON.parse(body)
-            throw new Error(json.message);
-        } else {
-            return await res.json() as object;
+            const json: unknown = JSON.parse(body);
+            throw new Error(isRecord(json) && typeof json.message === 'string' ? json.message : undefined);
         }
+
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- CloudTAK API responses are JSON objects
+        return await res.json() as object;
     }
 
     /**
@@ -508,9 +509,7 @@ export default class TaskBase {
      * @returns The Response from the Layer Alert API
      */
     async alert(alertin: TaskLayerAlert): Promise<object> {
-        if (!this.layer) {
-            this.layer = await this.fetchLayer();
-        }
+        this.layer ??= await this.fetchLayer();
 
         console.log(`ok - Generating Alert`);
         const alert = await fetch(new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/alert`, this.etl.api), {
@@ -526,9 +525,10 @@ export default class TaskBase {
         if (!alert.ok) {
             console.error(await alert.text());
             throw new Error('Failed to post alert to ETL');
-        } else {
-            return await alert.json() as object;
         }
+
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- CloudTAK API responses are JSON objects
+        return await alert.json() as object;
     }
 
     /**
@@ -538,7 +538,7 @@ export default class TaskBase {
         type: T,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<Static<T>> {
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         if (flow === DataFlowType.Incoming) {
             if (!this.layer.incoming) {
@@ -548,7 +548,7 @@ export default class TaskBase {
             return TypeValidator.type(type, this.layer.incoming.environment, {
                 verbose: true
             });
-        } else {
+        }
             if (!this.layer.outgoing) {
                 throw new Error('Cannot call env() without outgoing config');
             }
@@ -556,7 +556,7 @@ export default class TaskBase {
             return TypeValidator.type(type, this.layer.outgoing.environment, {
                 verbose: true
             });
-        }
+        
     }
 
     /**
@@ -567,7 +567,7 @@ export default class TaskBase {
         type: T,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<Static<T>> {
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         if (flow === DataFlowType.Incoming) {
             if (!this.layer.incoming) {
@@ -606,7 +606,7 @@ export default class TaskBase {
         ephem: Record<string, unknown>,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<void> {
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         const url = new URL(`/api/connection/${this.layer.connection}/layer/${this.layer.id}/${flow}/ephemeral`, this.etl.api);
         console.log(`ok - PUT ${url}`);
@@ -670,7 +670,7 @@ export default class TaskBase {
             throw new Error(`Unknown Permission: ${scope} - Permissions must be one of: ${Object.keys(PERMISSIONS).map(p => `${p}:<${PERMISSIONS[p].join('|')}|*>`).join(', ')}`);
         }
 
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         const wildcard = `${scope.slice(0, scope.lastIndexOf(':'))}:*`;
         return this.layer.permissions.includes(scope) || this.layer.permissions.includes(wildcard);
@@ -696,21 +696,22 @@ export default class TaskBase {
      * @returns A boolean representing the success state
      */
     async submit(
+        // oxlint-disable-next-line typescript/no-deprecated -- deprecated API kept for compatibility
         input: Static<typeof Feature.InputFeatureCollection> | Static<typeof SubmitFeatureCollection> | SubmitRecords,
         opts?: {
             verbose?: boolean,
             archive?: boolean
         }
     ): Promise<boolean> {
-        if (!opts) opts = {};
-        if (opts.verbose === undefined) opts.verbose = false;
-        if (opts.archive === undefined) opts.archive = true;
+        opts ??= {};
+        opts.verbose ??= false;
+        opts.archive ??= true;
 
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         if (!this.layer.incoming) throw new Error('Cannot call submit() without incoming config');
 
-        if (!input || Array.isArray(input)) {
+        if (typeof input !== 'object' || input === null || Array.isArray(input)) {
             throw new Error('Submissions must be provided as a GeoJSON FeatureCollection');
         }
 
@@ -718,14 +719,15 @@ export default class TaskBase {
             if (typeof input.schema !== 'string' || input.schema.length === 0) {
                 throw new Error('Record submissions must provide a non-empty schema string');
             } else if (!Array.isArray(input.items)) {
-                throw new Error('Record submissions must provide an items array');
+                throw new TypeError('Record submissions must provide an items array');
             }
 
-            return await this.submitRecords(input, opts);
+            // oxlint-disable-next-line typescript/no-deprecated -- deprecated API kept for compatibility
+            return this.submitRecords(input, opts);
         }
 
         if (!Array.isArray(input.features)) {
-            throw new Error('Submissions must be provided as a GeoJSON FeatureCollection');
+            throw new TypeError('Submissions must be provided as a GeoJSON FeatureCollection');
         }
 
         await this.localizeTimestamps(input.features);
@@ -735,7 +737,7 @@ export default class TaskBase {
                 throw new Error('Schema submissions must provide a non-empty schema string');
             }
 
-            return await this.submitSchema(input, opts);
+            return this.submitSchema(input, opts);
         }
 
         console.log(`ok - posting ${input.features.length} features`);
@@ -770,11 +772,11 @@ export default class TaskBase {
             archive?: boolean
         }
     ): Promise<boolean> {
-        if (!opts) opts = {};
-        if (opts.verbose === undefined) opts.verbose = false;
-        if (opts.archive === undefined) opts.archive = true;
+        opts ??= {};
+        opts.verbose ??= false;
+        opts.archive ??= true;
 
-        if (!this.layer) this.layer = await this.fetchLayer();
+        this.layer ??= await this.fetchLayer();
 
         if (this.layer.connection === null || this.layer.connection === undefined) {
             throw new Error('Cannot submit a schema FeatureCollection - Layer is not attached to a Connection');
@@ -806,13 +808,14 @@ export default class TaskBase {
      * @returns A boolean representing the success state
      */
     protected async submitRecords(
+        // oxlint-disable-next-line typescript/no-deprecated -- deprecated API kept for compatibility
         input: SubmitRecords,
         opts?: {
             verbose?: boolean
         }
     ): Promise<boolean> {
-        if (!opts) opts = {};
-        if (opts.verbose === undefined) opts.verbose = false;
+        opts ??= {};
+        opts.verbose ??= false;
 
         console.log(`ok - posting ${input.items.length} ${input.schema} records`);
 
@@ -839,31 +842,38 @@ export default class TaskBase {
      * Layer's incoming config, if any
      */
     private async localizeTimestamps(features: Array<Static<typeof SubmitFeature>>): Promise<void> {
-        if (!this.layer || !this.layer.incoming) return;
+        if (!this.layer?.incoming) return;
 
-        const cnf = this.layer.incoming.config;
-        if (!cnf || !cnf.timezone || !cnf.timezone.timezone || cnf.timezone.timezone.toLowerCase() === 'no timezone') return;
+        const timezone = this.layer.incoming.config.timezone?.timezone;
+        if (!timezone || timezone.toLowerCase() === 'no timezone') return;
 
         const named = TaskBase.namedSchemas(await this.schema(SchemaType.Output, DataFlowType.Incoming));
-        let schema = (named.find((n) => n.id === DEFAULT_SCHEMA_ID) ?? named[0])?.schema;
-        if (!schema || !schema.properties) schema = Type.Object({});
+        const schema = (named.find((n) => n.id === DEFAULT_SCHEMA_ID) ?? named[0])?.schema;
+        const properties: unknown = schema?.properties;
 
-        const fields = Object.keys(schema.properties).filter((k) => {
-            if (!schema.properties[k]) return false;
-            return schema.properties[k].format === 'date-time';
-        });
+        const fields = isRecord(properties)
+            ? Object.keys(properties).filter((k) => {
+                const property = properties[k];
+                return isRecord(property) && property.format === 'date-time';
+            })
+            : [];
 
         for (const feat of features) {
             for (const field of fields) {
-                if (!feat.properties.metadata || !feat.properties.metadata[field]) continue;
-                const d = new Date(String(feat.properties.metadata[field]));
+                const { metadata } = feat.properties;
+                if (!metadata) continue;
+
+                const value: unknown = metadata[field];
+                if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') continue;
+                if (value === '' || value === 0) continue;
+
                 const parts = new Intl.DateTimeFormat('en-CA', {
-                    timeZone: cnf.timezone.timezone,
+                    timeZone: timezone,
                     year: 'numeric', month: '2-digit', day: '2-digit',
                     hour: '2-digit', minute: '2-digit', hour12: false
-                }).formatToParts(d);
-                const p = Object.fromEntries(parts.map(p => [p.type, p.value]));
-                feat.properties.metadata[field] = `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute} (${cnf.timezone.timezone})`;
+                }).formatToParts(new Date(String(value)));
+                const p = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+                metadata[field] = `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute} (${timezone})`;
             }
         }
     }
@@ -876,7 +886,8 @@ export default class TaskBase {
     private postError(prefix: string, status: number, body: string): string {
         let message: string;
         try {
-            message = String(JSON.parse(body).message || '');
+            const json: unknown = JSON.parse(body);
+            message = isRecord(json) && typeof json.message === 'string' ? json.message : '';
         } catch {
             message = body.slice(0, 200);
         }
@@ -905,13 +916,13 @@ export default class TaskBase {
     }): Promise<void> {
         const items = opts.items.slice();
 
-        let buffs: Array<Buffer<ArrayBufferLike>> = [opts.pre];
+        let buffs: Array<Buffer> = [opts.pre];
         let submit = false;
         let curr = opts.pre.byteLength + opts.post.byteLength;
 
         do {
             let tmpbuff: null | Buffer = null;
-            if (items.length) {
+            if (items.length > 0) {
                 tmpbuff = Buffer.from((buffs.length > 1 ? ',' : '') + JSON.stringify(items.pop()))
 
                 if (curr + tmpbuff.byteLength <= this.etl.config.submit_size || buffs.length === 1) {
@@ -949,14 +960,15 @@ export default class TaskBase {
                 }
 
                 if (tmpbuff) {
-                    buffs = [opts.pre, tmpbuff.slice(1)]; // Remove the preceding comma if starting the array over
+                    // Remove the preceding comma if starting the array over
+                    buffs = [opts.pre, tmpbuff.subarray(1)];
                     curr = opts.pre.byteLength + opts.post.byteLength + tmpbuff.byteLength;
                 } else {
                     buffs = [opts.pre];
                     curr = opts.pre.byteLength + opts.post.byteLength;
                 }
             }
-        } while (items.length || buffs.length > 1);
+        } while (items.length > 0 || buffs.length > 1);
     }
 }
 
@@ -965,6 +977,7 @@ export type {
     TaskBaseSettings,
     TaskLayerAlert,
     NamedSchema,
+    // oxlint-disable-next-line typescript/no-deprecated -- deprecated API kept for compatibility
     SubmitRecords,
     EmailMessage,
     EmailAddress,

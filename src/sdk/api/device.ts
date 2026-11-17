@@ -19,7 +19,7 @@ export default class DeviceCommands extends Commands {
      * Layer tokens require `device:read` and only see Devices of their own Connection
      */
     async list(query: Partial<CoreDeviceListQuery> = {}): Promise<CoreDeviceList> {
-        return await this.api.Entity.list(EntityKind.DEVICE, query);
+        return this.api.Entity.list(EntityKind.DEVICE, query);
     }
 
     /**
@@ -28,7 +28,7 @@ export default class DeviceCommands extends Commands {
      * Layer tokens require `device:read`
      */
     async get(id: string): Promise<CoreDevice> {
-        return await this.api.Entity.get(EntityKind.DEVICE, id);
+        return this.api.Entity.get(EntityKind.DEVICE, id);
     }
 
     /**
@@ -37,7 +37,7 @@ export default class DeviceCommands extends Commands {
      * Layer tokens require `device:create`
      */
     async create(body: CoreDeviceCreate): Promise<CoreDevice> {
-        return await this.api.Entity.create(EntityKind.DEVICE, body);
+        return this.api.Entity.create(EntityKind.DEVICE, body);
     }
 
     /**
@@ -46,7 +46,7 @@ export default class DeviceCommands extends Commands {
      * Layer tokens require `device:update`
      */
     async update(id: string, body: CoreDeviceUpdate): Promise<CoreDevice> {
-        return await this.api.Entity.update(EntityKind.DEVICE, id, body);
+        return this.api.Entity.update(EntityKind.DEVICE, id, body);
     }
 
     /**
@@ -55,6 +55,6 @@ export default class DeviceCommands extends Commands {
      * Layer tokens require `device:delete`
      */
     async delete(id: string): Promise<StandardResponse> {
-        return await this.api.Entity.delete(EntityKind.DEVICE, id);
+        return this.api.Entity.delete(EntityKind.DEVICE, id);
     }
 }

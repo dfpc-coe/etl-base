@@ -12,6 +12,12 @@
 
 ### Pending Release
 
+### v11.4.0 - 2026-11-17
+
+- :arrow_up: Migrate to Typescript 7.0 for builds
+- :arrow_up: Migrate to OXLint for linting
+- :bug: Fix bugs surfaced by OXLint
+
 ### v11.3.1 - 2026-11-16
 
 - :tada: Add `stale` to the `CoreDevice` types - seconds after its last update a Device stops being broadcast to TAK clients

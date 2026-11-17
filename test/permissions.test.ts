@@ -43,7 +43,7 @@ test('hasPermission', async (t) => {
         res.end(JSON.stringify(req.url === '/api/layer/1' ? layerBody : { status: 404, message: 'Not Found' }));
     });
 
-    await new Promise<void>((resolve) => server.listen(0, resolve));
+    await new Promise<void>((resolve) => { server.listen(0, resolve); });
 
     process.env.ETL_API = `http://localhost:${(server.address() as AddressInfo).port}`;
     process.env.ETL_LAYER = '1';
@@ -110,7 +110,7 @@ test('hasPermission', async (t) => {
             res.end(JSON.stringify(rest));
         });
 
-        await new Promise<void>((resolve) => stripped.listen(0, resolve));
+        await new Promise<void>((resolve) => { stripped.listen(0, resolve); });
 
         const api = process.env.ETL_API;
         process.env.ETL_API = `http://localhost:${(stripped.address() as AddressInfo).port}`;

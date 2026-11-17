@@ -69,9 +69,9 @@ export default class EntityCommands extends Commands {
         kind: K,
         query: Partial<CoreEntityListQuery<K>> = {}
     ): Promise<CoreEntityList<K>> {
-        const url = this.url(EntityCommands.path(kind), query as Record<string, unknown>);
+        const url = this.url(EntityCommands.path(kind), query);
 
-        return await this.api.fetch<CoreEntityList<K>>(url);
+        return this.api.fetch<CoreEntityList<K>>(url);
     }
 
     /**
@@ -85,7 +85,7 @@ export default class EntityCommands extends Commands {
     ): Promise<CoreEntity<K>> {
         const url = new URL(EntityCommands.path(kind, id), this.api.url);
 
-        return await this.api.fetch<CoreEntity<K>>(url);
+        return this.api.fetch<CoreEntity<K>>(url);
     }
 
     /**
@@ -99,7 +99,7 @@ export default class EntityCommands extends Commands {
     ): Promise<CoreEntity<K>> {
         const url = new URL(EntityCommands.path(kind), this.api.url);
 
-        return await this.api.fetch<CoreEntity<K>>(url, {
+        return this.api.fetch<CoreEntity<K>>(url, {
             method: 'POST',
             body
         });
@@ -117,7 +117,7 @@ export default class EntityCommands extends Commands {
     ): Promise<CoreEntity<K>> {
         const url = new URL(EntityCommands.path(kind, id), this.api.url);
 
-        return await this.api.fetch<CoreEntity<K>>(url, {
+        return this.api.fetch<CoreEntity<K>>(url, {
             method: 'PATCH',
             body
         });
@@ -134,7 +134,7 @@ export default class EntityCommands extends Commands {
     ): Promise<StandardResponse> {
         const url = new URL(EntityCommands.path(kind, id), this.api.url);
 
-        return await this.api.fetch<StandardResponse>(url, {
+        return this.api.fetch<StandardResponse>(url, {
             method: 'DELETE'
         });
     }

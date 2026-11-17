@@ -30,7 +30,7 @@ export default class AssignmentCommands extends Commands {
         event: string,
         query: Partial<CoreEventAssignmentListQuery> = {}
     ): Promise<CoreEventAssignmentList> {
-        return await this.api.fetch<CoreEventAssignmentList>(this.url(AssignmentCommands.path(event), query));
+        return this.api.fetch<CoreEventAssignmentList>(this.url(AssignmentCommands.path(event), query));
     }
 
     /**
@@ -39,7 +39,7 @@ export default class AssignmentCommands extends Commands {
      * Layer tokens require `event:read` & `assignment:read`
      */
     async get(event: string, id: string): Promise<CoreEventAssignment> {
-        return await this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event, id)));
+        return this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event, id)));
     }
 
     /**
@@ -48,7 +48,7 @@ export default class AssignmentCommands extends Commands {
      * Layer tokens require `event:update` & `assignment:create`
      */
     async create(event: string, body: CoreEventAssignmentCreate): Promise<CoreEventAssignment> {
-        return await this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event)), {
+        return this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event)), {
             method: 'POST',
             body
         });
@@ -60,7 +60,7 @@ export default class AssignmentCommands extends Commands {
      * Layer tokens require `event:update` & `assignment:update`
      */
     async update(event: string, id: string, body: CoreEventAssignmentUpdate): Promise<CoreEventAssignment> {
-        return await this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event, id)), {
+        return this.api.fetch<CoreEventAssignment>(this.url(AssignmentCommands.path(event, id)), {
             method: 'PATCH',
             body
         });
@@ -72,7 +72,7 @@ export default class AssignmentCommands extends Commands {
      * Layer tokens require `event:update` & `assignment:delete`
      */
     async delete(event: string, id: string): Promise<StandardResponse> {
-        return await this.api.fetch<StandardResponse>(this.url(AssignmentCommands.path(event, id)), {
+        return this.api.fetch<StandardResponse>(this.url(AssignmentCommands.path(event, id)), {
             method: 'DELETE'
         });
     }

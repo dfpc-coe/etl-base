@@ -51,8 +51,12 @@ function login(): Promise<void> {
                 --password-stdin "$\{AWS_ACCOUNT_ID}.dkr.ecr.$\{AWS_REGION}.amazonaws.com"
 
         `, (err) => {
-            if (err) return reject(err);
-            return resolve();
+            if (err) {
+                reject(new Error(err.message, { cause: err }));
+                return;
+            }
+
+            resolve();
         });
 
         $.stdout?.pipe(process.stdout);
@@ -78,7 +82,12 @@ async function build(): Promise<void> {
         git rev-parse --show-toplevel
     `).toString().trim());
 
-    const pkg = JSON.parse(String(await fs.readFile('./package.json'))) as { version: string };
+    const pkg: unknown = JSON.parse(String(await fs.readFile('./package.json')));
+    if (typeof pkg !== 'object' || pkg === null || !('version' in pkg) || typeof pkg.version !== 'string') {
+        throw new Error('package.json does not provide a version');
+    }
+
+    const { version } = pkg;
 
     const caps = await capabilities('./capabilities.json');
 
@@ -96,12 +105,16 @@ async function build(): Promise<void> {
                 --provenance=false \
                 --annotation "${CAPABILITIES_ANNOTATION}=$\{CLOUDTAK_CAPABILITIES}" \
                 --output type=image,oci-mediatypes=true,push=true \
-                -t "$\{AWS_ACCOUNT_ID}.dkr.ecr.$\{AWS_REGION}.amazonaws.com/tak-vpc-${process.env.Environment}-cloudtak-tasks:${basename}-v${pkg.version}"
+                -t "$\{AWS_ACCOUNT_ID}.dkr.ecr.$\{AWS_REGION}.amazonaws.com/tak-vpc-${process.env.Environment}-cloudtak-tasks:${basename}-v${version}"
         `, {
             env: { ...process.env, CLOUDTAK_CAPABILITIES: caps }
         }, (err) => {
-            if (err) return reject(err);
-            return resolve();
+            if (err) {
+                reject(new Error(err.message, { cause: err }));
+                return;
+            }
+
+            resolve();
         });
 
         $.stdout?.pipe(process.stdout);

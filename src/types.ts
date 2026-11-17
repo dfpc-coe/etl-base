@@ -234,6 +234,7 @@ export const TaskLayer = Type.Object({
 });
 
 export enum OutgoingMessageType {
+    // oxlint-disable-next-line no-shadow -- enum member, not the imported Feature
     Feature = 'feature',
     Event = 'event',
     Device = 'device',

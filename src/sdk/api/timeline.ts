@@ -35,7 +35,7 @@ export default class TimelineCommands extends Commands {
         entity: string,
         query: Partial<CoreEntityTimelineListQuery> = {}
     ): Promise<CoreEntityTimelineList> {
-        return await this.api.fetch<CoreEntityTimelineList>(this.url(TimelineCommands.path(entity), query));
+        return this.api.fetch<CoreEntityTimelineList>(this.url(TimelineCommands.path(entity), query));
     }
 
     /**
@@ -44,7 +44,7 @@ export default class TimelineCommands extends Commands {
      * Layer tokens require `timeline:read`
      */
     async get(entity: string, entry: string): Promise<CoreEntityTimeline> {
-        return await this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity, entry)));
+        return this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity, entry)));
     }
 
     /**
@@ -53,7 +53,7 @@ export default class TimelineCommands extends Commands {
      * Layer tokens require `timeline:create`
      */
     async create(entity: string, body: CoreEntityTimelineInput): Promise<CoreEntityTimeline> {
-        return await this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity)), {
+        return this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity)), {
             method: 'POST',
             body
         });
@@ -68,7 +68,7 @@ export default class TimelineCommands extends Commands {
      * Layer tokens require `timeline:create`
      */
     async upsert(entity: string, entries: CoreEntityTimelineInput[]): Promise<CoreEntityTimelineUpsert> {
-        return await this.api.fetch<CoreEntityTimelineUpsert>(this.url(TimelineCommands.path(entity)), {
+        return this.api.fetch<CoreEntityTimelineUpsert>(this.url(TimelineCommands.path(entity)), {
             method: 'PUT',
             body: { entries }
         });
@@ -80,7 +80,7 @@ export default class TimelineCommands extends Commands {
      * Layer tokens require `timeline:update`
      */
     async update(entity: string, entry: string, body: CoreEntityTimelineUpdate): Promise<CoreEntityTimeline> {
-        return await this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity, entry)), {
+        return this.api.fetch<CoreEntityTimeline>(this.url(TimelineCommands.path(entity, entry)), {
             method: 'PATCH',
             body
         });
@@ -92,7 +92,7 @@ export default class TimelineCommands extends Commands {
      * Layer tokens require `timeline:delete`
      */
     async delete(entity: string, entry: string): Promise<StandardResponse> {
-        return await this.api.fetch<StandardResponse>(this.url(TimelineCommands.path(entity, entry)), {
+        return this.api.fetch<StandardResponse>(this.url(TimelineCommands.path(entity, entry)), {
             method: 'DELETE'
         });
     }

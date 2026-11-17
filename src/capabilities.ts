@@ -203,8 +203,8 @@ export default class StaticCapabilities {
         const permission = resource.slice(0, separator);
         const level = resource.slice(separator + 1);
 
+        if (!Object.hasOwn(PERMISSIONS, permission)) return false;
         const levels = PERMISSIONS[permission];
-        if (!levels) return false;
 
         return level === '*' || levels.includes(level);
     }
@@ -218,8 +218,8 @@ export default class StaticCapabilities {
         const split = splitOutgoingType(resource);
         if (!split) return false;
 
+        if (!Object.hasOwn(OUTGOING_TYPES, split.type)) return false;
         const actions = OUTGOING_TYPES[split.type];
-        if (!actions) return false;
 
         return split.action === '*' || actions.includes(split.action);
     }
@@ -290,7 +290,7 @@ export default class StaticCapabilities {
             .map((permission) => permission.resource)
             .filter((resource) => !StaticCapabilities.isValidPermission(resource));
 
-        if (invalid.length) {
+        if (invalid.length > 0) {
             throw new Err(400, null, `Invalid Capabilities Document: Unknown Permissions: ${invalid.join(', ')}`);
         }
 
@@ -298,7 +298,7 @@ export default class StaticCapabilities {
             .map((type) => type.resource)
             .filter((resource) => !StaticCapabilities.isValidOutgoingType(resource));
 
-        if (unknownTypes.length) {
+        if (unknownTypes.length > 0) {
             throw new Err(400, null, `Invalid Capabilities Document: Unknown Outgoing Types: ${unknownTypes.join(', ')}`);
         }
 

@@ -13,10 +13,10 @@
     },
     "scripts": {
         "test": "c8 --reporter=lcov --reporter html tsx --test test/*.ts",
-        "lint": "eslint index.ts bin test",
+        "lint": "oxlint --type-aware --deny-warnings --report-unused-disable-directives",
         "doc": "typedoc index.ts",
         "typegen": "curl 'https://raw.githubusercontent.com/dfpc-coe/CloudTAK/refs/heads/main/api/derived-types.d.ts' > src/api-types.ts",
-        "build": "tsc --build && cp package.json dist/",
+        "build": "node node_modules/typescript7/bin/tsc --build && cp package.json dist/",
         "pretest": "npm run lint"
     },
     "repository": {
@@ -30,14 +30,14 @@
     },
     "homepage": "https://github.com/tak-ps/etl-base#readme",
     "devDependencies": {
-        "@eslint/js": "^10.0.1",
         "@types/node": "^26.0.0",
         "c8": "^12.0.0",
-        "eslint": "^10.0.0",
+        "oxlint": "^1.94.0",
+        "oxlint-tsgolint": "^7.0.2007",
         "tsx": "^4.23.12",
         "typedoc": "^0.28.0",
-        "typescript": "^6.0.0",
-        "typescript-eslint": "^8.0.0"
+        "typescript": "npm:@typescript/typescript6@^6.0.2",
+        "typescript7": "npm:typescript@^7.0.2"
     },
     "peerDependencies": {
         "@tak-ps/node-cot": "^14.1.0"
