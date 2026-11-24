@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v11.4.1 - 2026-11-24
+
+- :arrow_up: Update all GH Action Dependencies to latest versions
+
 ### v11.4.0 - 2026-11-17
 
 - :arrow_up: Migrate to Typescript 7.0 for builds
